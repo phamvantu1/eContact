@@ -1,4 +1,4 @@
-package com.customer.customer;
+package com.ec.customer;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

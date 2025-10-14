@@ -1,0 +1,5 @@
+bảng customer bỏ  18 19
+doi kieu du lieu status  string
+bo sung gioi tinh
+
+bang permission bo sung name

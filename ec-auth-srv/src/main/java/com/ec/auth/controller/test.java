@@ -1,4 +1,4 @@
-package com.customer.customer.controller;
+package com.ec.auth.controller;
 
 import com.ec.library.response.Response;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/customers")
+@RequestMapping("/api/auths")
 public class test {
     @GetMapping("/{id}")
     public Response<List<Integer>> getCustomer(@PathVariable Long id) {

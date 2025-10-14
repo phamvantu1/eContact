@@ -1,0 +1,19 @@
+package com.ec.customer.model.entity;
+
+import com.ec.library.entity.BaseEntity;
+import jakarta.persistence.*;
+import lombok.Data;
+
+@Entity
+@Data
+@Table(name = "roles")
+public class Role extends BaseEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+
+    private Integer status;
+
+}
