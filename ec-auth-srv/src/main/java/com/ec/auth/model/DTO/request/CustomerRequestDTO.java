@@ -1,4 +1,4 @@
-package com.ec.customer.model.DTO.request;
+package com.ec.auth.model.DTO.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -34,6 +34,7 @@ public class CustomerRequestDTO {
     @NotNull
     private String status;
 
+    @NotNull
     private String taxCode;
 
     @NotNull

@@ -13,9 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.util.Base64;
 
 @Component
 public class JwtAuthenticationFilter implements GatewayFilter, Ordered {
@@ -26,6 +24,14 @@ public class JwtAuthenticationFilter implements GatewayFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+
+        String path = exchange.getRequest().getURI().getPath(); // Dùng getURI().getPath()
+
+        // Bỏ qua auth-service
+        if (path.startsWith("/api/auth")) {
+            return chain.filter(exchange);
+        }
+
         HttpHeaders headers = exchange.getRequest().getHeaders();
         String authHeader = headers.getFirst(HttpHeaders.AUTHORIZATION);
 

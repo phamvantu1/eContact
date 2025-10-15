@@ -39,6 +39,8 @@ public class Customer extends BaseEntity {
 
     private String gender;
 
+    private String taxCode;
+
     @Type(JsonType.class)
     @Column(columnDefinition = "jsonb")
     private Map<String, Object> signImage;

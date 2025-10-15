@@ -19,6 +19,15 @@ spring:
               - OPTIONS
             allowedHeaders: "*"
             allowCredentials: true
+      routes:
+        - id: ec-auth-srv
+          uri: lb://ec-auth-srv
+          predicates:
+            - Path=/api/auth/**
+        - id: ec-customer-srv
+          uri: lb://ec-customer-srv
+          predicates:
+            - Path=/api/customers/**
       discovery:
         locator:
           enabled: true    # Tự động định tuyến theo tên service

@@ -23,6 +23,7 @@ public enum ResponseCode {
     OTP_EXPIRED("ERR_400", "OTP đã hết hạn", HttpStatus.BAD_REQUEST),
     CONFIRM_PASSWORD_NOT_MATCH("ERR_400", "Mật khẩu xác nhận không khớp", HttpStatus.BAD_REQUEST),
     INVALID_OLD_PASSWORD("ERR_400", "Mật khẩu cũ không đúng", HttpStatus.BAD_REQUEST),
+    PASSWORD_INVALID("ERR_400", "Mật khẩu không hợp lệ", HttpStatus.BAD_REQUEST),
 
 
     // customer
@@ -36,6 +37,10 @@ public enum ResponseCode {
     // role
     ROLE_ALREADY_EXISTS("ERR_409", "Vai trò đã tồn tại", HttpStatus.CONFLICT),
     ROLE_NOT_FOUND("ERR_404", "Không tìm thấy vai trò", HttpStatus.NOT_FOUND),
+
+
+    // permission
+    PERMISSION_NOT_FOUND("ERR_404", "Không tìm thấy quyền", HttpStatus.NOT_FOUND),
 
 
     BAD_REQUEST("ERR_400", "Bad request", HttpStatus.BAD_REQUEST);

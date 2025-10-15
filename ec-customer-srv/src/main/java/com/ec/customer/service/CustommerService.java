@@ -12,6 +12,7 @@ import com.ec.customer.repository.OrganizationRepository;
 import com.ec.customer.repository.RoleRepository;
 import com.ec.library.exception.CustomException;
 import com.ec.library.exception.ResponseCode;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -96,12 +97,12 @@ public class CustommerService {
         }
     }
 
-    public Page<CustomerResponseDTO> getAllCustomer(int page, int size, String textSearch, Long organizationId){
+    public CustomerResponseDTO getCustomerByEmail(String email){
         try{
+            Customer customer = customerRepository.findByEmail(email)
+                    .orElseThrow(() -> new CustomException(ResponseCode.CUSTOMER_NOT_FOUND));
 
-            Pageable pageable =  PageRequest.of(page, size);
-
-            List<Customer> customerList = customerRepository.getAllCustomer(textSearch, organizationId, pageable);
+            return customerMapper.toResponseDTO(customer);
 
         }catch (CustomException e){
             throw e;
@@ -109,4 +110,35 @@ public class CustommerService {
             throw new RuntimeException("Có lỗi trong quá trình xóa người dùng : " + e.getMessage());
         }
     }
+
+    @Transactional
+    public Map<String, String> registerCustomer(CustomerRequestDTO customerRequestDTO){
+        try{
+
+            Customer customer = customerMapper.toEntity(customerRequestDTO);
+            customer.setStatus(CustomerStatus.ACTIVE.name());
+            customerRepository.save(customer);
+
+            return Map.of("message", "Đăng ký tài khoản thành công");
+
+        }catch (CustomException e){
+            throw e;
+        }catch (Exception e){
+            throw new RuntimeException("Có lỗi trong quá trình đăng ký tài khoản  : " + e.getMessage());
+        }
+    }
+
+//    public Page<CustomerResponseDTO> getAllCustomer(int page, int size, String textSearch, Long organizationId){
+//        try{
+//
+//            Pageable pageable =  PageRequest.of(page, size);
+//
+//            List<Customer> customerList = customerRepository.getAllCustomer(textSearch, organizationId, pageable);
+//
+//        }catch (CustomException e){
+//            throw e;
+//        }catch (Exception e){
+//            throw new RuntimeException("Có lỗi trong quá trình xóa người dùng : " + e.getMessage());
+//        }
+//    }
 }

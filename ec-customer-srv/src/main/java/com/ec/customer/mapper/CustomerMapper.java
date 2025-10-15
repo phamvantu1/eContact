@@ -29,6 +29,6 @@ public interface CustomerMapper {
 
     // Map từ Entity → ResponseDTO
     @Mapping(target = "organizationId", expression = "java(customer.getOrganization() != null ? customer.getOrganization().getId().intValue() : null)")
-    @Mapping(target = "roleId", expression = "java(customer.getRoles() != null && !customer.getRoles().isEmpty() ? customer.getRoles().iterator().next().getId().intValue() : null)")
+    //    @Mapping(target = "roleId", expression = "java(customer.getRoles() != null && !customer.getRoles().isEmpty() ? customer.getRoles().iterator().next().getId().intValue() : null)")
     CustomerResponseDTO toResponseDTO(Customer customer);
 }

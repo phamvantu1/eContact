@@ -1,11 +1,19 @@
-package com.ec.customer.model.DTO.response;
+package com.ec.auth.model.entity;
 
+
+import com.ec.library.entity.BaseEntity;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
-public class CustomerResponseDTO {
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class Customer extends BaseEntity {
 
     private Long id;
 
@@ -19,17 +27,12 @@ public class CustomerResponseDTO {
 
     private String birthday;
 
-    private String gender;
-
     private String status;
 
-    private String taxCode;
-
-    private Integer roleId;
-
-    private Integer organizationId;
+    private String gender;
 
     private List<String> roles;
 
     private List<String> permissions;
+
 }

@@ -9,3 +9,11 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
+
+application:
+  sercurity:
+    jwt:
+      secret-key: 8e29c681e354368d6ec0358461b9897180c6b9c9e77754cad6cd1c042e306b028e9e214b41e4632576f2e6f0899d4b165f5bb193199702f9c336cfffb0db5d19
+      expiration: 86400000
+      refresh-token:
+        expiration: 604800000

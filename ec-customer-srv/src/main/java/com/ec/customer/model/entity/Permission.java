@@ -16,13 +16,4 @@ public class Permission {
 
     private String name;
 
-    private Integer status;
-
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "role_permissions",
-            joinColumns = @JoinColumn(name = "permission_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Set<Role> roles;
 }
