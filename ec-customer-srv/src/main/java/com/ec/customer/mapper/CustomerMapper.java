@@ -1,19 +1,19 @@
 package com.ec.customer.mapper;
 
+import com.ec.customer.model.DTO.response.RoleResponseDTO;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import com.ec.customer.model.DTO.request.CustomerRequestDTO;
 import com.ec.customer.model.DTO.response.CustomerResponseDTO;
 import com.ec.customer.model.entity.Customer;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.factory.Mappers;
-
-import java.util.Set;
 
 @Mapper(componentModel = "spring")
 public interface CustomerMapper {
-
-    CustomerMapper INSTANCE = Mappers.getMapper(CustomerMapper.class);
 
     // Map từ RequestDTO → Entity (tạo mới)
     @Mapping(target = "organization", ignore = true)
@@ -27,8 +27,25 @@ public interface CustomerMapper {
     @Mapping(target = "signImage", ignore = true)
     void updateEntityFromDto(CustomerRequestDTO dto, @MappingTarget Customer customer);
 
-    // Map từ Entity → ResponseDTO
-    @Mapping(target = "organizationId", expression = "java(customer.getOrganization() != null ? customer.getOrganization().getId().intValue() : null)")
-    @Mapping(target = "roleId", expression = "java(customer.getRoles() != null && !customer.getRoles().isEmpty() ? customer.getRoles().iterator().next().getId().intValue() : null)")
+//    // Map từ Entity → ResponseDTO
+//    @Mapping(target = "organizationId",
+//            expression = "java(customer.getOrganization() != null ? customer.getOrganization().getId().intValue() : null)")
+
+    @Mapping(target = "organizationId", expression = "java(mapOrganizationId(customer))")
+    @Mapping(target = "roles", expression = "java(mapRoles(customer))")
     CustomerResponseDTO toResponseDTO(Customer customer);
+
+    // helper methods
+    default Integer mapOrganizationId(Customer customer) {
+        return customer.getOrganization() != null
+                ? customer.getOrganization().getId().intValue()
+                : null;
+    }
+
+    default List<RoleResponseDTO> mapRoles(Customer customer) {
+        if (customer.getRoles() == null) return null;
+        return customer.getRoles().stream()
+                .map(role -> new RoleResponseDTO(role.getId(), role.getName()))
+                .collect(Collectors.toList());
+    }
 }

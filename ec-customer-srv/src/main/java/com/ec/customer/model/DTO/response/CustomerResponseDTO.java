@@ -2,6 +2,8 @@ package com.ec.customer.model.DTO.response;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class CustomerResponseDTO {
     private String name;
@@ -18,7 +20,7 @@ public class CustomerResponseDTO {
 
     private String status;
 
-    private Integer roleId;
+    private List<RoleResponseDTO> roles;
 
     private Integer organizationId;
 }

@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ public class CustommerService {
     private final RoleRepository roleRepository;
     private final CustomerMapper customerMapper;
 
+    @Transactional
     public Map<String, String> createCustomer(CustomerRequestDTO customerRequestDTO) {
         try {
 
@@ -55,6 +57,7 @@ public class CustommerService {
         }
     }
 
+    @Transactional
     public Map<String, String> updateCustomer(Long customerId, CustomerRequestDTO customerRequestDTO) {
         try {
             Customer customer = customerRepository.findById(customerId)
@@ -80,6 +83,7 @@ public class CustommerService {
         }
     }
 
+    @Transactional
     public Map<String,String> deleteCustomer(Long customerId){
         try {
             Customer customer = customerRepository.findById(customerId)
@@ -96,12 +100,30 @@ public class CustommerService {
         }
     }
 
+    @Transactional
     public Page<CustomerResponseDTO> getAllCustomer(int page, int size, String textSearch, Long organizationId){
         try{
 
             Pageable pageable =  PageRequest.of(page, size);
 
-            List<Customer> customerList = customerRepository.getAllCustomer(textSearch, organizationId, pageable);
+            Page<Customer> customerList = customerRepository.getAllCustomer(textSearch, organizationId, pageable);
+
+            return customerList.map(customerMapper::toResponseDTO);
+
+        }catch (CustomException e){
+            throw e;
+        }catch (Exception e){
+            throw new RuntimeException("Có lỗi trong quá trình xóa người dùng : " + e.getMessage());
+        }
+    }
+
+    @Transactional
+    public CustomerResponseDTO getCustomerById(Long customerId){
+        try{
+            Customer customer = customerRepository.findById(customerId)
+                    .orElseThrow(() -> new CustomException(ResponseCode.CUSTOMER_NOT_FOUND));
+
+            return customerMapper.toResponseDTO(customer);
 
         }catch (CustomException e){
             throw e;
