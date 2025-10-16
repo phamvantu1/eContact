@@ -28,8 +28,8 @@
 
 5. cài đặt java 21 + maven
  -  build file jar
-    trỏ đến lần lượt từng service để build file jar
-      chạy câu lệnh :  mvn clean install -DskipTests
+ -  trỏ đến lần lượt từng service để build file jar
+ -  chạy câu lệnh :  mvn clean install -DskipTests
         thứ tự
         common-library
         gateway
