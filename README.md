@@ -42,13 +42,13 @@
       auth
       các service còn lại
 7. swagger
-  auth service
-    http://localhost:8082/api/auth/swagger-ui/index.html
-  customer service
-    http://localhost:8083/api/auth/swagger-ui/index.html
-  contract service
-    http://localhost:8084/api/auth/swagger-ui/index.html
-  notification service
+  - auth service
+      http://localhost:8082/api/auth/swagger-ui/index.html
+  - customer service
+      http://localhost:8083/api/auth/swagger-ui/index.html
+  - contract service
+      http://localhost:8084/api/auth/swagger-ui/index.html
+  - notification service
     http://localhost:8085/api/auth/swagger-ui/index.html
 
 8. gateway  : cổng 8080
