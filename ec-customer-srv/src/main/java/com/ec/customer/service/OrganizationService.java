@@ -30,7 +30,7 @@ public class OrganizationService {
             Organization organization = Organization.builder()
                     .name(organizationRequestDTO.getName())
                     .email(organizationRequestDTO.getEmail())
-                    .status(DefineStatus.ACTIVE.getStatus())
+                    .status(DefineStatus.ACTIVE.getValue())
                     .taxCode(organizationRequestDTO.getTaxCode())
                     .build();
 
@@ -57,7 +57,7 @@ public class OrganizationService {
             Organization organization = organizationRepository.findById(organizationId)
                     .orElseThrow(() -> new CustomException(ResponseCode.ORGANIZATION_NOT_FOUND));
 
-            organization.setStatus(DefineStatus.INACTIVE.getStatus());
+            organization.setStatus(DefineStatus.INACTIVE.getValue());
             organizationRepository.save(organization);
 
             return Map.of("message", "Xoá tổ chức thành công");

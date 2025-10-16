@@ -21,15 +21,12 @@ public class CustomerResponseDTO {
 
     private String gender;
 
-    private String status;
+    private Integer status;
 
     private String taxCode;
 
-    private Integer roleId;
+    private Long organizationId;
 
-    private Integer organizationId;
+    private List<RoleResponseDTO> roles;
 
-    private List<String> roles;
-
-    private List<String> permissions;
 }

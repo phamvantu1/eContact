@@ -9,13 +9,13 @@ public enum DefineStatus {
     DefineStatus(int status) {
         this.status = status;
     }
-    public int getStatus() {
+    public int getValue() {
         return status;
     }
 
     public static DefineStatus fromLevel(int status) {
         for (DefineStatus s : DefineStatus.values()) {
-            if (s.getStatus() == status) {
+            if (s.getValue() == status) {
                 return s;
             }
         }

@@ -1,15 +1,5 @@
 
 
-
-Status tat ca la integer
-
-
-
-bang permission bo sung name
-bo status
-
-role bo status
-role bo code
 role bo sung permission name
 
 kich  ban role bo ma vai tro

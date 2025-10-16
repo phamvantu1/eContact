@@ -32,8 +32,9 @@ public class CustomerRequestDTO {
     private Long organizationId;
 
     @NotNull
-    private String status;
+    private Integer status;
 
+    @NotNull
     private String taxCode;
 
     @NotNull

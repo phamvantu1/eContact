@@ -35,7 +35,7 @@ public class Customer extends BaseEntity {
 
     private String birthday;
 
-    private String status;
+    private Integer status;
 
     private String gender;
 

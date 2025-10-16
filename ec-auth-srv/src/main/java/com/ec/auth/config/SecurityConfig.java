@@ -2,9 +2,9 @@ package com.ec.auth.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -16,16 +16,29 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-//                .csrf().disable() // nếu cần
+                // ✅ Bỏ cơ chế CSRF vì đây là REST API, không cần
+                .csrf(csrf -> csrf.disable())
+
+                // ✅ Không dùng session (stateless)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // ✅ Cấu hình quyền truy cập
                 .authorizeHttpRequests(auth -> auth
+                        // Các endpoint không cần token
                         .requestMatchers(
+                                "/api/auth/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
+                        // Các request còn lại yêu cầu xác thực
                         .anyRequest().authenticated()
                 )
-                .httpBasic(Customizer.withDefaults()); // hoặc .formLogin() nếu bạn muốn
+
+                // ❌ Không dùng Basic Auth mặc định
+                .httpBasic(httpBasic -> httpBasic.disable())
+                .formLogin(form -> form.disable());
+
         return http.build();
     }
 

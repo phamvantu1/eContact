@@ -28,6 +28,8 @@ public enum ResponseCode {
 
     // customer
     CUSTOMER_NOT_FOUND("ERR_404", "Không tìm thấy khách hàng", HttpStatus.NOT_FOUND),
+    CUSTOMER_ALREADY_EXISTS("ERR_409", "Khách hàng đã tồn tại", HttpStatus.CONFLICT),
+    CUSTOMER_EMAIL_EXISTED("ERR_409", "Email đã tồn tại", HttpStatus.CONFLICT),
 
 
     // organization

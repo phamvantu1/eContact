@@ -37,7 +37,7 @@ public class RoleService {
             }
             Role role = Role.builder()
                     .name(roleRequestDTO.getName())
-                    .status(DefineStatus.ACTIVE.getStatus())
+                    .status(DefineStatus.ACTIVE.getValue())
                     .permissions(permissionList)
                     .build();
 
@@ -85,7 +85,7 @@ public class RoleService {
             Role role = roleRepository.findById(roleId)
                     .orElseThrow(() -> new CustomException(ResponseCode.ROLE_NOT_FOUND));
 
-            role.setStatus(DefineStatus.INACTIVE.getStatus());
+            role.setStatus(DefineStatus.INACTIVE.getValue());
 
             roleRepository.save(role);
 

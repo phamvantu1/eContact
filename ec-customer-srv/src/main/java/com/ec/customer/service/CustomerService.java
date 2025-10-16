@@ -1,6 +1,7 @@
 package com.ec.customer.service;
 
 import com.ec.customer.common.constant.CustomerStatus;
+import com.ec.customer.common.constant.DefineStatus;
 import com.ec.customer.mapper.CustomerMapper;
 import com.ec.customer.model.DTO.request.CustomerRequestDTO;
 import com.ec.customer.model.DTO.response.CustomerResponseDTO;
@@ -13,27 +14,36 @@ import com.ec.customer.repository.RoleRepository;
 import com.ec.library.exception.CustomException;
 import com.ec.library.exception.ResponseCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
+
 import java.util.Map;
 import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
-public class CustommerService {
+@Slf4j
+public class CustomerService {
 
     private final CustomerRepository customerRepository;
     private final OrganizationRepository organizationRepository;
     private final RoleRepository roleRepository;
     private final CustomerMapper customerMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public Map<String, String> createCustomer(CustomerRequestDTO customerRequestDTO) {
         try {
+
+            Customer oldCustomer = customerRepository.findByEmail(customerRequestDTO.getEmail()).orElse(null);
+            if(oldCustomer != null){
+                throw new CustomException(ResponseCode.CUSTOMER_EMAIL_EXISTED);
+            }
 
             Organization organization = organizationRepository.findById(customerRequestDTO.getOrganizationId())
                     .orElseThrow(() -> new CustomException(ResponseCode.ORGANIZATION_NOT_FOUND));
@@ -44,6 +54,9 @@ public class CustommerService {
             Customer customer = customerMapper.toEntity(customerRequestDTO);
             customer.setOrganization(organization);
             customer.setRoles(Set.of(role));
+
+            String password = "123456";
+            customer.setPassword(passwordEncoder.encode(password));
 
             customerRepository.save(customer);
 
@@ -87,7 +100,7 @@ public class CustommerService {
         try {
             Customer customer = customerRepository.findById(customerId)
                     .orElseThrow(() -> new CustomException(ResponseCode.CUSTOMER_NOT_FOUND));
-            customer.setStatus(CustomerStatus.INACTIVE.name());
+            customer.setStatus(DefineStatus.INACTIVE.getValue());
 
             customerRepository.save(customer);
 
@@ -133,6 +146,7 @@ public class CustommerService {
 
     public CustomerResponseDTO getCustomerByEmail(String email){
         try{
+            log.info("Email nhận được: {}", email);
             Customer customer = customerRepository.findByEmail(email)
                     .orElseThrow(() -> new CustomException(ResponseCode.CUSTOMER_NOT_FOUND));
 
@@ -144,12 +158,17 @@ public class CustommerService {
             throw new RuntimeException("Có lỗi trong quá trình xóa người dùng : " + e.getMessage());
         }
     }
+
     @Transactional
     public Map<String, String> registerCustomer(CustomerRequestDTO customerRequestDTO){
         try{
+            Customer oldCustomer = customerRepository.findByEmail(customerRequestDTO.getEmail()).orElse(null);
+            if(oldCustomer != null){
+                throw new CustomException(ResponseCode.CUSTOMER_EMAIL_EXISTED);
+            }
 
             Customer customer = customerMapper.toEntity(customerRequestDTO);
-            customer.setStatus(CustomerStatus.ACTIVE.name());
+            customer.setStatus(DefineStatus.ACTIVE.getValue());
             customerRepository.save(customer);
 
             return Map.of("message", "Đăng ký tài khoản thành công");

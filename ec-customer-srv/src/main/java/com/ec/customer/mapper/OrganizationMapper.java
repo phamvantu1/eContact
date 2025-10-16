@@ -2,22 +2,37 @@ package com.ec.customer.mapper;
 
 import com.ec.customer.model.DTO.response.OrganizationResponseDTO;
 import com.ec.customer.model.entity.Organization;
-import org.mapstruct.*;
+import org.springframework.stereotype.Component;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring")
-public interface OrganizationMapper {
+@Component
+public class OrganizationMapper {
 
-    @Mapping(target = "children", expression = "java(mapChildren(organization.getChildren()))")
-    OrganizationResponseDTO toResponseDTO(Organization organization);
+    // --- Chuyển từ Entity -> DTO ---
+    public OrganizationResponseDTO toResponseDTO(Organization organization) {
+        if (organization == null) return null;
 
-    default Set<OrganizationResponseDTO> mapChildren(Set<Organization> children) {
-        if (children == null || children.isEmpty()) {
-            return null;
-        }
+        OrganizationResponseDTO dto = new OrganizationResponseDTO();
+        dto.setId(organization.getId());
+        dto.setName(organization.getName());
+        dto.setEmail(organization.getEmail());
+        dto.setStatus(organization.getStatus());
+        dto.setTaxCode(organization.getTaxCode());
+
+        // map đệ quy children
+        dto.setChildren(mapChildren(organization.getChildren()));
+
+        return dto;
+    }
+
+    // --- map danh sách con ---
+    private Set<OrganizationResponseDTO> mapChildren(Set<Organization> children) {
+        if (children == null || children.isEmpty()) return null;
+
         return children.stream()
                 .map(this::toResponseDTO)
-                .collect(java.util.stream.Collectors.toSet());
+                .collect(Collectors.toSet());
     }
 }
