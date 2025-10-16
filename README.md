@@ -20,11 +20,11 @@
  -  Tạo các DB : (eContract_customer ,eContract_notification)  
 
 4. Cài đặt redis (docker)
-  docker create --name redis-local -p 6379:6379 redis:latest ( tạo )
+  - docker create --name redis-local -p 6379:6379 redis:latest ( tạo )
   
-  docker start redis-local ( bật )
+  - docker start redis-local ( bật )
   
-  docker stop redis-local (tắt)
+ - docker stop redis-local (tắt)
 
 5. cài đặt java 21 + maven
  -  build file jar
