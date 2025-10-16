@@ -24,6 +24,8 @@ public enum ResponseCode {
     CONFIRM_PASSWORD_NOT_MATCH("ERR_400", "Mật khẩu xác nhận không khớp", HttpStatus.BAD_REQUEST),
     INVALID_OLD_PASSWORD("ERR_400", "Mật khẩu cũ không đúng", HttpStatus.BAD_REQUEST),
     PASSWORD_INVALID("ERR_400", "Mật khẩu không hợp lệ", HttpStatus.BAD_REQUEST),
+    EMAIL_INVALID("ERR_400", "Email không hợp lệ", HttpStatus.NOT_FOUND),
+    EMAIL_EXISTED("ERR_409", "Email đã tồn tại", HttpStatus.CONFLICT),
 
 
     // customer

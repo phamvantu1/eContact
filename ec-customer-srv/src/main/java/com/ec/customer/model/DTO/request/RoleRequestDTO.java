@@ -7,10 +7,10 @@ import java.util.List;
 
 @Data
 public class RoleRequestDTO {
-    private Long id;
+    private Integer id;
 
     @NotNull
     private String name;
 
-    List<Long> permissionIds;
+    List<Integer> permissionIds;
 }

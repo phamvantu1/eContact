@@ -4,6 +4,12 @@ server:
 spring:
   application:
     name: ec-gateway-srv
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+      timeout: 60000
   cloud:
     gateway:
       globalcors:
@@ -19,19 +25,6 @@ spring:
               - OPTIONS
             allowedHeaders: "*"
             allowCredentials: true
-      routes:
-        - id: ec-auth-srv
-          uri: lb://ec-auth-srv
-          predicates:
-            - Path=/api/auth/**
-        - id: ec-customer-srv
-          uri: lb://ec-customer-srv
-          predicates:
-            - Path=/api/customers/**
-      discovery:
-        locator:
-          enabled: true    # Tự động định tuyến theo tên service
-          lower-case-service-id: true
 
 eureka:
   client:
@@ -40,4 +33,13 @@ eureka:
   instance:
     prefer-ip-address: true
     hostname: localhost
+
+application:
+  sercurity:
+    jwt:
+      secret-key: 8e29c681e354368d6ec0358461b9897180c6b9c9e77754cad6cd1c042e306b028e9e214b41e4632576f2e6f0899d4b165f5bb193199702f9c336cfffb0db5d19
+      expiration: 86400000
+      refresh-token:
+        expiration: 604800000
+
 

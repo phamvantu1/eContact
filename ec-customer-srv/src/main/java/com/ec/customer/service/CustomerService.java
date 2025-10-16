@@ -3,6 +3,7 @@ package com.ec.customer.service;
 import com.ec.customer.common.constant.CustomerStatus;
 import com.ec.customer.common.constant.DefineStatus;
 import com.ec.customer.mapper.CustomerMapper;
+import com.ec.customer.model.DTO.request.ChangePasswordDTO;
 import com.ec.customer.model.DTO.request.CustomerRequestDTO;
 import com.ec.customer.model.DTO.response.CustomerResponseDTO;
 import com.ec.customer.model.entity.Customer;
@@ -36,6 +37,10 @@ public class CustomerService {
     private final CustomerMapper customerMapper;
     private final PasswordEncoder passwordEncoder;
 
+    private static final String passwordDefault = "123456";
+    private static final String roleUser = "USER";
+    private static final Integer defaultOrganizationId = 1;
+
     @Transactional
     public Map<String, String> createCustomer(CustomerRequestDTO customerRequestDTO) {
         try {
@@ -55,8 +60,7 @@ public class CustomerService {
             customer.setOrganization(organization);
             customer.setRoles(Set.of(role));
 
-            String password = "123456";
-            customer.setPassword(passwordEncoder.encode(password));
+            customer.setPassword(passwordEncoder.encode(passwordDefault));
 
             customerRepository.save(customer);
 
@@ -70,7 +74,7 @@ public class CustomerService {
     }
 
     @Transactional
-    public Map<String, String> updateCustomer(Long customerId, CustomerRequestDTO customerRequestDTO) {
+    public Map<String, String> updateCustomer(Integer customerId, CustomerRequestDTO customerRequestDTO) {
         try {
             Customer customer = customerRepository.findById(customerId)
                     .orElseThrow(() -> new CustomException(ResponseCode.CUSTOMER_NOT_FOUND));
@@ -96,7 +100,7 @@ public class CustomerService {
     }
 
     @Transactional
-    public Map<String,String> deleteCustomer(Long customerId){
+    public Map<String,String> deleteCustomer(Integer customerId){
         try {
             Customer customer = customerRepository.findById(customerId)
                     .orElseThrow(() -> new CustomException(ResponseCode.CUSTOMER_NOT_FOUND));
@@ -113,7 +117,7 @@ public class CustomerService {
     }
 
     @Transactional
-    public Page<CustomerResponseDTO> getAllCustomer(int page, int size, String textSearch, Long organizationId){
+    public Page<CustomerResponseDTO> getAllCustomer(int page, int size, String textSearch, Integer organizationId){
         try{
 
             Pageable pageable =  PageRequest.of(page, size);
@@ -130,7 +134,7 @@ public class CustomerService {
     }
 
     @Transactional
-    public CustomerResponseDTO getCustomerById(Long customerId){
+    public CustomerResponseDTO getCustomerById(Integer customerId){
         try{
             Customer customer = customerRepository.findById(customerId)
                     .orElseThrow(() -> new CustomException(ResponseCode.CUSTOMER_NOT_FOUND));
@@ -167,8 +171,19 @@ public class CustomerService {
                 throw new CustomException(ResponseCode.CUSTOMER_EMAIL_EXISTED);
             }
 
+            Role role = roleRepository.findByName(roleUser)
+                    .orElseThrow(() -> new CustomException(ResponseCode.ROLE_NOT_FOUND));
+
+            Organization organization = organizationRepository.findById(defaultOrganizationId)
+                    .orElseThrow(() -> new CustomException(ResponseCode.ORGANIZATION_NOT_FOUND));
+
             Customer customer = customerMapper.toEntity(customerRequestDTO);
+
             customer.setStatus(DefineStatus.ACTIVE.getValue());
+            customer.setRoles(Set.of(role));
+            customer.setOrganization(organization);
+            customer.setPassword(passwordEncoder.encode(customerRequestDTO.getPassword()));
+
             customerRepository.save(customer);
 
             return Map.of("message", "Đăng ký tài khoản thành công");
@@ -177,6 +192,36 @@ public class CustomerService {
             throw e;
         }catch (Exception e){
             throw new RuntimeException("Có lỗi trong quá trình đăng ký tài khoản  : " + e.getMessage());
+        }
+    }
+
+    @Transactional
+    public Map<String, String> changePassword(Integer customerId, ChangePasswordDTO changePasswordDTO){
+        try{
+            Customer customer = customerRepository.findById(customerId)
+                    .orElseThrow(() -> new CustomException(ResponseCode.CUSTOMER_NOT_FOUND));
+
+            String oldPassword = changePasswordDTO.getOldPassword();
+            String newPassword = changePasswordDTO.getNewPassword();
+            String confirmNewPassword = changePasswordDTO.getConfirmPassword();
+
+            if(!passwordEncoder.matches(oldPassword, customer.getPassword())){
+                throw new CustomException(ResponseCode.INVALID_OLD_PASSWORD);
+            }
+
+            if(!newPassword.equals(confirmNewPassword)){
+                throw new CustomException(ResponseCode.CONFIRM_PASSWORD_NOT_MATCH);
+            }
+
+            customer.setPassword(passwordEncoder.encode(newPassword));
+            customerRepository.save(customer);
+
+            return Map.of("message", "Đổi mật khẩu thành công");
+
+        }catch (CustomException e){
+            throw e;
+        }catch (Exception e){
+            throw new RuntimeException("Có lỗi trong quá trình đổi mật khẩu  : " + e.getMessage());
         }
     }
 }

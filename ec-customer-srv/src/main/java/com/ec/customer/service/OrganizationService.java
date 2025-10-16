@@ -52,7 +52,7 @@ public class OrganizationService {
     }
 
     @Transactional
-    public Map<String, String> deleteOrganization(Long organizationId) {
+    public Map<String, String> deleteOrganization(Integer organizationId) {
         try {
             Organization organization = organizationRepository.findById(organizationId)
                     .orElseThrow(() -> new CustomException(ResponseCode.ORGANIZATION_NOT_FOUND));
@@ -69,7 +69,7 @@ public class OrganizationService {
     }
 
     @Transactional
-    public Map<String, String> updateOrganization(Long organizationId, OrganizationRequestDTO organizationRequestDTO) {
+    public Map<String, String> updateOrganization(Integer organizationId, OrganizationRequestDTO organizationRequestDTO) {
         try {
             Organization organization = organizationRepository.findById(organizationId)
                     .orElseThrow(() -> new CustomException(ResponseCode.ORGANIZATION_NOT_FOUND));
@@ -109,7 +109,7 @@ public class OrganizationService {
     }
 
     @Transactional
-    public OrganizationResponseDTO getOrganizationById(Long organizationId) {
+    public OrganizationResponseDTO getOrganizationById(Integer organizationId) {
         try {
             Organization organization = organizationRepository.findById(organizationId)
                     .orElseThrow(() -> new CustomException(ResponseCode.ORGANIZATION_NOT_FOUND));

@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 public class Customer extends BaseEntity {
 
-    private Long id;
+    private Integer id;
 
     private String name;
 

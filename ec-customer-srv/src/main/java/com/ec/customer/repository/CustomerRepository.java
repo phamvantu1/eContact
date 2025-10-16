@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface CustomerRepository extends JpaRepository<Customer, Long> {
+public interface CustomerRepository extends JpaRepository<Customer, Integer> {
 
 
     @Query(value = "select c.* from customers c " +
@@ -19,7 +19,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
             "order by c.created_at desc "
     ,nativeQuery = true)
     Page<Customer> getAllCustomer(@Param("textSearch") String textSearch,
-                                  @Param("organizationId") Long organizationId,
+                                  @Param("organizationId") Integer organizationId,
                                   Pageable pageable);
 
     Optional<Customer> findByEmail(@Param("email") String email);

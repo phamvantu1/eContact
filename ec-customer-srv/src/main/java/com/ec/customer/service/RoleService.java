@@ -52,7 +52,7 @@ public class RoleService {
         }
     }
 
-    public Map<String, String> updateRole(Long roleId, RoleRequestDTO roleRequestDTO){
+    public Map<String, String> updateRole(Integer roleId, RoleRequestDTO roleRequestDTO){
         try{
             Role role = roleRepository.findById(roleId)
                     .orElseThrow(() -> new CustomException(ResponseCode.ROLE_NOT_FOUND));
@@ -80,7 +80,7 @@ public class RoleService {
         }
     }
 
-    public Map<String, String> deleteRole(Long roleId){
+    public Map<String, String> deleteRole(Integer roleId){
         try{
             Role role = roleRepository.findById(roleId)
                     .orElseThrow(() -> new CustomException(ResponseCode.ROLE_NOT_FOUND));
@@ -123,7 +123,7 @@ public class RoleService {
     }
 
     @Transactional
-    public RoleResponseDTO getRoleById(Long roleId){
+    public RoleResponseDTO getRoleById(Integer roleId){
         try{
             Role role = roleRepository.findById(roleId)
                     .orElseThrow(() -> new CustomException(ResponseCode.ROLE_NOT_FOUND));

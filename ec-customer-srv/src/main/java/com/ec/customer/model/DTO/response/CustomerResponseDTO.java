@@ -7,7 +7,7 @@ import java.util.List;
 @Data
 public class CustomerResponseDTO {
 
-    private Long id;
+    private Integer id;
 
     private String name;
 
@@ -25,7 +25,7 @@ public class CustomerResponseDTO {
 
     private String taxCode;
 
-    private Long organizationId;
+    private Integer organizationId;
 
     private List<RoleResponseDTO> roles;
 

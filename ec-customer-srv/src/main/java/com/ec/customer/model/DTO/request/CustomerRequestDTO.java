@@ -29,7 +29,7 @@ public class CustomerRequestDTO {
     private String gender;
 
     @NotNull
-    private Long organizationId;
+    private Integer organizationId;
 
     @NotNull
     private Integer status;
@@ -38,5 +38,5 @@ public class CustomerRequestDTO {
     private String taxCode;
 
     @NotNull
-    private Long roleId;
+    private Integer roleId;
 }

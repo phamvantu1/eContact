@@ -1,5 +1,22 @@
 
 
+http://localhost:8082/api/auth/swagger-ui/index.html
+
+docker run -d --name redis-local -p 6379:6379 redis:latest
+
+
+
+docker ps
+
+docker exec -it redis-local redis-cli
+
+KEYS *
+
+GET <key>
+GET eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJwaGFtdHUifQ...
+
+
+
 role bo sung permission name
 
 kich  ban role bo ma vai tro

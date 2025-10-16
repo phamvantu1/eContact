@@ -1,0 +1,39 @@
+server:
+  port: 8085
+  servlet:
+    context-path: /api/notifications
+
+spring:
+  application:
+    name: ec-notification-srv
+  datasource:
+    url: jdbc:postgresql://localhost:5432/eContract_notification
+    username: postgres
+    password: 123456
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: pvt1213.phamvantu@gmail.com
+    password: movnbpvotcidvrym
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+    hostname: localhost

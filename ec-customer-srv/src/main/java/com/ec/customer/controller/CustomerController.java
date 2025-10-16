@@ -1,5 +1,6 @@
 package com.ec.customer.controller;
 
+import com.ec.customer.model.DTO.request.ChangePasswordDTO;
 import com.ec.customer.model.DTO.request.CustomerRequestDTO;
 import com.ec.customer.service.CustomerService;
 import com.ec.library.response.Response;
@@ -25,19 +26,20 @@ public class CustomerController {
 
     @Operation(summary = "Cập nhật thông tin khách hàng", description = "Cập nhật dữ liệu khách hàng theo ID")
     @PutMapping("/update-customer/{customerId}")
-    public Response<?> updateCustomer(@Valid @RequestBody CustomerRequestDTO customerRequestDTO){
-        return Response.success(customerService.createCustomer(customerRequestDTO));
+    public Response<?> updateCustomer(@Valid @RequestBody CustomerRequestDTO customerRequestDTO,
+                                      @PathVariable("customerId") Integer customerId){
+        return Response.success(customerService.updateCustomer(customerId, customerRequestDTO));
     }
 
     @Operation(summary = "Xóa khách hàng", description = "Xóa khách hàng theo ID")
     @DeleteMapping("/delete-customer/{customerId}")
-    public Response<?> deleteCustomer(@PathVariable Long customerId){
+    public Response<?> deleteCustomer(@PathVariable("customerId") Integer customerId){
         return Response.success(customerService.deleteCustomer(customerId));
     }
 
     @Operation(summary = "Xem chi tiết khách hàng", description = "Lấy thông tin chi tiết của một khách hàng theo ID")
     @GetMapping("/get-customer/{customerId}")
-    public Response<?> getCustomer(@PathVariable Long customerId){
+    public Response<?> getCustomer(@PathVariable("customerId") Integer customerId){
         return Response.success(customerService.getCustomerById(customerId));
     }
 
@@ -46,7 +48,7 @@ public class CustomerController {
     public Response<?> getAllCustomer(@RequestParam("page") int page,
                                       @RequestParam("size") int size,
                                       @RequestParam("textSearch") String textSearch,
-                                      @RequestParam("organizationId") Long organizationId){
+                                      @RequestParam("organizationId") Integer organizationId){
         return Response.success(customerService.getAllCustomer(page, size,textSearch, organizationId));
     }
     @GetMapping("/get-by-email")
@@ -59,8 +61,11 @@ public class CustomerController {
         return Response.success(customerService.registerCustomer(customerRequestDTO));
     }
 
-    @PostMapping("/test")
-    public Response<?> test(){
-        return Response.success("hah");
+    @PutMapping("/change-password/{customerId}")
+    public Response<?> changePassword(@Valid @RequestBody ChangePasswordDTO changePasswordDTO,
+                                      @PathVariable("customerId") Integer customerId){
+        return Response.success(customerService.changePassword(customerId, changePasswordDTO));
     }
+
+
 }

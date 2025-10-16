@@ -20,4 +20,9 @@ public class Response<T> {
     public static <T> Response<T> success(T data) {
         return new Response<>("SUCCESS", "Success", data);
     }
+
+    public static <T> Response<T> error(String code, String message) {
+        return new Response<>(code, message, null);
+    }
+
 }

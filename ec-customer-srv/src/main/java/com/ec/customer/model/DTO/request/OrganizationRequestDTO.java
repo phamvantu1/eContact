@@ -8,7 +8,7 @@ import java.util.List;
 
 @Data
 public class OrganizationRequestDTO {
-    private Long id;
+    private Integer id;
 
     @NotNull
     private String name;
@@ -18,5 +18,5 @@ public class OrganizationRequestDTO {
     @NotNull
     private String taxCode;
 
-    private Long parentId;
+    private Integer parentId;
 }

@@ -4,9 +4,9 @@ public class ServiceEndpoints {
 
     // Tên service — trùng với tên đăng ký trong Eureka
     public static final String CUSTOMER_SERVICE = "http://ec-customer-srv/api/customers";
-    public static final String NOTICE_SERVICE = "http://ec-notification-srv";
-    public static final String AUTH_SERVICE = "http:/ec-auth-srv";
-    public static final String CONTRACT_SERVICE = "http://ec-contract-srv";
+    public static final String NOTICE_SERVICE = "http://ec-notification-srv/api/notifications";
+    public static final String AUTH_SERVICE = "http:/ec-auth-srv/api/auth";
+    public static final String CONTRACT_SERVICE = "http://ec-contract-srv/api/contracts";
 
     // Base API paths
     public static final String CUSTOMER_API = CUSTOMER_SERVICE + "/customers";

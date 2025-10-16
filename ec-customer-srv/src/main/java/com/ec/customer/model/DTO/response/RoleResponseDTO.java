@@ -7,7 +7,7 @@ import java.util.Set;
 
 @Data
 public class RoleResponseDTO {
-    private Long id;
+    private Integer id;
 
     private String name;
 
