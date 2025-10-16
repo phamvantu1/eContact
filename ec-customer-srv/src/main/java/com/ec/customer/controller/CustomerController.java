@@ -38,7 +38,7 @@ public class CustomerController {
     }
 
     @Operation(summary = "Xem chi tiết khách hàng", description = "Lấy thông tin chi tiết của một khách hàng theo ID")
-    @GetMapping("/get-customer/{customerId}")
+    @GetMapping("/{customerId}")
     public Response<?> getCustomer(@PathVariable("customerId") Integer customerId){
         return Response.success(customerService.getCustomerById(customerId));
     }

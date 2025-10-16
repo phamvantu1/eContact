@@ -8,10 +8,13 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="notification" />
+        <module name="ec-customer-srv" />
         <module name="auth-service" />
         <module name="auth" />
+        <module name="common-library" />
         <module name="ec-discovery-srv" />
         <module name="ec-gateway-srv" />
+        <module name="ec-notification-srv" />
       </profile>
       <profile name="Annotation profile for auth" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -23,16 +26,6 @@
           <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct/1.5.5.Final/mapstruct-1.5.5.Final.jar" />
         </processorPath>
         <module name="customer" />
-      </profile>
-      <profile name="Annotation profile for customer" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.34/lombok-1.18.34.jar" />
-        </processorPath>
-        <module name="common-library" />
-        <module name="ec-customer-srv" />
       </profile>
       <profile name="Annotation profile for ec-auth-srv" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -55,6 +48,7 @@
       <module name="ec-customer-srv" options="-parameters" />
       <module name="ec-discovery-srv" options="-parameters" />
       <module name="ec-gateway-srv" options="-parameters" />
+      <module name="ec-notification-srv" options="-parameters" />
       <module name="notification" options="-parameters" />
     </option>
   </component>

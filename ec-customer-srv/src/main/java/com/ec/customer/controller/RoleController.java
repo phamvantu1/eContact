@@ -24,4 +24,21 @@ public class RoleController {
                               @PathVariable("roleId") Integer roleId){
         return Response.success(roleService.updateRole(roleId, roleRequestDTO)) ;
     }
+
+    @DeleteMapping("/delete/{roleId}")
+    public Response<?> delete(@PathVariable("roleId") Integer roleId){
+        return Response.success(roleService.deleteRole(roleId)) ;
+    }
+
+    @GetMapping("/get-all")
+    public Response<?> getAllRoles(@RequestParam(name = "textSearch", required = false, defaultValue = "") String textSearch,
+                                   @RequestParam(name = "page" , required = false, defaultValue = "0") int page,
+                                   @RequestParam(name = "size", required = false, defaultValue = "10") int size ){
+        return Response.success(roleService.getAllRoles(page, size, textSearch));
+    }
+
+    @GetMapping("/{roleId}")
+    public Response<?> getRoleById(@PathVariable("roleId") Integer roleId){
+        return Response.success(roleService.getRoleById(roleId));
+    }
 }

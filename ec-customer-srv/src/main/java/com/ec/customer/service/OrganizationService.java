@@ -31,6 +31,7 @@ public class OrganizationService {
                     .name(organizationRequestDTO.getName())
                     .email(organizationRequestDTO.getEmail())
                     .status(DefineStatus.ACTIVE.getValue())
+                    .code(organizationRequestDTO.getCode())
                     .taxCode(organizationRequestDTO.getTaxCode())
                     .build();
 
@@ -77,6 +78,7 @@ public class OrganizationService {
             organization.setName(organizationRequestDTO.getName());
             organization.setEmail(organizationRequestDTO.getEmail());
             organization.setTaxCode(organizationRequestDTO.getTaxCode());
+            organization.setCode(organizationRequestDTO.getCode());
 
             if (organizationRequestDTO.getParentId() != null) {
                 Organization parentOrganization = organizationRepository.findById(organizationRequestDTO.getParentId())

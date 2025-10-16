@@ -1,0 +1,41 @@
+
+swagger :
+http://localhost:8082/api/auth/swagger-ui/index.html
+
+redis :
+//docker run -d --name redis-local -p 6379:6379 redis:latest
+
+docker create --name redis-local -p 6379:6379 redis:latest
+
+docker start redis-local
+
+docker stop redis-local
+
+docker ps -a
+
+docker ps
+
+docker exec -it redis-local redis-cli
+
+KEYS *
+
+GET <key>
+GET eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJwaGFtdHUifQ...
+
+
+postgres :
+
+tạo daata
+docker create --name postgres-local -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=123456 -p 5432:5432 postgres:15
+
+docker start postgres-local
+
+CREATE DATABASE econtract;
+CREATE DATABASE customer;
+\l   -- xem danh sách database
+\q   -- thoát
+
+docker stop postgres-local
+
+docker ps -a
+

@@ -12,6 +12,7 @@ public interface OrganizationRepository extends JpaRepository<Organization, Inte
     @Query(value = "Select o.* from organizations o " +
             " where (:textSearch is null or o.name like %:textSearch%) " +
             " and o.parent_id is null " +
+            " and o.status != 0 " +
             " order by o.created_at desc "
     , nativeQuery = true)
     Page<Organization> getAllOrganizations(@Param("textSearch") String textSearch,

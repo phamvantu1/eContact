@@ -29,6 +29,8 @@ public class Organization extends BaseEntity {
 
     private String taxCode;
 
+    private String code;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private Organization parent;  // cha

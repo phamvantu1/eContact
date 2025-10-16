@@ -13,6 +13,7 @@ public interface RoleRepository extends JpaRepository<Role, Integer> {
 
     @Query(value = "select r.* from roles r " +
             " where (:textSeach is null or r.name like %:textSeach%) " +
+            " r.status != 0 " +
             " order by r.created_at desc "
             ,nativeQuery = true)
     Page<Role> getAllRoles(@Param("textSeach") String textSearch,

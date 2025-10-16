@@ -1,6 +1,7 @@
 package com.ec.customer.model.DTO.response;
 
 import com.ec.customer.model.entity.Organization;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.Set;
@@ -16,6 +17,9 @@ public class OrganizationResponseDTO {
     private Integer status;
 
     private String taxCode;
+
+    @NotNull
+    private String code;
 
     private Set<OrganizationResponseDTO> children;
 }

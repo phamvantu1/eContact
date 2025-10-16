@@ -8,15 +8,18 @@ import java.util.List;
 
 @Data
 public class OrganizationRequestDTO {
-    private Integer id;
 
     @NotNull
     private String name;
 
+    @NotNull
     private String email;
 
     @NotNull
     private String taxCode;
+
+    @NotNull
+    private String code;
 
     private Integer parentId;
 }
