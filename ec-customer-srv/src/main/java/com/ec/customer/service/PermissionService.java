@@ -15,10 +15,10 @@ public class PermissionService {
 
     private final PermissionRepository permissionRepository;
 
-    public Page<Permission> getAllPermissions(int page, int size) {
+    public Page<Permission> getAllPermissions(int page, int size, String textSearch) {
         try{
             Pageable pageable = PageRequest.of(page, size);
-            return permissionRepository.findAll(pageable);
+            return permissionRepository.getAllPermission(pageable, textSearch);
         }catch (CustomException e){
             throw e;
         }catch(Exception e){

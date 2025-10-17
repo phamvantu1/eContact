@@ -45,10 +45,16 @@
   - auth service
       http://localhost:8082/api/auth/swagger-ui/index.html
   - customer service
-      http://localhost:8083/api/auth/swagger-ui/index.html
+      http://localhost:8083/api/customers/swagger-ui/index.html
   - contract service
-      http://localhost:8084/api/auth/swagger-ui/index.html
+      http://localhost:8084/api/contracts/swagger-ui/index.html
   - notification service
-    http://localhost:8085/api/auth/swagger-ui/index.html
+    http://localhost:8085/api/notifications/swagger-ui/index.html
 
 8. gateway  : cổng 8080
+
+9. insert database
+- insert into permissions(id, name) values
+  (1, 'Xem danh sach hop dong'),
+  (2, 'Tao danh sach hop dong'),
+  (3, 'Xem lich su hop dong')
