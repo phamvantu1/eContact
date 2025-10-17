@@ -16,6 +16,7 @@
         <option value="$PROJECT_DIR$/library/pom.xml" />
         <option value="$PROJECT_DIR$/common-library/pom.xml" />
         <option value="$PROJECT_DIR$/ec-notification-srv/pom.xml" />
+        <option value="$PROJECT_DIR$/ec-contract-srv/pom.xml" />
       </list>
     </option>
   </component>

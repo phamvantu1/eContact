@@ -4,6 +4,7 @@
     <file url="file://$PROJECT_DIR$/auth-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/common-library/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ec-auth-srv/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/ec-contract-srv/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ec-customer-srv/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ec-discovery-srv/discovery/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ec-discovery-srv/src/main/java" charset="UTF-8" />
