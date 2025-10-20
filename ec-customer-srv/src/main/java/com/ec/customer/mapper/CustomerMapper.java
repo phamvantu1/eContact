@@ -52,7 +52,7 @@ public class CustomerMapper {
 
         customer.setName(dto.getName());
         customer.setEmail(dto.getEmail());
-        customer.setPassword(dto.getPassword());
+//        customer.setPassword(dto.getPassword());
         customer.setPhone(dto.getPhone());
         customer.setBirthday(dto.getBirthday());
         customer.setGender(dto.getGender());

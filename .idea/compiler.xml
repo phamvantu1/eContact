@@ -8,8 +8,11 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="notification" />
+        <module name="ec-customer-srv" />
         <module name="auth-service" />
+        <module name="ec-auth-srv" />
         <module name="auth" />
+        <module name="common-library" />
         <module name="ec-discovery-srv" />
         <module name="ec-gateway-srv" />
         <module name="ec-notification-srv" />
@@ -32,9 +35,7 @@
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.34/lombok-1.18.34.jar" />
         </processorPath>
-        <module name="ec-customer-srv" />
-        <module name="common-library" />
-        <module name="ec-auth-srv" />
+        <module name="ec-contract-srv" />
         <module name="contract" />
       </profile>
     </annotationProcessing>
@@ -47,6 +48,7 @@
       <module name="contract" options="-parameters" />
       <module name="customer" options="-parameters" />
       <module name="ec-auth-srv" options="-parameters" />
+      <module name="ec-contract-srv" options="-parameters" />
       <module name="ec-customer-srv" options="-parameters" />
       <module name="ec-discovery-srv" options="-parameters" />
       <module name="ec-gateway-srv" options="-parameters" />

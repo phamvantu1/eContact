@@ -13,6 +13,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.validation.FieldError;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -28,6 +33,21 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Response<Void>> handleAuthException(AuthenticationException ex, WebRequest request) {
         return buildErrorResponse(ResponseCode.UNAUTHORIZED);
     }
+    // ✅ Lỗi validate @Valid
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Response<Void>> handleValidationException(MethodArgumentNotValidException ex) {
+        // Lấy lỗi đầu tiên
+        FieldError fieldError = ex.getBindingResult().getFieldError();
+        String message = (fieldError != null) ? fieldError.getDefaultMessage() : "Dữ liệu không hợp lệ";
+        return new ResponseEntity<>(Response.error("VALIDATION_ERROR", message), HttpStatus.BAD_REQUEST);
+    }
+
+    // ✅ Lỗi IllegalArgumentException
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Response<Void>> handleIllegalArgument(IllegalArgumentException ex) {
+        return new ResponseEntity<>(Response.error("VALIDATION_ERROR", ex.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
 
     // Custom exception
     @ExceptionHandler(CustomException.class)

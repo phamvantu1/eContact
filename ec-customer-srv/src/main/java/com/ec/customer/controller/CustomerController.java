@@ -45,10 +45,10 @@ public class CustomerController {
 
     @Operation(summary = "Danh sách user", description = "Lấy danh user hàng có phân trang và tìm kiếm")
     @GetMapping("/get-all-customer")
-    public Response<?> getAllCustomer(@RequestParam("page") int page,
-                                      @RequestParam("size") int size,
-                                      @RequestParam("textSearch") String textSearch,
-                                      @RequestParam("organizationId") Integer organizationId){
+    public Response<?> getAllCustomer(@RequestParam(name = "page", required = false, defaultValue = "0") int page,
+                                      @RequestParam(name = "size", required = false, defaultValue = "10") int size,
+                                      @RequestParam(name = "textSearch", required = false) String textSearch,
+                                      @RequestParam(name = "organizationId", required = false) Integer organizationId){
         return Response.success(customerService.getAllCustomer(page, size,textSearch, organizationId));
     }
 

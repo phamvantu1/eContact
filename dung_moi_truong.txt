@@ -22,6 +22,8 @@ KEYS *
 GET <key>
 GET eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJwaGFtdHUifQ...
 
+rm redis-local
+
 
 postgres :
 

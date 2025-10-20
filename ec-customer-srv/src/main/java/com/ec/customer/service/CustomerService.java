@@ -23,6 +23,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -87,7 +89,7 @@ public class CustomerService {
 
             customerMapper.updateEntityFromDto(customerRequestDTO, customer);
             customer.setOrganization(organization);
-            customer.setRoles(Set.of(role));
+            customer.setRoles(new HashSet<>(Collections.singletonList(role)));
 
             customerRepository.save(customer);
 
@@ -166,6 +168,7 @@ public class CustomerService {
     @Transactional
     public Map<String, String> registerCustomer(CustomerRequestDTO customerRequestDTO){
         try{
+            log.info("Đăng ký khách hàng với email: {}", customerRequestDTO.getEmail());
             Customer oldCustomer = customerRepository.findByEmail(customerRequestDTO.getEmail()).orElse(null);
             if(oldCustomer != null){
                 throw new CustomException(ResponseCode.CUSTOMER_EMAIL_EXISTED);

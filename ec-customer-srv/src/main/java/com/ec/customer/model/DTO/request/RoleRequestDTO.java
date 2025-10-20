@@ -7,7 +7,6 @@ import java.util.List;
 
 @Data
 public class RoleRequestDTO {
-    private Integer id;
 
     @NotNull
     private String name;

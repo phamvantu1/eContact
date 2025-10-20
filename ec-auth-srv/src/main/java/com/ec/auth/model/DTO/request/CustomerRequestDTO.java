@@ -30,7 +30,7 @@ public class CustomerRequestDTO {
 
     private Integer organizationId;
 
-    private String status;
+    private Integer status;
 
     @NotNull
     private String taxCode;

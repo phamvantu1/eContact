@@ -2,6 +2,7 @@ package com.ec.auth.service;
 
 import com.ec.auth.model.DTO.request.LoginRequestDTO;
 import com.ec.auth.model.DTO.request.CustomerRequestDTO;
+import com.ec.auth.model.DTO.response.Response;
 import com.ec.auth.model.entity.Customer;
 import com.ec.auth.utils.JwtUtil;
 import com.ec.library.constants.ServiceEndpoints;
@@ -14,8 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -51,7 +51,7 @@ public class AuthService {
     public Customer getCustomerByEmail(String email) {
         try {
             String url = ServiceEndpoints.CUSTOMER_API + "/get-by-email?email=" + email;
-            log.info("Gọi Customer API tại URL: {}", url);
+            log.info("Gọi Customer API getCustomerByEmail tại URL: {}", url);
 
             // Gọi API
             ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
@@ -137,24 +137,32 @@ public class AuthService {
 
     public Map<String, String> register(CustomerRequestDTO customerRequestDTO) {
         try {
-            ResponseEntity<Void> response = restTemplate.postForEntity(
-                    ServiceEndpoints.CUSTOMER_API + "/register",
-                    customerRequestDTO,
-                    Void.class
+            String url = ServiceEndpoints.CUSTOMER_API + "/register";
+
+            log.info("Gọi Customer API tại URL: {}", url);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setAccept(java.util.Collections.singletonList(MediaType.ALL));
+
+            HttpEntity<CustomerRequestDTO> entity = new HttpEntity<>(customerRequestDTO, headers);
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    entity,
+                    String.class
             );
 
-            // ✅ Kiểm tra HTTP status
-            if (response.getStatusCode().is2xxSuccessful()) {
-                return Map.of("message", "Đăng ký tài khoản thành công");
-            } else {
-                throw new RuntimeException("Đăng ký thất bại với mã lỗi: " + response.getStatusCode());
-            }
+            return Map.of("message", "Đăng ký tài khoản thành công");
 
-        }catch (HttpClientErrorException | HttpServerErrorException ex) {
+
+        } catch (HttpClientErrorException | HttpServerErrorException ex) {
             // Ném lên CustomerApiException để GlobalExceptionHandler xử lý
             throw new CustomerApiException(ex.getStatusCode().value(), ex.getResponseBodyAsString());
-        } catch (Exception ex) {
-            throw new RuntimeException("Có lỗi trong quá trình đăng ký tài khoản: " + ex.getMessage(), ex);
+        }catch (Exception e) {
+            log.error("Lỗi khi gọi Customer API: {}", e.getMessage(), e);
+            throw new RuntimeException("Lỗi khi gọi Customer API: " + e.getMessage(), e);
         }
     }
 
