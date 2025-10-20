@@ -14,13 +14,13 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     show-sql: false
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     defer-datasource-initialization: true
   sql:
     init:
-      mode: embedded        # Chỉ chạy data.sql lần đầu tiên
+      mode: always        # kích hoạt khởi tạo SQL
       data-locations: classpath:data.sql  # chỉ định file SQL
 
 eureka:
