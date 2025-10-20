@@ -71,6 +71,21 @@ VALUES
     (19, 1),
     (20, 2);
 
+-- Đồng bộ lại sequence cho bảng organizations
+SELECT setval(pg_get_serial_sequence('organizations', 'id'), COALESCE(MAX(id), 1)) FROM organizations;
+
+-- Đồng bộ lại sequence cho bảng permissions
+SELECT setval(pg_get_serial_sequence('permissions', 'id'), COALESCE(MAX(id), 1)) FROM permissions;
+
+-- Đồng bộ lại sequence cho bảng roles
+SELECT setval(pg_get_serial_sequence('roles', 'id'), COALESCE(MAX(id), 1)) FROM roles;
+
+-- Đồng bộ lại sequence cho bảng customers
+SELECT setval(pg_get_serial_sequence('customers', 'id'), COALESCE(MAX(id), 1)) FROM customers;
+
+-- Nếu bảng customer_roles có id tự tăng thì thêm, còn nếu chỉ gồm (customer_id, role_id) thì KHÔNG cần
+-- SELECT setval(pg_get_serial_sequence('customer_roles', 'id'), COALESCE(MAX(id), 1)) FROM customer_roles;
+
 
 
 
