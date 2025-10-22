@@ -2,6 +2,7 @@
 swagger :
 http://localhost:8082/api/auth/swagger-ui/index.html
 
+--------------------------------------------------------------------------
 redis :
 //docker run -d --name redis-local -p 6379:6379 redis:latest
 
@@ -24,10 +25,10 @@ GET eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJwaGFtdHUifQ...
 
 rm redis-local
 
-
+---------------------------------------------------------------------
 postgres :
 
-tạo daata
+tạo data
 docker create --name postgres-local -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=123456 -p 5432:5432 postgres:15
 
 docker start postgres-local
@@ -40,4 +41,40 @@ CREATE DATABASE customer;
 docker stop postgres-local
 
 docker ps -a
+
+
+----------------------------------------------------------------
+minIO :
+
+docker create --name minio -p 9000:9000 -p 9001:9001 -e "MINIO_ROOT_USER=minioadmin" -e "MINIO_ROOT_PASSWORD=minioadmin" -v /data/minio:/data quay.io/minio/minio server /data --console-address ":9001"
+
+
+docker start minio
+
+
+docker stop minio
+
+9000  : cổng dành cho truy cập API
+9001  : cổng dành cho giao diện quản trị web
+
+
+
+---------------------------------------------------
+docker create --hostname rabbitmq --name rabbitmq -p 5672:5672 -p 15672:15672 -e RABBITMQ_DEFAULT_USER=admin -e RABBITMQ_DEFAULT_PASS=admin rabbitmq:3-management
+
+docker start rabbitmq
+
+docker stop rabbitmq
+
+docker rm -f rabbitmq
+
+Container này sẽ có:
+
+Tên: rabbitmq
+
+Giao diện web: http://localhost:15672
+
+Tài khoản: admin / admin
+
+Cổng AMQP: 5672
 

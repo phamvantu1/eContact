@@ -1,5 +1,5 @@
 server:
-  port: 8083
+  port: 8084
   servlet:
     context-path: /api/contracts
 
@@ -25,3 +25,10 @@ eureka:
   instance:
     prefer-ip-address: true
     hostname: localhost
+
+minio:
+  url: http://localhost:9000
+  access-key: minioadmin
+  secret-key: minioadmin
+  bucket-name: contracts
+

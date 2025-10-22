@@ -1,4 +1,4 @@
-package com.contract.contract;
+package com.ec.contract;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
