@@ -7,26 +7,30 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
-@Table(name = "participants")
+@Table(name = "template_contracts")
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Participant extends BaseEntity {
+public class TemplateContract extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     private String name;
 
-    private Integer type;
+    private LocalDateTime startTime;
 
-    private Integer ordering; // thu tu xu ly
+    private Integer typeId;
 
-    private Integer contractId;
+    private Integer customerId;
 
     private Integer status;
 
-    private String taxCode;
+    private Integer organizationId;
+
+    private LocalDateTime endTime;
 }

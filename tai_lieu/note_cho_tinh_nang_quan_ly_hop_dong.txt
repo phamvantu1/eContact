@@ -1,0 +1,2 @@
+bước 1 : 
+- check xem file hợp đồng có chữ ký chưa

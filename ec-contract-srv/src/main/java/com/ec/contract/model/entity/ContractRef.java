@@ -1,5 +1,6 @@
 package com.ec.contract.model.entity;
 
+
 import com.ec.library.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,25 +9,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "participants")
+@Table(name = "contract_refs")
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Participant extends BaseEntity {
+public class ContractRef extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private String name;
-
-    private Integer type;
-
-    private Integer ordering; // thu tu xu ly
-
     private Integer contractId;
 
-    private Integer status;
-
-    private String taxCode;
+    private Integer refId;
 }

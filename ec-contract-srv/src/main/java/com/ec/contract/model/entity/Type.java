@@ -8,25 +8,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "participants")
+@Table(name = "types")
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Participant extends BaseEntity {
+public class Type extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     private String name;
 
-    private Integer type;
-
-    private Integer ordering; // thu tu xu ly
-
-    private Integer contractId;
+    private Integer organizationId;
 
     private Integer status;
-
-    private String taxCode;
 }

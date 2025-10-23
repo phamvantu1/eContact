@@ -17,6 +17,9 @@ GET eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJwaGFtdHUifQ...
 
 
 
-role bo sung permission name
+bang type :
+bo code , ordering ,
 
-kich  ban role bo ma vai tro
+
+bang document :
+bo recipientId
