@@ -11,4 +11,9 @@ import org.springframework.stereotype.Service;
 public class ContractService {
 
     private final ContractRepository contractRepository;
+    private final DocumentService documentService;
+
+    public
+
+
 }

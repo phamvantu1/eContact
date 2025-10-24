@@ -57,5 +57,18 @@ public class MinioService {
                         .build()
         );
     }
+
+    // Tạo URL truy cập tạm thời
+    public String getPresignedUrl(String bucketName, String objectName) throws Exception {
+        return minioClient.getPresignedObjectUrl(
+                GetPresignedObjectUrlArgs.builder()
+                        .method(Method.GET)
+                        .bucket(bucketName)
+                        .object(objectName)
+                        .expiry(60 * 60) // 1 giờ
+                        .build()
+        );
+    }
+
 }
 

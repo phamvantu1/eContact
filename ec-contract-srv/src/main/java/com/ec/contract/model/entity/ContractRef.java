@@ -19,7 +19,9 @@ public class ContractRef extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private Integer contractId;
+    @ManyToOne
+    @JoinColumn(name = "contract_id") // foreign key trỏ về contracts.id
+    private Contract contract;
 
     private Integer refId;
 }

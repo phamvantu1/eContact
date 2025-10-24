@@ -24,7 +24,9 @@ public class Participant extends BaseEntity {
 
     private Integer ordering; // thu tu xu ly
 
-    private Integer contractId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "contract_id") // foreign key trỏ về contracts.id
+    private Contract contract;
 
     private Integer status;
 

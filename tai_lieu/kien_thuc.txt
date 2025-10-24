@@ -1,0 +1,17 @@
+Trong PDF:
+
+Chữ ký số không nằm “bên ngoài” file, mà được lưu trong Signature Field của PDF.
+
+PDF có cấu trúc gọi là AcroForm, trong đó có các field kiểu Sig (signature).
+
+Mỗi field chữ ký (PDSignature) lưu thông tin như:
+
+ByteRange: phạm vi byte trong file PDF được ký.
+
+Contents: dữ liệu chữ ký số (PKCS#7 / CMS, có certificate, hash, timestamp).
+
+Name: tên người ký.
+
+M / Filter / SubFilter: thông tin kiểu chữ ký, thuật toán hash, timestamp.
+
+Tóm lại: PDFBox không “tự động xác minh chữ ký”, nó chỉ đọc cấu trúc chữ ký trong PDF.

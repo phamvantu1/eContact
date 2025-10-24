@@ -1,6 +1,7 @@
 package com.ec.contract.model.entity;
 
 import com.ec.library.entity.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Table(name = "contracts")
@@ -28,7 +30,13 @@ public class Contract extends BaseEntity {
 
     private String note;
 
-    private Integer refId; // hop dong lien quan
+    @JsonIgnore
+    @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<ContractRef> contractRefs;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<Participant> participants;
 
     private Integer typeId; // loai hop dong
 
