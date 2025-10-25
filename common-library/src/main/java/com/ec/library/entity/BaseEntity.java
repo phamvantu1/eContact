@@ -23,7 +23,7 @@ public abstract class BaseEntity {
 
     @CreatedBy
     @Column(name = "created_by", updatable = false)
-    private String createdBy;
+    private Integer createdBy;
 
     @LastModifiedDate
     @Column(name = "updated_at")
@@ -31,6 +31,6 @@ public abstract class BaseEntity {
 
     @LastModifiedBy
     @Column(name = "updated_by")
-    private String updatedBy;
+    private Integer updatedBy;
 
 }
