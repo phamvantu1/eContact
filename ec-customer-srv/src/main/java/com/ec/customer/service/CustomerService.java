@@ -14,6 +14,7 @@ import com.ec.customer.repository.OrganizationRepository;
 import com.ec.customer.repository.RoleRepository;
 import com.ec.library.exception.CustomException;
 import com.ec.library.exception.ResponseCode;
+import com.ec.library.response.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -150,36 +151,37 @@ public class CustomerService {
         }
     }
 
-    public CustomerResponseDTO getCustomerByEmail(String email){
-        try{
+    public Response<?> getCustomerByEmail(String email){
+        try {
             log.info("Email nhận được: {}", email);
-            Customer customer = customerRepository.findByEmail(email)
-                    .orElseThrow(() -> new CustomException(ResponseCode.CUSTOMER_NOT_FOUND));
+            Customer customer = customerRepository.findByEmail(email).orElse(null);
 
-            return customerMapper.toResponseDTO(customer);
+            if (customer == null) {
+                return Response.success(Map.of("error", "Không tìm thấy người dùng với email: " + email));
+            }
 
-        }catch (CustomException e){
-            throw e;
+            return Response.success(customerMapper.toResponseDTO(customer));
+
         }catch (Exception e){
             throw new RuntimeException("Có lỗi trong quá trình xóa người dùng : " + e.getMessage());
         }
     }
 
     @Transactional
-    public Map<String, String> registerCustomer(CustomerRequestDTO customerRequestDTO){
+    public Response<?> registerCustomer(CustomerRequestDTO customerRequestDTO){
         try{
             log.info("Đăng ký khách hàng với email: {}", customerRequestDTO.getEmail());
             Customer oldCustomer = customerRepository.findByEmail(customerRequestDTO.getEmail()).orElse(null);
             if(oldCustomer != null){
-                throw new CustomException(ResponseCode.CUSTOMER_EMAIL_EXISTED);
+              return Response.success(Map.of("error", "Email đã tồn tại trong hệ thống"));
             }
 
-            Role role = roleRepository.findByName(roleUser)
-                    .orElseThrow(() -> new CustomException(ResponseCode.ROLE_NOT_FOUND));
+            Role role = roleRepository.findByName(roleUser).orElse(null);
 
-            Organization organization = organizationRepository.findById(defaultOrganizationId)
-                    .orElseThrow(() -> new CustomException(ResponseCode.ORGANIZATION_NOT_FOUND));
+            if(role == null) return Response.success(Map.of("error", "Vai trò người dùng không tồn tại trong hệ thống"));
 
+            Organization organization = organizationRepository.findById(defaultOrganizationId).orElse(null);
+            if(organization == null) return Response.success(Map.of("error", "Tổ chức mặc định không tồn tại trong hệ thống"));
             Customer customer = customerMapper.toEntity(customerRequestDTO);
 
             customer.setStatus(DefineStatus.ACTIVE.getValue());
@@ -189,10 +191,8 @@ public class CustomerService {
 
             customerRepository.save(customer);
 
-            return Map.of("message", "Đăng ký tài khoản thành công");
+            return Response.success(Map.of("message", "Đăng ký tài khoản thành công"));
 
-        }catch (CustomException e){
-            throw e;
         }catch (Exception e){
             throw new RuntimeException("Có lỗi trong quá trình đăng ký tài khoản  : " + e.getMessage());
         }

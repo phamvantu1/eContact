@@ -6,6 +6,7 @@ import com.ec.customer.service.CustomerService;
 import com.ec.library.response.Response;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -54,14 +55,14 @@ public class CustomerController {
 
     @Operation(summary = "Lấy thông tin user theo email")
     @GetMapping("/internal/get-by-email")
-    public Response<?> getCustomerByEmail(@RequestParam(name = "email") String email){
-        return Response.success(customerService.getCustomerByEmail(email));
+    public ResponseEntity<?> getCustomerByEmail(@RequestParam(name = "email") String email){
+        return ResponseEntity.ok(customerService.getCustomerByEmail(email));
     }
 
     @Operation(summary = "Đăng ký user ( FE không dùng )", description = "Dùng để call service từ auth-service")
     @PostMapping("/internal/register")
-    public Response<?> registerCustomer( @RequestBody CustomerRequestDTO customerRequestDTO){
-        return Response.success(customerService.registerCustomer(customerRequestDTO));
+    public ResponseEntity<?> registerCustomer( @RequestBody CustomerRequestDTO customerRequestDTO){
+        return ResponseEntity.ok(customerService.registerCustomer(customerRequestDTO));
     }
 
     @Operation(summary = "Đổi mật khẩu", description = "Đổi mật khẩu cho user theo ID")

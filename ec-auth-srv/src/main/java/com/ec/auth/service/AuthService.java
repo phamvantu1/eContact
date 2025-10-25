@@ -22,6 +22,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -53,74 +54,71 @@ public class AuthService {
             String url = ServiceEndpoints.CUSTOMER_API + "/internal/get-by-email?email=" + email;
             log.info("Gọi Customer API getCustomerByEmail tại URL: {}", url);
 
-            // Gọi API
             ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
                     null,
-                    new ParameterizedTypeReference<>() {
-                    }
+                    new ParameterizedTypeReference<>() {}
             );
 
-            log.info("Phản hồi từ Customer API: {}", response.getBody());
+            Map<String, Object> body = response.getBody();
 
-            if (response.getBody() == null || response.getBody().get("data") == null) {
+            Map<String, Object> data = (Map<String, Object>) body.get("data");
+            if (data == null) {
+                log.warn("Không có trường 'data' trong phản hồi");
                 return null;
             }
 
-            // Lấy object "data" ra
-            ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> dataMap = (Map<String, Object>) response.getBody().get("data");
+            // Nếu có lỗi trong data → trả null (hoặc ném exception tuỳ logic)
+            if (data.containsKey("error")) {
+                log.warn("Customer API báo lỗi: {}", data.get("error"));
+                return null;
+            }
 
-            // Chuyển thành Customer entity của Auth Service
+            // ✅ Chuyển data thành Customer
             Customer customer = new Customer();
-            customer.setId(((Number) dataMap.get("id")).intValue());
-            customer.setName((String) dataMap.get("name"));
-            customer.setEmail((String) dataMap.get("email"));
-            customer.setPassword((String) dataMap.get("password"));
-            customer.setPhone((String) dataMap.get("phone"));
-            customer.setBirthday((String) dataMap.get("birthday"));
-            customer.setGender((String) dataMap.get("gender"));
-            customer.setStatus(String.valueOf(dataMap.get("status")));
+            customer.setId(((Number) data.get("id")).intValue());
+            customer.setName((String) data.get("name"));
+            customer.setEmail((String) data.get("email"));
+            customer.setPassword((String) data.get("password"));
+            customer.setPhone((String) data.get("phone"));
+            customer.setBirthday((String) data.get("birthday"));
+            customer.setGender((String) data.get("gender"));
+            customer.setStatus(String.valueOf(data.get("status")));
 
             // Xử lý roles
-            List<Map<String, Object>> rolesList = (List<Map<String, Object>>) dataMap.get("roles");
+            List<Map<String, Object>> rolesList = (List<Map<String, Object>>) data.get("roles");
             if (rolesList != null) {
                 List<String> roleNames = rolesList.stream()
                         .map(role -> (String) role.get("name"))
                         .toList();
                 customer.setRoles(roleNames);
 
-                // Gom toàn bộ permissions (nếu có)
-                List<String> allPermissions = rolesList.stream()
+                List<String> permissions = rolesList.stream()
                         .flatMap(role -> {
                             List<Map<String, Object>> perms = (List<Map<String, Object>>) role.get("permissions");
-                            if (perms == null) return Stream.empty();
-                            return perms.stream()
-                                    .map(p -> (String) p.get("name"))
-                                    .filter(Objects::nonNull);
+                            return perms == null ? Stream.empty() :
+                                    perms.stream().map(p -> (String) p.get("name")).filter(Objects::nonNull);
                         })
                         .toList();
-                customer.setPermissions(allPermissions);
+                customer.setPermissions(permissions);
             }
 
             return customer;
 
-        } catch (HttpClientErrorException | HttpServerErrorException ex) {
-            // Ném lên CustomerApiException để GlobalExceptionHandler xử lý
-            throw new CustomerApiException(ex.getStatusCode().value(), ex.getResponseBodyAsString());
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error("Lỗi khi gọi Customer API: {}", e.getMessage(), e);
-            throw new RuntimeException("Lỗi khi gọi Customer API: " + e.getMessage(), e);
+            return null;
         }
     }
+
 
 
     public Map<String, String> login(LoginRequestDTO authRequest) {
         try {
             Customer customer = getCustomerByEmail(authRequest.getEmail());
             if (customer == null) {
-                throw new CustomException(ResponseCode.EMAIL_INVALID);
+                throw new CustomException(ResponseCode.EMAIL_NOT_FOUND);
             }
 
             if (!passwordEncoder.matches(authRequest.getPassword(), customer.getPassword())) {
@@ -138,33 +136,43 @@ public class AuthService {
     public Map<String, String> register(CustomerRequestDTO customerRequestDTO) {
         try {
             String url = ServiceEndpoints.CUSTOMER_API + "/internal/register";
-
             log.info("Gọi Customer API tại URL: {}", url);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setAccept(java.util.Collections.singletonList(MediaType.ALL));
+            headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
             HttpEntity<CustomerRequestDTO> entity = new HttpEntity<>(customerRequestDTO, headers);
 
-            ResponseEntity<String> response = restTemplate.exchange(
+            // Gọi API, và nhận JSON trả về dạng Map
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                     url,
                     HttpMethod.POST,
                     entity,
-                    String.class
+                    new ParameterizedTypeReference<>() {}
             );
 
+            log.info("Phản hồi từ Customer API: {}", response.getBody());
+            if (response.getBody() == null || response.getBody().get("data") == null) {
+                return Map.of("message", "Phản hồi không hợp lệ từ Customer API");
+            }
+
+            Map<String, Object> data = (Map<String, Object>) response.getBody().get("data");
+
+            // Nếu có lỗi trong data
+            if (data.containsKey("error")) {
+                return Map.of("message", String.valueOf(data.get("error")));
+            }
+
+            // Nếu thành công
             return Map.of("message", "Đăng ký tài khoản thành công");
 
-
-        } catch (HttpClientErrorException | HttpServerErrorException ex) {
-            // Ném lên CustomerApiException để GlobalExceptionHandler xử lý
-            throw new CustomerApiException(ex.getStatusCode().value(), ex.getResponseBodyAsString());
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error("Lỗi khi gọi Customer API: {}", e.getMessage(), e);
-            throw new RuntimeException("Lỗi khi gọi Customer API: " + e.getMessage(), e);
+            return Map.of("message", "Lỗi khi gọi Customer API: " + e.getMessage());
         }
     }
+
 
     public Map<String, String> logout(HttpServletRequest request){
         try{

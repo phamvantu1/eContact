@@ -25,6 +25,7 @@ public enum ResponseCode {
     INVALID_OLD_PASSWORD("ERR_400", "Mật khẩu cũ không đúng", HttpStatus.BAD_REQUEST),
     PASSWORD_INVALID("ERR_400", "Mật khẩu không hợp lệ", HttpStatus.BAD_REQUEST),
     EMAIL_INVALID("ERR_400", "Email không hợp lệ", HttpStatus.NOT_FOUND),
+    EMAIL_NOT_FOUND("ERR_404", "Email không tồn tại", HttpStatus.NOT_FOUND),
     EMAIL_EXISTED("ERR_409", "Email đã tồn tại", HttpStatus.CONFLICT),
 
 
