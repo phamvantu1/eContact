@@ -50,7 +50,7 @@ public class AuthService {
 
     public Customer getCustomerByEmail(String email) {
         try {
-            String url = ServiceEndpoints.CUSTOMER_API + "/get-by-email?email=" + email;
+            String url = ServiceEndpoints.CUSTOMER_API + "/internal/get-by-email?email=" + email;
             log.info("Gọi Customer API getCustomerByEmail tại URL: {}", url);
 
             // Gọi API
@@ -137,7 +137,7 @@ public class AuthService {
 
     public Map<String, String> register(CustomerRequestDTO customerRequestDTO) {
         try {
-            String url = ServiceEndpoints.CUSTOMER_API + "/register";
+            String url = ServiceEndpoints.CUSTOMER_API + "/internal/register";
 
             log.info("Gọi Customer API tại URL: {}", url);
 

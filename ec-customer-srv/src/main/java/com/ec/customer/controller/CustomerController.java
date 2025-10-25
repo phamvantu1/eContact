@@ -53,13 +53,13 @@ public class CustomerController {
     }
 
     @Operation(summary = "Lấy thông tin user theo email")
-    @GetMapping("/get-by-email")
+    @GetMapping("/internal/get-by-email")
     public Response<?> getCustomerByEmail(@RequestParam(name = "email") String email){
         return Response.success(customerService.getCustomerByEmail(email));
     }
 
     @Operation(summary = "Đăng ký user ( FE không dùng )", description = "Dùng để call service từ auth-service")
-    @PostMapping("/register")
+    @PostMapping("/internal/register")
     public Response<?> registerCustomer( @RequestBody CustomerRequestDTO customerRequestDTO){
         return Response.success(customerService.registerCustomer(customerRequestDTO));
     }
