@@ -60,6 +60,10 @@ public enum ResponseCode {
     CONTRACT_NOT_FOUND("ERR_404", "Không tìm thấy hợp đồng", HttpStatus.NOT_FOUND),
 
 
+    // recipient
+    DUPLICATE_RECIPIENT_EMAIL("ERR_409", "Địa chỉ email bị trùng lặp", HttpStatus.CONFLICT),
+
+
 
     BAD_REQUEST("ERR_400", "Bad request", HttpStatus.BAD_REQUEST);
 

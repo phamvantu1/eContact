@@ -11,8 +11,6 @@ import com.ec.contract.repository.ContractRefRepository;
 import com.ec.contract.repository.ContractRepository;
 import com.ec.library.exception.CustomException;
 import com.ec.library.exception.ResponseCode;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +67,7 @@ public class ContractService {
                     .contractExpireTime(requestDTO.getContractExpireTime())
                     .customerId(customer.getId())
                     .organizationId(customer.getOrganizationId())
-                    .status(ContractStatus.DRAFF.getDbVal())
+                    .status(ContractStatus.DRAFT.getDbVal())
                     .build();
 
             if (!requestDTO.getContractRefs().isEmpty()){

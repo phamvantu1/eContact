@@ -2,10 +2,7 @@ package com.ec.contract.model.entity;
 
 import com.ec.library.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "fields")
@@ -37,4 +34,9 @@ public class Field extends BaseEntity {
     private Integer documentId;
 
     private Integer contractId;
+
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "recipient_id", insertable = false, updatable = false)
+    @ToString.Exclude
+    private Recipient recipient;
 }

@@ -3,12 +3,10 @@ package com.ec.contract.model.entity;
 import com.ec.library.entity.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Table(name = "recipients")
@@ -46,7 +44,7 @@ public class Recipient extends BaseEntity {
 
     private LocalDateTime processAt; // ngay xu ly
 
-    private Integer signTye;
+    private Integer signType;
 
     private String reasonReject;
 
@@ -54,7 +52,12 @@ public class Recipient extends BaseEntity {
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @JoinColumn(name = "participant_id", referencedColumnName = "id")
     private Participant participant;
+
+    @OneToMany(mappedBy = "recipient", fetch = FetchType.LAZY)
+    private Set<Field> fields;
 
 }

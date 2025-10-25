@@ -72,5 +72,11 @@ public class CustomerController {
         return Response.success(customerService.changePassword(customerId, changePasswordDTO));
     }
 
+    @Operation(summary = "Gợi ý danh sách user", description = "Gợi ý danh sách user theo từ khóa")
+    @GetMapping("/suggest-list-customer")
+    public Response<?> suggestListCustomer(@RequestParam(name = "textSearch", required = false) String textSearch){
+        return Response.success(customerService.suggestListCustomer(textSearch));
+    }
+
 
 }

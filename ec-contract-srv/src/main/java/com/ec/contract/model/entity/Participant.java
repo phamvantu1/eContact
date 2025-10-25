@@ -3,11 +3,9 @@ package com.ec.contract.model.entity;
 import com.ec.library.entity.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -37,6 +35,19 @@ public class Participant extends BaseEntity {
 
     @JsonIgnore
     @OneToMany(mappedBy = "participant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Set<Recipient> recipients;
+
+    public void addRecipient(Recipient recipient) {
+        if (recipient != null) {
+            if (recipients == null) {
+                recipients = new HashSet<>();
+            }
+
+            recipient.setParticipant(this);
+            recipients.add(recipient);
+        }
+    }
 
 }

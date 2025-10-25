@@ -1,17 +1,20 @@
-package com.ec.contract.model.dto.response;
+package com.ec.contract.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RecipientResponseDTO {
+public class RecipientDTO implements Serializable, Comparable<RecipientDTO> {
 
     private Integer id;
 
@@ -39,7 +42,20 @@ public class RecipientResponseDTO {
 
     private LocalDateTime processAt; // ngay xu ly
 
-    private Integer signTye;
+    private Integer signType;
 
     private Integer participantId;
+
+    @JsonIgnore
+    private Set<FieldDto> fields;
+
+    // dieu phoi -> xem xet -> ky -> van thu
+    @Override
+    public int compareTo(RecipientDTO other) {
+        if (role == other.getRole()) {
+            return ordering - other.getOrdering();
+        }
+        return role - other.getRole();
+    }
+
 }

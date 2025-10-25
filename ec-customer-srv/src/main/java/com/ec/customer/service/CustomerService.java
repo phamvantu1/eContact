@@ -6,6 +6,7 @@ import com.ec.customer.mapper.CustomerMapper;
 import com.ec.customer.model.DTO.request.ChangePasswordDTO;
 import com.ec.customer.model.DTO.request.CustomerRequestDTO;
 import com.ec.customer.model.DTO.response.CustomerResponseDTO;
+import com.ec.customer.model.DTO.response.CustomerSuggestDTO;
 import com.ec.customer.model.entity.Customer;
 import com.ec.customer.model.entity.Organization;
 import com.ec.customer.model.entity.Role;
@@ -24,10 +25,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -49,7 +48,7 @@ public class CustomerService {
         try {
 
             Customer oldCustomer = customerRepository.findByEmail(customerRequestDTO.getEmail()).orElse(null);
-            if(oldCustomer != null){
+            if (oldCustomer != null) {
                 throw new CustomException(ResponseCode.CUSTOMER_EMAIL_EXISTED);
             }
 
@@ -103,7 +102,7 @@ public class CustomerService {
     }
 
     @Transactional
-    public Map<String,String> deleteCustomer(Integer customerId){
+    public Map<String, String> deleteCustomer(Integer customerId) {
         try {
             Customer customer = customerRepository.findById(customerId)
                     .orElseThrow(() -> new CustomException(ResponseCode.CUSTOMER_NOT_FOUND));
@@ -111,47 +110,47 @@ public class CustomerService {
 
             customerRepository.save(customer);
 
-            return Map.of("message","Xóa người dùng thành công");
-        }catch (CustomException e){
+            return Map.of("message", "Xóa người dùng thành công");
+        } catch (CustomException e) {
             throw e;
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("Có lỗi trong quá trình xóa người dùng : " + e.getMessage());
         }
     }
 
     @Transactional
-    public Page<CustomerResponseDTO> getAllCustomer(int page, int size, String textSearch, Integer organizationId){
-        try{
+    public Page<CustomerResponseDTO> getAllCustomer(int page, int size, String textSearch, Integer organizationId) {
+        try {
 
-            Pageable pageable =  PageRequest.of(page, size);
+            Pageable pageable = PageRequest.of(page, size);
 
             Page<Customer> customerList = customerRepository.getAllCustomer(textSearch, organizationId, pageable);
 
             return customerList.map(customerMapper::toResponseDTO);
 
-        }catch (CustomException e){
+        } catch (CustomException e) {
             throw e;
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("Có lỗi trong quá trình xóa người dùng : " + e.getMessage());
         }
     }
 
     @Transactional
-    public CustomerResponseDTO getCustomerById(Integer customerId){
-        try{
+    public CustomerResponseDTO getCustomerById(Integer customerId) {
+        try {
             Customer customer = customerRepository.findById(customerId)
                     .orElseThrow(() -> new CustomException(ResponseCode.CUSTOMER_NOT_FOUND));
 
             return customerMapper.toResponseDTO(customer);
 
-        }catch (CustomException e){
+        } catch (CustomException e) {
             throw e;
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("Có lỗi trong quá trình xóa người dùng : " + e.getMessage());
         }
     }
 
-    public Response<?> getCustomerByEmail(String email){
+    public Response<?> getCustomerByEmail(String email) {
         try {
             log.info("Email nhận được: {}", email);
             Customer customer = customerRepository.findByEmail(email).orElse(null);
@@ -162,26 +161,28 @@ public class CustomerService {
 
             return Response.success(customerMapper.toResponseDTO(customer));
 
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("Có lỗi trong quá trình xóa người dùng : " + e.getMessage());
         }
     }
 
     @Transactional
-    public Response<?> registerCustomer(CustomerRequestDTO customerRequestDTO){
-        try{
+    public Response<?> registerCustomer(CustomerRequestDTO customerRequestDTO) {
+        try {
             log.info("Đăng ký khách hàng với email: {}", customerRequestDTO.getEmail());
             Customer oldCustomer = customerRepository.findByEmail(customerRequestDTO.getEmail()).orElse(null);
-            if(oldCustomer != null){
-              return Response.success(Map.of("error", "Email đã tồn tại trong hệ thống"));
+            if (oldCustomer != null) {
+                return Response.success(Map.of("error", "Email đã tồn tại trong hệ thống"));
             }
 
             Role role = roleRepository.findByName(roleUser).orElse(null);
 
-            if(role == null) return Response.success(Map.of("error", "Vai trò người dùng không tồn tại trong hệ thống"));
+            if (role == null)
+                return Response.success(Map.of("error", "Vai trò người dùng không tồn tại trong hệ thống"));
 
             Organization organization = organizationRepository.findById(defaultOrganizationId).orElse(null);
-            if(organization == null) return Response.success(Map.of("error", "Tổ chức mặc định không tồn tại trong hệ thống"));
+            if (organization == null)
+                return Response.success(Map.of("error", "Tổ chức mặc định không tồn tại trong hệ thống"));
             Customer customer = customerMapper.toEntity(customerRequestDTO);
 
             customer.setStatus(DefineStatus.ACTIVE.getValue());
@@ -193,14 +194,14 @@ public class CustomerService {
 
             return Response.success(Map.of("message", "Đăng ký tài khoản thành công"));
 
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("Có lỗi trong quá trình đăng ký tài khoản  : " + e.getMessage());
         }
     }
 
     @Transactional
-    public Map<String, String> changePassword(Integer customerId, ChangePasswordDTO changePasswordDTO){
-        try{
+    public Map<String, String> changePassword(Integer customerId, ChangePasswordDTO changePasswordDTO) {
+        try {
             Customer customer = customerRepository.findById(customerId)
                     .orElseThrow(() -> new CustomException(ResponseCode.CUSTOMER_NOT_FOUND));
 
@@ -208,11 +209,11 @@ public class CustomerService {
             String newPassword = changePasswordDTO.getNewPassword();
             String confirmNewPassword = changePasswordDTO.getConfirmPassword();
 
-            if(!passwordEncoder.matches(oldPassword, customer.getPassword())){
+            if (!passwordEncoder.matches(oldPassword, customer.getPassword())) {
                 throw new CustomException(ResponseCode.INVALID_OLD_PASSWORD);
             }
 
-            if(!newPassword.equals(confirmNewPassword)){
+            if (!newPassword.equals(confirmNewPassword)) {
                 throw new CustomException(ResponseCode.CONFIRM_PASSWORD_NOT_MATCH);
             }
 
@@ -221,10 +222,31 @@ public class CustomerService {
 
             return Map.of("message", "Đổi mật khẩu thành công");
 
-        }catch (CustomException e){
+        } catch (CustomException e) {
             throw e;
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("Có lỗi trong quá trình đổi mật khẩu  : " + e.getMessage());
+        }
+    }
+
+    public List<CustomerSuggestDTO> suggestListCustomer(String textSearch) {
+        try {
+            List<Customer> customerList = customerRepository.suggestListCustomer(textSearch);
+
+            return customerList.stream()
+                    .map(customer -> {
+                                CustomerSuggestDTO dto = new CustomerSuggestDTO();
+                                dto.setEmail(customer.getEmail());
+                                dto.setName(customer.getName());
+                                dto.setPhone(customer.getPhone());
+                                return dto;
+                            }
+                    ).collect(Collectors.toList());
+
+        } catch (CustomException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Có lỗi trong quá trình gợi ý người dùng  : " + e.getMessage());
         }
     }
 }

@@ -24,4 +24,11 @@ public interface CustomerRepository extends JpaRepository<Customer, Integer> {
                                   Pageable pageable);
 
     Optional<Customer> findByEmail(@Param("email") String email);
+
+    @Query(value = "select c.* from customers c " +
+            "where (:textSearch is null or (c.name ilike %:textSearch% or c.email ilike %:textSearch% or c.phone ilike %:textSearch%)) " +
+            " and c.status = 1 " +
+            "order by c.name asc "
+            ,nativeQuery = true)
+    List<Customer> suggestListCustomer(@Param("textSearch") String textSearch);
 }

@@ -1,7 +1,6 @@
 package com.ec.contract.model.dto.response;
 
-import com.ec.contract.model.entity.ContractRef;
-import com.ec.contract.model.entity.Participant;
+import com.ec.contract.model.dto.ParticipantDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,7 +27,7 @@ public class ContractResponseDTO {
 
     private Set<ContractRefResponseDTO> contractRefs;
 
-    private Set<ParticipantResponseDTO> participants;
+    private Set<ParticipantDTO> participants;
 
     private Integer typeId; // loai hop dong
 
