@@ -18,10 +18,10 @@ import java.util.stream.Collectors;
 @Component
 public class JwtUtil {
 
-    @Value("${application.sercurity.jwt.secret-key}")
+    @Value("${application.security.jwt.secret-key}")
     private String secretKey;
 
-    @Value("${application.sercurity.jwt.expiration}")
+    @Value("${application.security.jwt.expiration}")
     private long expiration; // milliseconds
 
     public String generateToken(Customer customer) {
@@ -29,6 +29,8 @@ public class JwtUtil {
 
         claims.put("role", customer.getRoles());
         claims.put("permissions", customer.getPermissions());
+        claims.put("customerId", customer.getId());
+        claims.put("email", customer.getEmail());
 
         return Jwts.builder()
                 .setClaims(claims)

@@ -21,7 +21,7 @@ import java.security.Key;
 @Component
 public class JwtAuthenticationFilter implements GatewayFilter, Ordered {
 
-    @Value("${application.sercurity.jwt.secret-key}")
+    @Value("${application.security.jwt.secret-key}")
     private String secretKey;
 
     private final ReactiveStringRedisTemplate redisTemplate;

@@ -1,4 +1,4 @@
-package com.ec.contract.conifg;
+package com.ec.contract.config;
 
 import io.minio.MinioClient;
 import org.springframework.beans.factory.annotation.Value;

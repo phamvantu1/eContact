@@ -1,6 +1,9 @@
-package com.ec.customer.filter;
+package com.ec.contract.filter;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -8,11 +11,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -37,7 +39,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String path = request.getRequestURI();
-        // ✅ Bỏ qua Swagger và internal API
         if (path.contains("/swagger") ||
                 path.contains("/v3/api-docs") ||
                 path.contains("/webjars") ||
@@ -63,17 +64,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             String username = claims.getBody().getSubject();
 
-            // Lấy danh sách role nếu có
             List<String> roles = claims.getBody().get("role", List.class);
-            List<?> authorities = roles != null
+            List<SimpleGrantedAuthority> authorities = roles != null
                     ? roles.stream().map(SimpleGrantedAuthority::new).toList()
                     : Collections.emptyList();
 
-            // Tạo authentication object
             UsernamePasswordAuthenticationToken authToken =
-                    new UsernamePasswordAuthenticationToken(authorities, username, null);
+                    new UsernamePasswordAuthenticationToken(username, null, authorities);
 
-            // ✅ Đưa vào context để Spring Security nhận diện
             SecurityContextHolder.getContext().setAuthentication(authToken);
 
             filterChain.doFilter(request, response);
@@ -81,6 +79,5 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         } catch (JwtException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
-
     }
 }

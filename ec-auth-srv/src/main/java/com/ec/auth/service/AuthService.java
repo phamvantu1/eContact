@@ -38,6 +38,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final CustomerService customerService;
 
 
     public void blacklistToken(String token, long expirationMillis) {
@@ -49,74 +50,9 @@ public class AuthService {
         return redisTemplate.hasKey(token);
     }
 
-    public Customer getCustomerByEmail(String email) {
-        try {
-            String url = ServiceEndpoints.CUSTOMER_API + "/internal/get-by-email?email=" + email;
-            log.info("Gọi Customer API getCustomerByEmail tại URL: {}", url);
-
-            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<>() {}
-            );
-
-            Map<String, Object> body = response.getBody();
-
-            Map<String, Object> data = (Map<String, Object>) body.get("data");
-            if (data == null) {
-                log.warn("Không có trường 'data' trong phản hồi");
-                return null;
-            }
-
-            // Nếu có lỗi trong data → trả null (hoặc ném exception tuỳ logic)
-            if (data.containsKey("error")) {
-                log.warn("Customer API báo lỗi: {}", data.get("error"));
-                return null;
-            }
-
-            // ✅ Chuyển data thành Customer
-            Customer customer = new Customer();
-            customer.setId(((Number) data.get("id")).intValue());
-            customer.setName((String) data.get("name"));
-            customer.setEmail((String) data.get("email"));
-            customer.setPassword((String) data.get("password"));
-            customer.setPhone((String) data.get("phone"));
-            customer.setBirthday((String) data.get("birthday"));
-            customer.setGender((String) data.get("gender"));
-            customer.setStatus(String.valueOf(data.get("status")));
-
-            // Xử lý roles
-            List<Map<String, Object>> rolesList = (List<Map<String, Object>>) data.get("roles");
-            if (rolesList != null) {
-                List<String> roleNames = rolesList.stream()
-                        .map(role -> (String) role.get("name"))
-                        .toList();
-                customer.setRoles(roleNames);
-
-                List<String> permissions = rolesList.stream()
-                        .flatMap(role -> {
-                            List<Map<String, Object>> perms = (List<Map<String, Object>>) role.get("permissions");
-                            return perms == null ? Stream.empty() :
-                                    perms.stream().map(p -> (String) p.get("name")).filter(Objects::nonNull);
-                        })
-                        .toList();
-                customer.setPermissions(permissions);
-            }
-
-            return customer;
-
-        } catch (Exception e) {
-            log.error("Lỗi khi gọi Customer API: {}", e.getMessage(), e);
-            return null;
-        }
-    }
-
-
-
     public Map<String, String> login(LoginRequestDTO authRequest) {
         try {
-            Customer customer = getCustomerByEmail(authRequest.getEmail());
+            Customer customer = customerService.getCustomerByEmail(authRequest.getEmail());
             if (customer == null) {
                 throw new CustomException(ResponseCode.EMAIL_NOT_FOUND);
             }

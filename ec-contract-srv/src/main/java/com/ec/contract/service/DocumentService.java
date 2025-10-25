@@ -1,8 +1,14 @@
 package com.ec.contract.service;
 
+import com.ec.contract.mapper.DocumentMapper;
+import com.ec.contract.model.dto.request.DocumentUploadDTO;
+import com.ec.contract.model.dto.response.DocumentResponseDTO;
+import com.ec.contract.model.entity.Contract;
 import com.ec.contract.model.entity.Document;
+import com.ec.contract.repository.ContractRepository;
 import com.ec.contract.repository.DocumentRepository;
 import com.ec.library.exception.CustomException;
+import com.ec.library.exception.ResponseCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -23,30 +29,50 @@ public class DocumentService {
 
     private final MinioService minioService;
     private final DocumentRepository documentRepository;
+    private final DocumentMapper documentMapper;
+    private final ContractRepository contractRepository;
 
     @Value("${minio.bucket-name}")
     private String bucketName;
 
-    public Document uploadDocument(MultipartFile file, Integer contractId, Integer type) throws Exception {
+    public DocumentResponseDTO uploadDocument(MultipartFile file) throws Exception {
         // 1️⃣ Sinh tên file duy nhất (tránh trùng)
         String originalName = file.getOriginalFilename();
         String uniqueName = System.currentTimeMillis() + "_" + originalName;
 
         // 2️⃣ Upload lên MinIO
-        minioService.uploadFile(file, uniqueName);
+        minioService.uploadFile(file,uniqueName);
 
-        // 3️⃣ Lưu bản ghi vào DB
-        Document document = Document.builder()
-                .name(originalName)
-                .path(uniqueName)        // chính là objectName trong MinIO
+        return DocumentResponseDTO.builder()
                 .fileName(originalName)
-                .bucketName(bucketName)
-                .contractId(contractId)
-                .type(type)
-                .status(1)
+                .path(uniqueName)
                 .build();
+    }
 
-        return documentRepository.save(document);
+    public DocumentResponseDTO createDocument(DocumentUploadDTO documentUploadDTO){
+        try{
+            Contract contract = contractRepository.findById(documentUploadDTO.getContractId())
+                    .orElseThrow(() -> new CustomException(ResponseCode.CONTRACT_NOT_FOUND));
+
+            Document document = Document.builder()
+                    .name(documentUploadDTO.getName())
+                    .path(documentUploadDTO.getPath())        // chính là objectName trong MinIO
+                    .fileName(documentUploadDTO.getFileName())
+                    .bucketName(bucketName)
+                    .contractId(documentUploadDTO.getContractId())
+                    .type(documentUploadDTO.getType())
+                    .status(1)
+                    .build();
+
+            Document savedDocument = documentRepository.save(document);
+
+            return documentMapper.toDto(savedDocument);
+        } catch (CustomException e){
+            throw e;
+        } catch (Exception e){
+            log.error("Error creating document record: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to create document record", e);
+        }
     }
 
     public Map<String, String> getSizePage(MultipartFile file) {
@@ -90,6 +116,35 @@ public class DocumentService {
         } catch (IOException e) {
             throw new RuntimeException("Failed to read PDF file: " + e.getMessage(), e);
         }
+    }
+
+    public Map<String, String> getPresignedUrl(Integer docId){
+        try{
+            Document document = documentRepository.findById(docId)
+                    .orElseThrow(() -> new CustomException(ResponseCode.DOCUMENT_NOT_FOUND));
+
+            String url = minioService.getPresignedUrl(document.getBucketName(), document.getPath());
+
+            return Map.of("message", url);
+        } catch (CustomException e){
+            throw e;
+        } catch (Exception e){
+            log.error("Error generating presigned URL: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to generate presigned URL", e);
+        }
+    }
+
+    public List<DocumentResponseDTO> getDocumentByContract(Integer contractId){
+       try{
+           List<Document> documents = documentRepository.findByContractId(contractId);
+
+           return documentMapper.toDtoList(documents);
+       } catch (CustomException e){
+           throw e;
+       } catch (Exception e){
+              log.error("Error fetching documents by contract ID {}: {}", contractId, e.getMessage(), e);
+              throw new RuntimeException("Failed to fetch documents by contract ID", e);
+       }
     }
 
 }

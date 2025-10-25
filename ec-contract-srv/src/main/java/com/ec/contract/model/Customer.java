@@ -1,4 +1,4 @@
-package com.ec.auth.model.entity;
+package com.ec.contract.model;
 
 
 import com.ec.library.entity.BaseEntity;
@@ -31,10 +31,10 @@ public class Customer extends BaseEntity {
 
     private String gender;
 
-    private Integer organizationId;
-
     private List<String> roles;
 
     private List<String> permissions;
+
+    private Integer organizationId;
 
 }

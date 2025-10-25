@@ -32,7 +32,7 @@ public class MinioService {
         minioClient.putObject(
                 PutObjectArgs.builder()
                         .bucket(bucketName)
-                        .object(fileName)
+                        .object(fileName) // path lưu trữ file
                         .stream(file.getInputStream(), file.getSize(), -1)
                         .contentType("application/pdf")
                         .build()
@@ -59,12 +59,12 @@ public class MinioService {
     }
 
     // Tạo URL truy cập tạm thời
-    public String getPresignedUrl(String bucketName, String objectName) throws Exception {
+    public String getPresignedUrl(String bucketName, String path) throws Exception {
         return minioClient.getPresignedObjectUrl(
                 GetPresignedObjectUrlArgs.builder()
                         .method(Method.GET)
                         .bucket(bucketName)
-                        .object(objectName)
+                        .object(path)
                         .expiry(60 * 60) // 1 giờ
                         .build()
         );

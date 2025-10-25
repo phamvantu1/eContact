@@ -48,6 +48,19 @@ public enum ResponseCode {
     PERMISSION_NOT_FOUND("ERR_404", "Không tìm thấy quyền", HttpStatus.NOT_FOUND),
 
 
+    // Document
+    DOCUMENT_NOT_FOUND("ERR_404", "Không tìm thấy tài liệu", HttpStatus.NOT_FOUND),
+
+    // contract ref
+    CONTRACT_REF_NOT_FOUND("ERR_404", "Không tìm thấy hợp đồng tham chiếu", HttpStatus.NOT_FOUND),
+
+
+
+    // contract
+    CONTRACT_NOT_FOUND("ERR_404", "Không tìm thấy hợp đồng", HttpStatus.NOT_FOUND),
+
+
+
     BAD_REQUEST("ERR_400", "Bad request", HttpStatus.BAD_REQUEST);
 
     private final String code;

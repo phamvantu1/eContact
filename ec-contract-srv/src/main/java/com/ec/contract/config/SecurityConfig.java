@@ -1,6 +1,6 @@
-package com.ec.customer.config;
+package com.ec.contract.config;
 
-import com.ec.customer.filter.JwtAuthFilter;
+import com.ec.contract.filter.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;

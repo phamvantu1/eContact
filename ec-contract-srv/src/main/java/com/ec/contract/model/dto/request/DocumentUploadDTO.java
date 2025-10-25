@@ -1,6 +1,5 @@
-package com.ec.contract.model.dto.response;
+package com.ec.contract.model.dto.request;
 
-import com.ec.contract.model.entity.Contract;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,11 +9,16 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ContractRefResponseDTO {
+public class DocumentUploadDTO {
 
-    private Integer id;
+    private String name;
+
+    private Integer type;
 
     private Integer contractId;
 
-    private Integer refId;
+    private String fileName;
+
+    private String path;
+
 }

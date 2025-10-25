@@ -1,8 +1,5 @@
-package com.ec.contract.model.entity;
+package com.ec.contract.model.dto.response;
 
-import com.ec.library.entity.BaseEntity;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,16 +7,12 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "recipients")
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class Recipient extends BaseEntity {
+@AllArgsConstructor
+public class RecipientResponseDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     private String name;
@@ -48,13 +41,5 @@ public class Recipient extends BaseEntity {
 
     private Integer signTye;
 
-    private String reasonReject;
-
-    private Integer delegateTo; // nguoi duoc uy quyen
-
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "participant_id", referencedColumnName = "id")
-    private Participant participant;
-
+    private Integer participantId;
 }
