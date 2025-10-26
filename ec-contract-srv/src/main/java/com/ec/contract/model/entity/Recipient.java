@@ -50,11 +50,10 @@ public class Recipient extends BaseEntity {
 
     private Integer delegateTo; // nguoi duoc uy quyen
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JoinColumn(name = "participant_id", referencedColumnName = "id")
+    @JoinColumn(name = "participant_id")
     private Participant participant;
 
     @OneToMany(mappedBy = "recipient", fetch = FetchType.LAZY)

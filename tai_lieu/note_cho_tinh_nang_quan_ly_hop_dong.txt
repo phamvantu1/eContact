@@ -4,3 +4,14 @@ tạo hợp đồng :
 -kiểm tra xem file có phải pdf không,
 - kiểm tra xem có chữ ký số chưa
 - kiểm tra kích thước file ký ( bao nhiêu MB )
+
+
+
+buoc 2 :
+- thấy lúc bấm tiếp theo xong -> quay lại
+-> thấy nó truyền id của participiant vào -> xem lại
+
+- ordering của participiant thì cứ truyền theo thứ tự
+còn ordering trong recipient của 1 participant thì
++ nếu khác role thì là 1
++ còn nếu có role trùng nhau thì ordering thì mới là tính 1 2 3

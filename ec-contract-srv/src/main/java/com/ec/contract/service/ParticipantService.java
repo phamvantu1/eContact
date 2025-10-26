@@ -32,12 +32,12 @@ public class ParticipantService {
     @Transactional
     public List<ParticipantDTO> createParticipant(List<ParticipantDTO> participantDTOList,
                                                   Integer contractId) {
-        try{
+        try {
 
             Contract contract = contractRepository.findById(contractId)
                     .orElseThrow(() -> new CustomException(ResponseCode.CONTRACT_NOT_FOUND));
 
-            if(hasDuplicateRecipientEmail(participantDTOList)){
+            if (hasDuplicateRecipientEmail(participantDTOList)) {
                 log.error("Duplicate recipient email found in participants for contractId: {}", contractId);
                 throw new CustomException(ResponseCode.DUPLICATE_RECIPIENT_EMAIL);
             }
@@ -80,27 +80,55 @@ public class ParticipantService {
                 }
             }
 
-            //final var participantCollection = fromDTO(participantDtoCollection);
             final Collection<Participant> participantCollection = new ArrayList<>();
+
             for (var participantDto : participantDTOList) {
-                var participant = new Participant();
+                Participant participant;
+
+                if (participantDto.getId() != null) {
+                    participant = participantRepository.findById(participantDto.getId())
+                            .orElseThrow(() -> new CustomException(ResponseCode.PARTICIPANT_NOT_FOUND));
+                } else {
+                    participant = new Participant();
+                }
+
                 BeanUtils.copyProperties(participantDto, participant,
-                        "type", "status", "recipients"
-                );
+                        "type", "status", "recipients");
+
+                // 🧠 Lấy danh sách recipient hiện tại
+                Set<Recipient> existingRecipients = participant.getRecipients() != null
+                        ? participant.getRecipients()
+                        : new HashSet<>();
+
+                Set<Recipient> updatedRecipients = new HashSet<>();
 
                 for (var recipientDto : participantDto.getRecipients()) {
-                    var recipient = new Recipient();
-                    BeanUtils.copyProperties(
-                            recipientDto, recipient,
-                            "fields", "signType", "role", "status"
-                    );
+                    Recipient recipient;
+
+                    if (recipientDto.getId() != null) {
+                        // Tìm recipient cũ trong danh sách hiện tại
+                        recipient = existingRecipients.stream()
+                                .filter(r -> r.getId().equals(recipientDto.getId()))
+                                .findFirst()
+                                .orElse(new Recipient());
+                    } else {
+                        recipient = new Recipient();
+                    }
+
+                    BeanUtils.copyProperties(recipientDto, recipient,
+                            "fields", "signType", "role", "status");
 
                     recipient.setSignType(recipientDto.getSignType());
                     recipient.setRole(recipientDto.getRole());
                     recipient.setStatus(recipientDto.getStatus());
+                    recipient.setParticipant(participant);
 
-                    participant.addRecipient(recipient);
+                    updatedRecipients.add(recipient);
                 }
+
+                // orphanRemoval sẽ tự xóa những recipient cũ không còn trong updatedRecipients
+                participant.getRecipients().clear();
+                participant.getRecipients().addAll(updatedRecipients);
 
                 participant.setContract(contract);
                 participant.setType(participantDto.getType());
@@ -113,9 +141,10 @@ public class ParticipantService {
 
             return participantMapper.toDtoList(participantList);
 
-        }catch(CustomException e){
+
+        } catch (CustomException e) {
             throw e;
-        }catch(Exception ex){
+        } catch (Exception ex) {
             log.info("Error creating participants for contractId {}: {}", contractId, ex.getMessage());
             throw ex;
         }
@@ -125,13 +154,13 @@ public class ParticipantService {
         List<ParticipantDTO> uniqueParticipants = new ArrayList<>();
         for (var p : participantDTOList) {
             boolean exists = false;
-            for (var p2: uniqueParticipants) {
+            for (var p2 : uniqueParticipants) {
                 if (p.isSame(p2)) {
                     exists = true;
                     break;
                 }
             }
-            if(!exists) {
+            if (!exists) {
                 uniqueParticipants.add(p);
             }
         }

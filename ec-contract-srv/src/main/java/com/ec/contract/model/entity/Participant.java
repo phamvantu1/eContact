@@ -33,11 +33,12 @@ public class Participant extends BaseEntity {
     @JoinColumn(name = "contract_id") // foreign key trỏ về contracts.id
     private Contract contract;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "participant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+
+    @OneToMany(mappedBy = "participant", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private Set<Recipient> recipients;
+    @Builder.Default
+    private Set<Recipient> recipients = new HashSet<>();
 
     public void addRecipient(Recipient recipient) {
         if (recipient != null) {
