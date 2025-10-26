@@ -46,7 +46,6 @@ public class RecipientDTO implements Serializable, Comparable<RecipientDTO> {
 
     private Integer participantId;
 
-    @JsonIgnore
     private Set<FieldDto> fields;
 
     // dieu phoi -> xem xet -> ky -> van thu

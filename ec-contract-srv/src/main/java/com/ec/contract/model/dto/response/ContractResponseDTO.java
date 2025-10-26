@@ -25,15 +25,13 @@ public class ContractResponseDTO {
 
     private String note;
 
-    private Set<ContractRefResponseDTO> contractRefs;
-
-    private Set<ParticipantDTO> participants;
-
     private Integer typeId; // loai hop dong
 
     private Integer customerId; // id nguoi tao
 
     private Boolean isTemplate; // la hop dong mau hay khong
+
+    private Integer templateContractId;
 
     private Integer status;
 
@@ -41,8 +39,10 @@ public class ContractResponseDTO {
 
     private String reasonReject; // ly do tu choi hop dong
 
-    private Integer templateContractId;
-
     private LocalDateTime contractExpireTime; // ngay het han hop dong
+
+    private Set<ContractRefResponseDTO> contractRefs;
+
+    private Set<ParticipantDTO> participants;
 
 }

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -139,8 +140,11 @@ public class ParticipantService {
 
             final var participantList = participantRepository.saveAll(participantCollection);
 
-            return participantMapper.toDtoList(participantList);
+            var result = participantMapper.toDtoList(participantList);
 
+            sortRecipient(result);
+
+            return result;
 
         } catch (CustomException e) {
             throw e;
@@ -184,5 +188,33 @@ public class ParticipantService {
                 .stream()
                 .anyMatch(count -> count > 1);
     }
+
+    // sắp xếp recipient theo role và ordering
+    public void sortRecipient(Collection<ParticipantDTO> participants) {
+        try {
+            for (var participant : participants) {
+                var recipients = participant.getRecipients().stream()
+                        .sorted(Comparator.comparing(RecipientDTO::getRole).thenComparing(RecipientDTO::getOrdering))
+                        .collect(Collectors.toCollection(LinkedHashSet::new));
+                participant.setRecipients(recipients);
+            }
+        } catch (Exception e) {
+            log.error("Lỗi sắp xếp recipient", e);
+        }
+    }
+
+    private void sortParticipant(List<ParticipantDTO> participants) {
+        try{
+            participants.sort((p1, p2) -> {
+                if (Objects.equals(p1.getType(), p2.getType())) {
+                    return p1.getOrdering() - p2.getOrdering();
+                }
+                return p1.getType() - p2.getType();
+            });
+        }catch (Exception e){
+            log.error("lỗi sắp xếp lại tổ chức trong hợp đồng", e);
+        }
+    }
+
 
 }

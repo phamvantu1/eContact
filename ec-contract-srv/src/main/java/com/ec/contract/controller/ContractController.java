@@ -32,4 +32,10 @@ public class ContractController {
         return Response.success(contractService.createContract(contractRequestDTO, authentication));
     }
 
+    @GetMapping("/{contractId}")
+    @Operation(summary = "Lấy thông tin hợp đồng theo ID", description = "Lấy thông tin chi tiết của một hợp đồng dựa trên ID hợp đồng.")
+    public Response<?> getContractById(@PathVariable(name = "contractId") Integer contractId){
+        return Response.success(contractService.getContractById(contractId));
+    }
+
 }

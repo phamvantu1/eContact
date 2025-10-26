@@ -7,8 +7,10 @@ import com.ec.contract.model.dto.request.ContractRequestDTO;
 import com.ec.contract.model.dto.response.ContractResponseDTO;
 import com.ec.contract.model.entity.Contract;
 import com.ec.contract.model.entity.ContractRef;
+import com.ec.contract.model.entity.Participant;
 import com.ec.contract.repository.ContractRefRepository;
 import com.ec.contract.repository.ContractRepository;
+import com.ec.contract.repository.ParticipantRepository;
 import com.ec.library.exception.CustomException;
 import com.ec.library.exception.ResponseCode;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,9 +34,10 @@ public class ContractService {
     private ContractMapper contractMapper;
 
     private final ContractRepository contractRepository;
-    private final DocumentService documentService;
     private final ContractRefRepository contractRefRepository;
     private final CustomerService customerService;
+    private final ParticipantRepository participantRepository;
+    private final ParticipantService participantService;
 
     public Map<String, String> checkCodeUnique(String code){
         try{
@@ -90,6 +94,35 @@ public class ContractService {
             throw ex;
         }catch (Exception e){
             throw new RuntimeException("Failed to create contract", e);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public ContractResponseDTO getContractById(Integer contractId){
+        try{
+
+            Contract contract = contractRepository.findById(contractId)
+                    .orElseThrow(() -> new CustomException(ResponseCode.CONTRACT_NOT_FOUND));
+
+            List<Participant> listParticipants =  participantRepository.findByContractIdOrderByOrderingAsc(contractId)
+                    .stream().toList();
+
+            contract.setParticipants(Set.copyOf(listParticipants));
+
+            List<ContractRef> contractRefList = contractRefRepository.findByContractId(contractId);
+
+            contract.setContractRefs(Set.copyOf(contractRefList));
+
+            var contractResponseDTO =  contractMapper.toDto(contract);
+
+            participantService.sortRecipient(contractResponseDTO.getParticipants());
+
+            return contractResponseDTO;
+
+        }catch(CustomException ex){
+            throw ex;
+        }catch( Exception e){
+            throw new RuntimeException("Failed to get contract by id", e);
         }
     }
 

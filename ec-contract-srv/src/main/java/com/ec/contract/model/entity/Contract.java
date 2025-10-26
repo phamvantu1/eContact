@@ -35,7 +35,8 @@ public class Contract extends BaseEntity {
     private Set<ContractRef> contractRefs;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OrderBy("ordering asc")
     private Set<Participant> participants;
 
     private Integer typeId; // loai hop dong

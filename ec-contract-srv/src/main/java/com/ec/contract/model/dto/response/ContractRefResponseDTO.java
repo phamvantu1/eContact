@@ -16,5 +16,9 @@ public class ContractRefResponseDTO {
 
     private Integer contractId;
 
-    private Integer refId;
+    private Integer refId; // id cua nguon tham chieu ( vd: id cua document, id cua template ...)
+
+    private String refName;
+
+    private String path;
 }
