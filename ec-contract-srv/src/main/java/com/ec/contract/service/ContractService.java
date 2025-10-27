@@ -2,6 +2,7 @@ package com.ec.contract.service;
 
 import com.ec.contract.constant.ContractStatus;
 import com.ec.contract.mapper.ContractMapper;
+import com.ec.contract.model.dto.request.FilterContractDTO;
 import com.ec.contract.model.entity.Customer;
 import com.ec.contract.model.dto.request.ContractRequestDTO;
 import com.ec.contract.model.dto.response.ContractResponseDTO;
@@ -15,6 +16,10 @@ import com.ec.library.exception.ResponseCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,11 +41,11 @@ public class ContractService {
     private final ParticipantService participantService;
     private final FieldRepository fieldRepository;
 
-    public Map<String, String> checkCodeUnique(String code){
-        try{
+    public Map<String, String> checkCodeUnique(String code) {
+        try {
             Boolean isUnique = contractRepository.existsByContractNo(code);
             return Map.of("isUnique", String.valueOf(isUnique));
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error("Error checking code uniqueness: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to check code uniqueness", e);
         }
@@ -48,8 +53,8 @@ public class ContractService {
 
     @Transactional
     public ContractResponseDTO createContract(ContractRequestDTO requestDTO,
-                                              Authentication authentication){
-        try{
+                                              Authentication authentication) {
+        try {
 
             String email = authentication.getName();
 
@@ -68,13 +73,13 @@ public class ContractService {
                     .contractExpireTime(requestDTO.getContractExpireTime())
                     .customerId(customer.getId())
                     .organizationId(customer.getOrganizationId())
-                    .status(ContractStatus.DRAFT.getDbVal())
+                    .status(ContractStatus.DRAFT.getDbVal()) // tao mac dinh la draft
                     .build();
 
-            if (!requestDTO.getContractRefs().isEmpty()){
+            if (!requestDTO.getContractRefs().isEmpty()) {
                 Set<ContractRef> contractRefs = new HashSet<>();
-                for (var ref : requestDTO.getContractRefs()){
-                    if (ref.getRefId() == null){
+                for (var ref : requestDTO.getContractRefs()) {
+                    if (ref.getRefId() == null) {
                         throw new CustomException(ResponseCode.CONTRACT_REF_NOT_FOUND);
                     }
                     ContractRef contractRef = contractRefRepository.findById(ref.getRefId())
@@ -87,29 +92,29 @@ public class ContractService {
             var result = contractRepository.save(contract);
 
             return contractMapper.toDto(result);
-        }catch(CustomException ex){
+        } catch (CustomException ex) {
             throw ex;
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("Failed to create contract", e);
         }
     }
 
     @Transactional(readOnly = true)
-    public ContractResponseDTO getContractById(Integer contractId){
-        try{
+    public ContractResponseDTO getContractById(Integer contractId) {
+        try {
 
             Contract contract = contractRepository.findById(contractId)
                     .orElseThrow(() -> new CustomException(ResponseCode.CONTRACT_NOT_FOUND));
 
             log.info("Fetched contract: {}", contract);
 
-            List<Participant> listParticipants =  participantRepository.findByContractIdOrderByOrderingAsc(contractId)
+            List<Participant> listParticipants = participantRepository.findByContractIdOrderByOrderingAsc(contractId)
                     .stream().toList();
 
-            for(Participant participant: listParticipants) {
+            for (Participant participant : listParticipants) {
                 Set<Recipient> recipientSet = participant.getRecipients();
 
-                for(Recipient recipient : recipientSet) {
+                for (Recipient recipient : recipientSet) {
                     Collection<Field> fieldCollection = fieldRepository.findAllByRecipientId(recipient.getId());
                     recipient.setFields(Set.copyOf(fieldCollection));
                 }
@@ -123,21 +128,21 @@ public class ContractService {
 
             contract.setContractRefs(Set.copyOf(contractRefList));
 
-            var contractResponseDTO =  contractMapper.toDto(contract);
+            var contractResponseDTO = contractMapper.toDto(contract);
 
             participantService.sortRecipient(contractResponseDTO.getParticipants());
 
             return contractResponseDTO;
 
-        }catch(CustomException ex){
+        } catch (CustomException ex) {
             throw ex;
-        }catch( Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("Failed to get contract by id {}", e);
         }
     }
 
-    public ContractResponseDTO changeContractStatus(Integer contractId, Integer status){
-        try{
+    public ContractResponseDTO changeContractStatus(Integer contractId, Integer status) {
+        try {
             Contract contract = contractRepository.findById(contractId)
                     .orElseThrow(() -> new CustomException(ResponseCode.CONTRACT_NOT_FOUND));
 
@@ -145,11 +150,103 @@ public class ContractService {
 
             var result = contractRepository.save(contract);
 
-            return contractMapper.toDto(result);
-        }catch(CustomException ex){
+            List<Participant> listParticipants = participantRepository.findByContractIdOrderByOrderingAsc(contractId)
+                    .stream().toList();
+
+            for (Participant participant : listParticipants) {
+                Set<Recipient> recipientSet = participant.getRecipients();
+
+                for (Recipient recipient : recipientSet) {
+                    Collection<Field> fieldCollection = fieldRepository.findAllByRecipientId(recipient.getId());
+                    recipient.setFields(Set.copyOf(fieldCollection));
+                }
+
+                participant.setRecipients(recipientSet);
+            }
+
+            contract.setParticipants(Set.copyOf(listParticipants));
+
+            List<ContractRef> contractRefList = contractRefRepository.findByContractId(contractId);
+
+            contract.setContractRefs(Set.copyOf(contractRefList));
+
+            var contractResponseDTO = contractMapper.toDto(contract);
+
+            participantService.sortRecipient(contractResponseDTO.getParticipants());
+
+            return contractResponseDTO;
+
+        } catch (CustomException ex) {
             throw ex;
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("Failed to change contract status", e);
+        }
+    }
+
+    public Page<ContractResponseDTO> getMyContracts(Authentication authentication,
+                                                    FilterContractDTO filterContractDTO) {
+        try {
+            String email = authentication.getName();
+
+            Customer customer = customerService.getCustomerByEmail(email);
+
+            Pageable pageable = PageRequest.of(filterContractDTO.getPage(), filterContractDTO.getSize());
+
+            Page<Contract> contractPage = contractRepository.findMyContracts(
+                    customer.getId(),
+                    filterContractDTO.getStatus(),
+                    filterContractDTO.getTextSearch(),
+                    filterContractDTO.getFromDate(),
+                    filterContractDTO.getToDate(),
+                    pageable);
+
+            List<ContractResponseDTO> contractResponseDTOList = contractPage.getContent()
+                    .stream()
+                    .map(contractMapper::toDto)
+                    .toList();
+
+            return new PageImpl<>(contractResponseDTOList, contractPage.getPageable(), contractPage.getTotalElements());
+        } catch (CustomException ex) {
+            throw ex;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get my contracts", e);
+        }
+    }
+
+    public Page<ContractResponseDTO> getMyProcessContracts(Authentication authentication,
+                                                           FilterContractDTO filterContractDTO) {
+        try {
+            String email = authentication.getName();
+
+            List<Integer> newListStatus = new ArrayList<>();
+
+            switch (filterContractDTO.getStatus()) {
+                case 1 -> newListStatus = Arrays.asList(10, 20);
+                case 2 -> newListStatus = Arrays.asList(30, 40, 31, 32);
+                // Có thể thêm nhiều case khác nếu cần
+                default -> newListStatus = Collections.emptyList(); // hoặc giữ nguyên list trống
+            }
+
+            Pageable pageable = PageRequest.of(filterContractDTO.getPage(), filterContractDTO.getSize());
+
+            Page<Contract> contractPage = contractRepository.findMyProcessContracts(
+                    email,
+                    newListStatus,
+                    filterContractDTO.getTextSearch(),
+                    filterContractDTO.getFromDate(),
+                    filterContractDTO.getToDate(),
+                    pageable);
+
+            List<ContractResponseDTO> contractResponseDTOList = contractPage.getContent()
+                    .stream()
+                    .map(contractMapper::toDto)
+                    .toList();
+
+            return new PageImpl<>(contractResponseDTOList, contractPage.getPageable(), contractPage.getTotalElements());
+        } catch (CustomException ex) {
+            throw ex;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get my process contracts", e);
         }
     }
 

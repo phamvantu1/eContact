@@ -17,3 +17,13 @@ còn ordering trong recipient của 1 participant thì
 + còn nếu có role trùng nhau thì ordering thì mới là tính 1 2 3
 
 - check lại đoạn status của participant tại sao truyền vafo toàn là 1
+
+
+
+
+
+
+II luồng view
+-  xoa ban nhap
+
+- màn hợp đồng nhận thì status 1 thì là chờ xử lý, 2 là đã xử lý
