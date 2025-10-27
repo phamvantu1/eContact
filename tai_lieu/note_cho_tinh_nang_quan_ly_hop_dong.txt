@@ -15,3 +15,5 @@ buoc 2 :
 còn ordering trong recipient của 1 participant thì
 + nếu khác role thì là 1
 + còn nếu có role trùng nhau thì ordering thì mới là tính 1 2 3
+
+- check lại đoạn status của participant tại sao truyền vafo toàn là 1

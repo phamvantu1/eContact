@@ -1,5 +1,6 @@
 package com.ec.contract.filter;
 
+import com.ec.library.entity.CustomUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
