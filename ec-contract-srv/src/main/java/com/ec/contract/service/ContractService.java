@@ -5,11 +5,10 @@ import com.ec.contract.mapper.ContractMapper;
 import com.ec.contract.model.Customer;
 import com.ec.contract.model.dto.request.ContractRequestDTO;
 import com.ec.contract.model.dto.response.ContractResponseDTO;
-import com.ec.contract.model.entity.Contract;
-import com.ec.contract.model.entity.ContractRef;
-import com.ec.contract.model.entity.Participant;
+import com.ec.contract.model.entity.*;
 import com.ec.contract.repository.ContractRefRepository;
 import com.ec.contract.repository.ContractRepository;
+import com.ec.contract.repository.FieldRepository;
 import com.ec.contract.repository.ParticipantRepository;
 import com.ec.library.exception.CustomException;
 import com.ec.library.exception.ResponseCode;
@@ -20,10 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +34,7 @@ public class ContractService {
     private final CustomerService customerService;
     private final ParticipantRepository participantRepository;
     private final ParticipantService participantService;
+    private final FieldRepository fieldRepository;
 
     public Map<String, String> checkCodeUnique(String code){
         try{
@@ -98,31 +95,63 @@ public class ContractService {
     }
 
     @Transactional(readOnly = true)
-    public ContractResponseDTO getContractById(Integer contractId){
+    public Contract getContractById(Integer contractId){
         try{
 
             Contract contract = contractRepository.findById(contractId)
                     .orElseThrow(() -> new CustomException(ResponseCode.CONTRACT_NOT_FOUND));
 
+            log.info("Fetched contract: {}", contract);
+
             List<Participant> listParticipants =  participantRepository.findByContractIdOrderByOrderingAsc(contractId)
                     .stream().toList();
 
-            contract.setParticipants(Set.copyOf(listParticipants));
+//            for(Participant participant: listParticipants) {
+//                Set<Recipient> recipientSet = participant.getRecipients();
+//
+//                for(Recipient recipient : recipientSet) {
+//                    Collection<Field> fieldCollection = fieldRepository.findAllByRecipientId(recipient.getId());
+//                    recipient.setFields(Set.copyOf(fieldCollection));
+//                }
+//
+//                participant.setRecipients(recipientSet);
+//            }
 
-            List<ContractRef> contractRefList = contractRefRepository.findByContractId(contractId);
+//            contract.setParticipants(Set.copyOf(listParticipants));
+//
+//            List<ContractRef> contractRefList = contractRefRepository.findByContractId(contractId);
+//
+//            contract.setContractRefs(Set.copyOf(contractRefList));
+//
+//            var contractResponseDTO =  contractMapper.toDto(contract);
+//
+//            participantService.sortRecipient(contractResponseDTO.getParticipants());
+//
+//            return contractResponseDTO;
 
-            contract.setContractRefs(Set.copyOf(contractRefList));
-
-            var contractResponseDTO =  contractMapper.toDto(contract);
-
-            participantService.sortRecipient(contractResponseDTO.getParticipants());
-
-            return contractResponseDTO;
+            return contract;
 
         }catch(CustomException ex){
             throw ex;
         }catch( Exception e){
-            throw new RuntimeException("Failed to get contract by id", e);
+            throw new RuntimeException("Failed to get contract by id {}", e);
+        }
+    }
+
+    public ContractResponseDTO changeContractStatus(Integer contractId, Integer status){
+        try{
+            Contract contract = contractRepository.findById(contractId)
+                    .orElseThrow(() -> new CustomException(ResponseCode.CONTRACT_NOT_FOUND));
+
+            contract.setStatus(status);
+
+            var result = contractRepository.save(contract);
+
+            return contractMapper.toDto(result);
+        }catch(CustomException ex){
+            throw ex;
+        }catch (Exception e){
+            throw new RuntimeException("Failed to change contract status", e);
         }
     }
 

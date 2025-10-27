@@ -13,8 +13,6 @@ import java.util.Set;
 public interface RecipientMapper {
 
     @Mapping(source = "participant.id", target = "participantId")
-    @Mapping(target = "fields", source = "fields") // map Set<Field> sang Set<FieldDto>
     RecipientDTO toDto(Recipient entity);
-
 }
 

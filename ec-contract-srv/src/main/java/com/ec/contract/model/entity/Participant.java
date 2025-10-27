@@ -29,10 +29,12 @@ public class Participant extends BaseEntity {
 
     private String taxCode;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "contract_id") // foreign key trỏ về contracts.id
-    private Contract contract;
+    @Column(name = "contract_id")
+    private int contractId;
 
+    @ManyToOne
+    @JoinColumn(name = "contract_id", insertable = false, updatable = false)
+    private Contract contract;
 
     @OneToMany(mappedBy = "participant", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @ToString.Exclude

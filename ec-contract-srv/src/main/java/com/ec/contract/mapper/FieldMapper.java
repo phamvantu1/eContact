@@ -14,4 +14,8 @@ public interface FieldMapper {
     FieldDto toDto(Field entity);
 
     List<FieldDto> toDtoList(List<Field> entities);
+
+    List<Field> toEntityList(List<FieldDto> dtos);
+
+    Field toEntity(FieldDto dto);
 }

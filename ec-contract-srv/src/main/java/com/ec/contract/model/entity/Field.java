@@ -35,7 +35,10 @@ public class Field extends BaseEntity {
 
     private Integer contractId;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @Column(name = "recipient_id")
+    private Integer recipientId;
+
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "recipient_id", insertable = false, updatable = false)
     @ToString.Exclude
     private Recipient recipient;

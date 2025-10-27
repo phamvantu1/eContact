@@ -7,6 +7,7 @@ import com.ec.contract.model.entity.Contract;
 import com.ec.contract.model.entity.Participant;
 import com.ec.contract.model.entity.Recipient;
 import com.ec.contract.repository.ContractRepository;
+import com.ec.contract.repository.FieldRepository;
 import com.ec.contract.repository.ParticipantRepository;
 import com.ec.contract.repository.RecipientRepository;
 import com.ec.library.exception.CustomException;
@@ -29,6 +30,7 @@ public class ParticipantService {
     private final ContractRepository contractRepository;
     private final RecipientRepository recipientRepository;
     private final ParticipantMapper participantMapper;
+    private final FieldRepository fieldRepository;
 
     @Transactional
     public List<ParticipantDTO> createParticipant(List<ParticipantDTO> participantDTOList,
@@ -131,7 +133,7 @@ public class ParticipantService {
                 participant.getRecipients().clear();
                 participant.getRecipients().addAll(updatedRecipients);
 
-                participant.setContract(contract);
+                participant.setContractId(contractId);
                 participant.setType(participantDto.getType());
                 participant.setStatus(participantDto.getStatus());
 

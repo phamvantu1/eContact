@@ -61,6 +61,7 @@ public enum ResponseCode {
 
 
     // recipient
+    RECIPIENT_NOT_FOUND("ERR_404", "Không tìm thấy người nhận", HttpStatus.NOT_FOUND),
     DUPLICATE_RECIPIENT_EMAIL("ERR_409", "Địa chỉ email bị trùng lặp", HttpStatus.CONFLICT),
 
 

@@ -38,4 +38,11 @@ public class ContractController {
         return Response.success(contractService.getContractById(contractId));
     }
 
+    @PutMapping("/change-status/{contractId}")
+    @Operation(summary = "Thay đổi trạng thái hợp đồng", description = "Cập nhật trạng thái của một hợp đồng dựa trên ID hợp đồng và trạng thái mới.")
+    public Response<?> changeContractStatus(@PathVariable(name = "contractId") Integer contractId,
+                                            @RequestParam(name = "status") Integer status){
+        return Response.success(contractService.changeContractStatus(contractId, status));
+    }
+
 }

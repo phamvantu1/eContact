@@ -44,15 +44,13 @@ public class FieldDto implements Serializable {
     @Min(value = 1, message = "Page number '${validatedValue}' must be greater than {value}")
     private short page;
 
-    private float coordinateX;
+    private Double boxX;
 
-    private float coordinateY;
+    private Double boxY;
 
-    private float width;
+    private Double boxW;
 
-    private float height;
-
-    private short required;
+    private Double boxH;
 
     private int status;
 
