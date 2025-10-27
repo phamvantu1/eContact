@@ -1,5 +1,7 @@
 package com.ec.contract.service;
 
+import com.ec.contract.constant.BaseStatus;
+import com.ec.contract.constant.DocumentType;
 import com.ec.contract.mapper.DocumentMapper;
 import com.ec.contract.model.dto.request.DocumentUploadDTO;
 import com.ec.contract.model.dto.response.DocumentResponseDTO;
@@ -61,7 +63,7 @@ public class DocumentService {
                     .bucketName(bucketName)
                     .contractId(documentUploadDTO.getContractId())
                     .type(documentUploadDTO.getType())
-                    .status(1)
+                    .status(documentUploadDTO.getStatus())
                     .build();
 
             Document savedDocument = documentRepository.save(document);
@@ -136,7 +138,7 @@ public class DocumentService {
 
     public List<DocumentResponseDTO> getDocumentByContract(Integer contractId){
        try{
-           List<Document> documents = documentRepository.findByContractId(contractId);
+           List<Document> documents = documentRepository.findByContractIdAndStatus(contractId,BaseStatus.ACTIVE.ordinal());
 
            return documentMapper.toDtoList(documents);
        } catch (CustomException e){

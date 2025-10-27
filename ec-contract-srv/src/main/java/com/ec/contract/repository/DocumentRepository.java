@@ -9,4 +9,5 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
 
     List<Document> findByContractId(Integer contractId);
 
+    List<Document> findByContractIdAndStatus(Integer contractId, Integer status);
 }

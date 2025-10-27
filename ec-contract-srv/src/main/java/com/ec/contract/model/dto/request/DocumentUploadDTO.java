@@ -21,4 +21,6 @@ public class DocumentUploadDTO {
 
     private String path;
 
+    private Integer status;
+
 }

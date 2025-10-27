@@ -53,7 +53,7 @@ public class DocumentController {
     }
 
     @PostMapping("/create-document")
-    @Operation(summary = "Tạo bản ghi tài liệu", description = "Tạo bản ghi tài liệu trong hệ thống dựa trên thông tin đã tải lên.")
+    @Operation(summary = "Tạo bản ghi tài liệu", description = "Tạo bản ghi tài liệu trong hệ thống dựa trên thông tin đã tải lên. type GOC(1) -file gốc ,VIEW(2) ,DINH_KEM(3)")
     public ResponseEntity<Response<?>> createDocument(@RequestBody DocumentUploadDTO documentUploadDTO) {
         return ResponseEntity.ok(
                 Response.success(documentService.createDocument(documentUploadDTO))
