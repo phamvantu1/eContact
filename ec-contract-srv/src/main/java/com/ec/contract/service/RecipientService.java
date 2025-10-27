@@ -31,19 +31,17 @@ public class RecipientService {
             Recipient recipient = recipientRepository.findById(recipientId)
                     .orElseThrow(() -> new CustomException(ResponseCode.RECIPIENT_NOT_FOUND));
 
-            Collection<Field> fields = fieldRepository.findByRecipientId(recipientId);
-
-//            recipient.setFields(new HashSet<>(fields));
-//            log.info("Fetched recipient: {}", recipient);
+            log.info("Fetched recipient entity: {}", recipient);
 
             return recipientMapper.toDto(recipient);
+
         } catch (CustomException ex){
             log.error("Custom error fetching recipient by id: {}", ex.getMessage());
             throw ex;
         }
         catch (Exception e) {
             log.error("Error fetching recipient by id: {}",  e.getMessage());
-            return null;
+            throw new RuntimeException("Failed to fetch recipient by id", e);
         }
     }
 }

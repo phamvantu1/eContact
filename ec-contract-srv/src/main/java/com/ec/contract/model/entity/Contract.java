@@ -2,6 +2,7 @@ package com.ec.contract.model.entity;
 
 import com.ec.library.entity.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,15 +31,6 @@ public class Contract extends BaseEntity {
 
     private String note;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<ContractRef> contractRefs;
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @OrderBy("ordering asc")
-    private Set<Participant> participants;
-
     private Integer typeId; // loai hop dong
 
     private Integer customerId; // id nguoi tao
@@ -54,4 +46,14 @@ public class Contract extends BaseEntity {
     private Integer templateContractId;
 
     private LocalDateTime contractExpireTime; // ngay het han hop dong
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<ContractRef> contractRefs;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OrderBy("ordering asc")
+    @JsonManagedReference
+    private Set<Participant> participants;
 }

@@ -1,4 +1,4 @@
-package com.ec.contract.model;
+package com.ec.contract.model.entity;
 
 
 import com.ec.library.entity.BaseEntity;

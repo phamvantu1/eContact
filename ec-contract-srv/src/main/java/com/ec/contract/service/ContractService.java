@@ -2,7 +2,7 @@ package com.ec.contract.service;
 
 import com.ec.contract.constant.ContractStatus;
 import com.ec.contract.mapper.ContractMapper;
-import com.ec.contract.model.Customer;
+import com.ec.contract.model.entity.Customer;
 import com.ec.contract.model.dto.request.ContractRequestDTO;
 import com.ec.contract.model.dto.response.ContractResponseDTO;
 import com.ec.contract.model.entity.*;
@@ -95,7 +95,7 @@ public class ContractService {
     }
 
     @Transactional(readOnly = true)
-    public Contract getContractById(Integer contractId){
+    public ContractResponseDTO getContractById(Integer contractId){
         try{
 
             Contract contract = contractRepository.findById(contractId)
@@ -106,30 +106,28 @@ public class ContractService {
             List<Participant> listParticipants =  participantRepository.findByContractIdOrderByOrderingAsc(contractId)
                     .stream().toList();
 
-//            for(Participant participant: listParticipants) {
-//                Set<Recipient> recipientSet = participant.getRecipients();
-//
-//                for(Recipient recipient : recipientSet) {
-//                    Collection<Field> fieldCollection = fieldRepository.findAllByRecipientId(recipient.getId());
-//                    recipient.setFields(Set.copyOf(fieldCollection));
-//                }
-//
-//                participant.setRecipients(recipientSet);
-//            }
+            for(Participant participant: listParticipants) {
+                Set<Recipient> recipientSet = participant.getRecipients();
 
-//            contract.setParticipants(Set.copyOf(listParticipants));
-//
-//            List<ContractRef> contractRefList = contractRefRepository.findByContractId(contractId);
-//
-//            contract.setContractRefs(Set.copyOf(contractRefList));
-//
-//            var contractResponseDTO =  contractMapper.toDto(contract);
-//
-//            participantService.sortRecipient(contractResponseDTO.getParticipants());
-//
-//            return contractResponseDTO;
+                for(Recipient recipient : recipientSet) {
+                    Collection<Field> fieldCollection = fieldRepository.findAllByRecipientId(recipient.getId());
+                    recipient.setFields(Set.copyOf(fieldCollection));
+                }
 
-            return contract;
+                participant.setRecipients(recipientSet);
+            }
+
+            contract.setParticipants(Set.copyOf(listParticipants));
+
+            List<ContractRef> contractRefList = contractRefRepository.findByContractId(contractId);
+
+            contract.setContractRefs(Set.copyOf(contractRefList));
+
+            var contractResponseDTO =  contractMapper.toDto(contract);
+
+            participantService.sortRecipient(contractResponseDTO.getParticipants());
+
+            return contractResponseDTO;
 
         }catch(CustomException ex){
             throw ex;

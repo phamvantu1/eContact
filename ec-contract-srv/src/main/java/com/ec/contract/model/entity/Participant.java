@@ -1,6 +1,7 @@
 package com.ec.contract.model.entity;
 
 import com.ec.library.entity.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -34,6 +35,7 @@ public class Participant extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "contract_id", insertable = false, updatable = false)
+    @JsonBackReference
     private Contract contract;
 
     @OneToMany(mappedBy = "participant", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)

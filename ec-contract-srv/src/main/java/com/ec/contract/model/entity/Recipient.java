@@ -2,18 +2,21 @@ package com.ec.contract.model.entity;
 
 import com.ec.library.entity.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.Set;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@ToString(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "recipients")
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
 public class Recipient extends BaseEntity {
 
     @Id
@@ -53,10 +56,14 @@ public class Recipient extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    @JsonIgnore
     @JoinColumn(name = "participant_id")
     private Participant participant;
 
     @OneToMany(mappedBy = "recipient", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @JsonIgnore
+    @JsonManagedReference
     private Set<Field> fields;
 
 }

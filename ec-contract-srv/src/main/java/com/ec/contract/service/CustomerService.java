@@ -1,6 +1,6 @@
 package com.ec.contract.service;
 
-import com.ec.contract.model.Customer;
+import com.ec.contract.model.entity.Customer;
 import com.ec.library.constants.ServiceEndpoints;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

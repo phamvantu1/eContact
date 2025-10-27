@@ -1,15 +1,19 @@
 package com.ec.contract.model.entity;
 
 import com.ec.library.entity.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@ToString(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "fields")
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
 public class Field extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,8 +42,10 @@ public class Field extends BaseEntity {
     @Column(name = "recipient_id")
     private Integer recipientId;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipient_id", insertable = false, updatable = false)
     @ToString.Exclude
+    @JsonBackReference
     private Recipient recipient;
 }
