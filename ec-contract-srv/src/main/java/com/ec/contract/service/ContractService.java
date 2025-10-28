@@ -82,8 +82,15 @@ public class ContractService {
                     if (ref.getRefId() == null) {
                         throw new CustomException(ResponseCode.CONTRACT_REF_NOT_FOUND);
                     }
-                    ContractRef contractRef = contractRefRepository.findById(ref.getRefId())
+
+                    Contract checkContractRef = contractRepository.findById(ref.getRefId())
                             .orElseThrow(() -> new CustomException(ResponseCode.CONTRACT_REF_NOT_FOUND));
+
+                    ContractRef contractRef = ContractRef.builder()
+                            .contract(contract)
+                            .refId(ref.getRefId())
+                            .build();
+
                     contractRefs.add(contractRef);
                 }
                 contract.setContractRefs(contractRefs);
@@ -247,6 +254,68 @@ public class ContractService {
             throw ex;
         } catch (Exception e) {
             throw new RuntimeException("Failed to get my process contracts", e);
+        }
+    }
+
+    public Page<ContractResponseDTO> getContractsByOrganization(
+            FilterContractDTO filterContractDTO) {
+        try {
+            Pageable pageable = PageRequest.of(filterContractDTO.getPage(), filterContractDTO.getSize());
+
+            List<Customer> listCustomers = customerService.getCustomerByOrganizationId(filterContractDTO.getOrganizationId());
+            List<Integer> listCustomerIds = new  ArrayList<>();
+            for (Customer customer : listCustomers) {
+                listCustomerIds.add(customer.getId());
+            }
+
+            if(listCustomerIds.isEmpty()){
+                return new PageImpl<>(new ArrayList<>(), pageable, 0);
+            }
+
+            Page<Contract> contractPage = contractRepository.findContractsByOrganization(
+                    listCustomerIds,
+                    filterContractDTO.getStatus(),
+                    filterContractDTO.getTextSearch(),
+                    filterContractDTO.getFromDate(),
+                    filterContractDTO.getToDate(),
+                    pageable);
+
+            List<ContractResponseDTO> contractResponseDTOList = contractPage.getContent()
+                    .stream()
+                    .map(contractMapper::toDto)
+                    .toList();
+
+            return new PageImpl<>(contractResponseDTOList, contractPage.getPageable(), contractPage.getTotalElements());
+        } catch (CustomException ex) {
+            throw ex;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get contracts by organization", e);
+        }
+    }
+
+    public ContractResponseDTO updateContract(Integer contractId,
+                                          ContractRequestDTO requestDTO) {
+        try {
+            Contract contract = contractRepository.findById(contractId)
+                    .orElseThrow(() -> new CustomException(ResponseCode.CONTRACT_NOT_FOUND));
+
+            contract.setName(requestDTO.getName());
+            contract.setNote(requestDTO.getNote());
+            contract.setContractNo(requestDTO.getContractNo());
+            contract.setSignTime(requestDTO.getSignTime());
+            contract.setContractRefs(contract.getContractRefs());
+            contract.setTypeId(requestDTO.getTypeId());
+            contract.setIsTemplate(requestDTO.getIsTemplate());
+            contract.setTemplateContractId(requestDTO.getTemplateContractId());
+            contract.setContractExpireTime(requestDTO.getContractExpireTime());
+
+            var result = contractRepository.save(contract);
+
+            return contractMapper.toDto(result);
+        } catch (CustomException ex) {
+            throw ex;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update contract", e);
         }
     }
 

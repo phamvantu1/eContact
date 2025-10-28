@@ -31,4 +31,11 @@ public interface CustomerRepository extends JpaRepository<Customer, Integer> {
             "order by c.name asc "
             ,nativeQuery = true)
     List<Customer> suggestListCustomer(@Param("textSearch") String textSearch);
+
+    @Query(value = "select c.* from customers c " +
+            "where c.organization_id = :organizationId " +
+            " and c.status = 1 " +
+            "order by c.name asc "
+            ,nativeQuery = true)
+    List<Customer> findByOrganizationId(Integer organizationId);
 }

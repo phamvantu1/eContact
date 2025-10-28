@@ -1,5 +1,6 @@
 package com.ec.contract.mapper;
 
+import com.ec.contract.model.dto.request.ContractRequestDTO;
 import com.ec.contract.model.dto.response.ContractResponseDTO;
 import com.ec.contract.model.entity.Contract;
 import org.mapstruct.Mapper;
@@ -17,4 +18,6 @@ public interface ContractMapper {
 
     // List<Entity> -> List<DTO>
     List<ContractResponseDTO> toDtoList(List<Contract> entities);
+
+    Contract toEntity(ContractRequestDTO dto);
 }

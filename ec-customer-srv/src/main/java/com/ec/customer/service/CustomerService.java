@@ -249,5 +249,21 @@ public class CustomerService {
             throw new RuntimeException("Có lỗi trong quá trình gợi ý người dùng  : " + e.getMessage());
         }
     }
+
+    public Response<?> getCustomerByOrganization(Integer organizationId) {
+        try{
+
+            List<Customer> customerList = customerRepository.findByOrganizationId(organizationId);
+
+            List<CustomerResponseDTO> customerResponseDTOList = customerList.stream()
+                    .map(customerMapper::toResponseDTO)
+                    .collect(Collectors.toList());
+
+            return Response.success(customerResponseDTOList);
+
+        }catch (Exception e){
+            throw new RuntimeException("Có lỗi trong quá trình lấy người dùng theo tổ chức  : " + e.getMessage());
+        }
+    }
 }
 

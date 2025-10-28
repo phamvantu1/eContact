@@ -2,7 +2,6 @@ package com.ec.contract.service;
 
 import com.ec.contract.mapper.RecipientMapper;
 import com.ec.contract.model.dto.RecipientDTO;
-import com.ec.contract.model.entity.Field;
 import com.ec.contract.model.entity.Recipient;
 import com.ec.contract.repository.FieldRepository;
 import com.ec.contract.repository.RecipientRepository;
@@ -12,9 +11,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collection;
-
 
 @Service
 @RequiredArgsConstructor

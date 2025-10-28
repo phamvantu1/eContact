@@ -13,6 +13,15 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
 
     Boolean existsByContractNo(String contractNo);
 
+    @Query(value = "SELECT * FROM contracts c " +
+            "WHERE c.status = :status " +
+            "ORDER BY c.created_at DESC",
+            countQuery = "SELECT count(*) FROM contracts c " +
+                    "WHERE c.status = :status",
+            nativeQuery = true)
+    Page<Contract> findByStatus(@Param("status") Integer status,
+                                Pageable pageable);
+
 
     @Query(value = "SELECT * FROM contracts c " +
             "WHERE c.created_by = :customerId " +
@@ -59,5 +68,27 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
                                           @Param("fromDate") String fromDate,
                                           @Param("toDate") String toDate,
                                           Pageable pageable);
+
+
+    @Query(value = "SELECT * FROM contracts c " +
+            "WHERE c.created_by in (:listCustomerIds) " +
+            "AND c.status = :status " +
+            "AND (:textSearch IS NULL OR c.contract_no ILIKE %:textSearch% OR c.name ILIKE %:textSearch%) " +
+            "AND (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
+            "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) " +
+            "ORDER BY c.created_at DESC",
+            countQuery = "SELECT count(*) FROM contracts c " +
+                    "WHERE c.created_by = :customerId " +
+                    "AND c.status = :status " +
+                    "AND (:textSearch IS NULL OR c.contract_no ILIKE %:textSearch% OR c.name ILIKE %:textSearch%) " +
+                    "AND (:fromDate IS NULL  OR c.created_at >= CAST(:fromDate AS timestamp)) " +
+                    "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp))",
+            nativeQuery = true)
+    Page<Contract> findContractsByOrganization(@Param("listCustomerIds") List<Integer> listCustomerIds,
+                                               @Param("status") Integer status,
+                                               @Param("textSearch") String textSearch,
+                                               @Param("fromDate") String fromDate,
+                                               @Param("toDate") String toDate,
+                                               Pageable pageable);
 
 }

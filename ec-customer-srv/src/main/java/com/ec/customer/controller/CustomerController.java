@@ -78,5 +78,11 @@ public class CustomerController {
         return Response.success(customerService.suggestListCustomer(textSearch));
     }
 
+    @GetMapping("/internal/get-customer-by-organization")
+    @Operation(summary = "Lấy danh sách user theo tổ chức")
+    public ResponseEntity<?> getCustomerByOrganization(@RequestParam(name = "organizationId") Integer organizationId){
+        return ResponseEntity.ok(customerService.getCustomerByOrganization(organizationId));
+    }
+
 
 }

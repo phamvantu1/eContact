@@ -28,3 +28,6 @@ bo recipientId
 tạo hợp đồng : kiểm tra xem file có phải pdf không,
 - kiểm tra xem có chữ ký số chưa
 - kiểm tra kích thước file ký ( bao nhiêu MB )
+
+
+

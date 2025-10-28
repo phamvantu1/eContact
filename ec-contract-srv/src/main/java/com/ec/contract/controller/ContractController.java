@@ -60,4 +60,19 @@ public class ContractController {
         return Response.success(contractService.getMyProcessContracts(authentication, filterContractDTO));
     }
 
+    @GetMapping("/contract-by-organization")
+    @Operation(summary = "Danh sách hợp đồng theo tổ chức", description = "Danh sách hợp đồng theo tổ chức")
+    public Response<?> getContractsByOrganization(@RequestBody FilterContractDTO filterContractDTO) {
+        return Response.success(contractService.getContractsByOrganization(filterContractDTO));
+    }
+
+    @PutMapping("/update-contract/{contractId}")
+    @Operation(summary = "Cập nhật hợp đồng", description = "Cập nhật thông tin hợp đồng dựa trên ID hợp đồng.")
+    public Response<?> updateContract(@PathVariable(name = "contractId") Integer contractId,
+                                      @RequestBody ContractRequestDTO contractRequestDTO) {
+        return Response.success(contractService.updateContract(contractId, contractRequestDTO));
+    }
+
+
+
 }

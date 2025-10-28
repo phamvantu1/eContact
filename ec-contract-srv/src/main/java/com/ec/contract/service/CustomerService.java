@@ -31,7 +31,8 @@ public class CustomerService {
                     url,
                     HttpMethod.GET,
                     null,
-                    new ParameterizedTypeReference<>() {}
+                    new ParameterizedTypeReference<>() {
+                    }
             );
 
             Map<String, Object> body = response.getBody();
@@ -85,4 +86,46 @@ public class CustomerService {
             return null;
         }
     }
+
+    public List<Customer> getCustomerByOrganizationId(Integer organizationId) {
+        try {
+            String url = ServiceEndpoints.CUSTOMER_API + "/internal/get-customer-by-organization?organizationId=" + organizationId;
+            log.info("Gọi Customer API getCustomerByOrganizationId tại URL: {}", url);
+
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<>() {
+                    }
+            );
+
+            Map<String, Object> body = response.getBody();
+
+            List<Map<String, Object>> dataList = (List<Map<String, Object>>) body.get("data");
+            if (dataList == null) {
+                log.warn("Không có trường 'data' trong phản hồi");
+                return List.of();
+            }
+            // Chuyển dataList thành List<Customer>
+            return dataList.stream().map(data -> {
+                Customer customer = new Customer();
+                customer.setId(((Number) data.get("id")).intValue());
+                customer.setName((String) data.get("name"));
+                customer.setEmail((String) data.get("email"));
+                customer.setPassword((String) data.get("password"));
+                customer.setPhone((String) data.get("phone"));
+                customer.setBirthday((String) data.get("birthday"));
+                customer.setGender((String) data.get("gender"));
+                customer.setOrganizationId(((Number) data.get("organizationId")).intValue());
+                customer.setStatus(String.valueOf(data.get("status")));
+                return customer;
+            }).toList();
+
+        } catch (Exception e) {
+            log.error("Lỗi khi gọi Customer API: {}", e.getMessage(), e);
+            return null;
+        }
+    }
+
 }

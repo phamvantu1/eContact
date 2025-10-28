@@ -156,6 +156,25 @@ public class ParticipantService {
         }
     }
 
+    @Transactional
+    public ParticipantDTO getParticipantById(Integer participantId) {
+        try{
+            Participant participant = participantRepository.findById(participantId)
+                    .orElseThrow(() -> new CustomException(ResponseCode.PARTICIPANT_NOT_FOUND));
+
+            ParticipantDTO participantDTO = participantMapper.toDto(participant);
+
+            sortRecipient(List.of(participantDTO));
+
+            return participantDTO;
+        }catch (CustomException e) {
+            throw e;
+        } catch (Exception ex) {
+            log.info("Error getting participants for contractId {}: {}", participantId, ex.getMessage());
+            throw ex;
+        }
+    }
+
     private List<ParticipantDTO> removeParticipantDuplicates(List<ParticipantDTO> participantDTOList) {
         List<ParticipantDTO> uniqueParticipants = new ArrayList<>();
         for (var p : participantDTOList) {
