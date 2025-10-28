@@ -70,6 +70,13 @@ public enum ResponseCode {
 
 
 
+
+
+    // type
+    TYPE_NOT_FOUND("ERR_404", "Không tìm thấy loại hợp đồng", HttpStatus.NOT_FOUND),
+
+
+
     BAD_REQUEST("ERR_400", "Bad request", HttpStatus.BAD_REQUEST);
 
     private final String code;
