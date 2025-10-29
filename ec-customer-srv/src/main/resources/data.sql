@@ -15,7 +15,8 @@ INSERT INTO organizations (id, name, email, status, tax_code, code, parent_id, c
 VALUES
     (1, 'Công ty Phú Hòa', 'info@phuhoa.vn', 1, '123456789', 'ORG001', NULL, NOW(), NOW()),
     (2, 'Chi nhánh Hà Nội', 'hanoi@phuhoa.vn', 1, '987654321', 'ORG002', 1, NOW(), NOW()),
-    (3, 'Chi nhánh TP.HCM', 'hcm@phuhoa.vn', 1, '567890123', 'ORG003', 1, NOW(), NOW());
+    (3, 'Chi nhánh TP.HCM', 'hcm@phuhoa.vn', 1, '567890123', 'ORG003', 2, NOW(), NOW()),
+    (4, 'Chi nhánh PTIT', 'ptit@gmail.com.vn', 1, '567890123', 'ORG003', 1, NOW(), NOW());
 
 
 INSERT INTO permissions (id, name, created_at, updated_at)

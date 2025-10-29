@@ -8,13 +8,15 @@ import com.ec.customer.model.entity.Organization;
 import com.ec.customer.repository.OrganizationRepository;
 import com.ec.library.exception.CustomException;
 import com.ec.library.exception.ResponseCode;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -25,26 +27,20 @@ public class OrganizationService {
     private final OrganizationMapper organizationMapper;
 
     @Transactional
-    public Map<String, String> createOrganization(OrganizationRequestDTO organizationRequestDTO){
+    public OrganizationResponseDTO createOrganization(OrganizationRequestDTO organizationRequestDTO){
         try{
             Organization organization = Organization.builder()
                     .name(organizationRequestDTO.getName())
                     .email(organizationRequestDTO.getEmail())
                     .status(DefineStatus.ACTIVE.getValue())
                     .code(organizationRequestDTO.getCode())
+                    .parentId(organizationRequestDTO.getParentId())
                     .taxCode(organizationRequestDTO.getTaxCode())
                     .build();
 
-            if (organizationRequestDTO.getParentId() != null) {
-                Organization parentOrganization = organizationRepository.findById(organizationRequestDTO.getParentId())
-                        .orElseThrow(() -> new CustomException(ResponseCode.ORGANIZATION_NOT_FOUND));
-
-                organization.setParent(parentOrganization);
-            }
-
             organizationRepository.save(organization);
 
-            return Map.of("message", "Tạo tổ chức thành công");
+            return organizationMapper.toDTO(organization);
         }catch (CustomException e) {
             throw e;
         } catch (Exception e) {
@@ -70,7 +66,7 @@ public class OrganizationService {
     }
 
     @Transactional
-    public Map<String, String> updateOrganization(Integer organizationId, OrganizationRequestDTO organizationRequestDTO) {
+    public OrganizationResponseDTO updateOrganization(Integer organizationId, OrganizationRequestDTO organizationRequestDTO) {
         try {
             Organization organization = organizationRepository.findById(organizationId)
                     .orElseThrow(() -> new CustomException(ResponseCode.ORGANIZATION_NOT_FOUND));
@@ -79,16 +75,11 @@ public class OrganizationService {
             organization.setEmail(organizationRequestDTO.getEmail());
             organization.setTaxCode(organizationRequestDTO.getTaxCode());
             organization.setCode(organizationRequestDTO.getCode());
-
-            if (organizationRequestDTO.getParentId() != null) {
-                Organization parentOrganization = organizationRepository.findById(organizationRequestDTO.getParentId())
-                        .orElseThrow(() -> new CustomException(ResponseCode.ORGANIZATION_NOT_FOUND));
-                organization.setParent(parentOrganization);
-            }
+            organization.setParentId(organizationRequestDTO.getParentId());
 
             organizationRepository.save(organization);
 
-            return Map.of("message", "Cập nhật tổ chức thành công");
+            return organizationMapper.toDTO(organization);
         } catch (CustomException e) {
             throw e;
         } catch (Exception e) {
@@ -96,27 +87,35 @@ public class OrganizationService {
         }
     }
 
-    @Transactional
-    public Page<OrganizationResponseDTO> getAllOrganizations(int page, int size, String textSearch ){
-        try{
+    @Transactional(readOnly = true)
+    public Page<OrganizationResponseDTO> getAllOrganizations(int page, int size, String textSearch) {
+        try {
             Pageable pageable = PageRequest.of(page, size);
 
-            var result = organizationRepository.getAllOrganizations(textSearch, pageable);
-            return result.map(organizationMapper::toResponseDTO);
-        }catch (CustomException e) {
+            // Gọi repository
+            Page<Organization> organizationPage = organizationRepository.getAllOrganizations(textSearch, pageable);
+
+            // Map sang DTO
+            List<OrganizationResponseDTO> dtoList = organizationMapper.toDTOList(organizationPage.getContent());
+
+            // Trả về Page<DTO>
+            return new PageImpl<>(dtoList, pageable, organizationPage.getTotalElements());
+
+        } catch (CustomException e) {
             throw e;
         } catch (Exception e) {
-            throw new RuntimeException("Có lỗi trong quá trình tìm kiếm : " + e.getMessage());
+            throw new RuntimeException("Có lỗi trong quá trình tìm kiếm: " + e.getMessage());
         }
     }
+
 
     @Transactional
     public OrganizationResponseDTO getOrganizationById(Integer organizationId) {
         try {
-            Organization organization = organizationRepository.findById(organizationId)
+            Organization organization = organizationRepository.findByIdAndStatus(organizationId, DefineStatus.ACTIVE.getValue())
                     .orElseThrow(() -> new CustomException(ResponseCode.ORGANIZATION_NOT_FOUND));
 
-            return organizationMapper.toResponseDTO(organization);
+            return organizationMapper.toDTO(organization);
         } catch (CustomException e) {
             throw e;
         } catch (Exception e) {

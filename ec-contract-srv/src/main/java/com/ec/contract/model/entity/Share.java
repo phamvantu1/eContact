@@ -25,4 +25,6 @@ public class Share extends BaseEntity {
 
     private Integer contractId;
 
+    private Integer status;
+
 }

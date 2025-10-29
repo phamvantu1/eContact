@@ -18,8 +18,8 @@ public class OrganizationResponseDTO {
 
     private String taxCode;
 
-    @NotNull
     private String code;
 
-    private Set<OrganizationResponseDTO> children;
+    private Integer parentId;
+
 }

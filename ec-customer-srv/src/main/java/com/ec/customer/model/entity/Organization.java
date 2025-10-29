@@ -31,11 +31,6 @@ public class Organization extends BaseEntity {
 
     private String code;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id")
-    private Organization parent;  // cha
-
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<Organization> children = new HashSet<>();  // danh sách con
+    private Integer parentId;  // cha
 
 }
