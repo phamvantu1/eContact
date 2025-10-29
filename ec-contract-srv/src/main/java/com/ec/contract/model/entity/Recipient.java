@@ -51,6 +51,8 @@ public class Recipient extends BaseEntity {
 
     private String reasonReject;
 
+    private String cardId;
+
     private Integer delegateTo; // nguoi duoc uy quyen
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -44,6 +44,8 @@ public class RecipientDTO implements Serializable, Comparable<RecipientDTO> {
 
     private Integer signType;
 
+    private String cardId;
+
     private Integer participantId;
 
     private Set<FieldDto> fields;
