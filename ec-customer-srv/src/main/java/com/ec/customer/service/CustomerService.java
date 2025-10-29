@@ -1,6 +1,5 @@
 package com.ec.customer.service;
 
-import com.ec.customer.common.constant.CustomerStatus;
 import com.ec.customer.common.constant.DefineStatus;
 import com.ec.customer.mapper.CustomerMapper;
 import com.ec.customer.model.DTO.request.ChangePasswordDTO;
@@ -118,7 +117,7 @@ public class CustomerService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<CustomerResponseDTO> getAllCustomer(int page, int size, String textSearch, Integer organizationId) {
         try {
 

@@ -39,3 +39,7 @@ tạo hợp đồng : kiểm tra xem file có phải pdf không,
 
 
 
+- minh : bấm vào ô text / ký thì hiển thị / hoặc kéo thay vì phải nhập số như hiện tại
+
+
+
