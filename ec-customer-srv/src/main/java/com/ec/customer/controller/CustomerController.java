@@ -13,7 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Tag(name = "Customer API", description = "Quản lý thông tin user")
 @RestController
-@RequestMapping("/customers")
+@RequestMapping("")
 @RequiredArgsConstructor
 public class CustomerController {
 

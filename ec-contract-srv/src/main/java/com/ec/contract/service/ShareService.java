@@ -2,11 +2,13 @@ package com.ec.contract.service;
 
 import com.ec.contract.constant.BaseStatus;
 import com.ec.contract.constant.ContractStatus;
+import com.ec.contract.mapper.ContractMapper;
 import com.ec.contract.mapper.ShareMapper;
 import com.ec.contract.model.dto.ShareDto;
 import com.ec.contract.model.dto.ShareListDto;
 import com.ec.contract.model.dto.request.FilterContractDTO;
 import com.ec.contract.model.dto.response.ContractResponseDTO;
+import com.ec.contract.model.entity.Contract;
 import com.ec.contract.model.entity.Share;
 import com.ec.contract.repository.ContractRepository;
 import com.ec.contract.repository.ShareRepository;
@@ -14,11 +16,15 @@ import com.ec.contract.util.PasswordUtil;
 import com.ec.library.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -31,6 +37,7 @@ public class ShareService {
     private final ContractRepository contractRepository;
     private final CustomerService customerService;
     private final ShareMapper shareMapper;
+    private final ContractMapper contractMapper;
 
 
     @Transactional
@@ -116,14 +123,30 @@ public class ShareService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ContractResponseDTO> getAllShares(FilterContractDTO filterContractDTO,
-                                                  Authentication authentication){
-        try{
+    public Page<ContractResponseDTO> getAllSharesContract(FilterContractDTO filterContractDTO,
+                                                  Authentication authentication) {
+        try {
+            String email = authentication.getName();
 
-        }catch (CustomException ce){
-            throw  ce;
-        }
-        catch (Exception e){
+            Pageable pageable = PageRequest.of(filterContractDTO.getPage(), filterContractDTO.getSize());
+
+            Page<Contract> contractPage = shareRepository.getAllSharesContract(
+                    email,
+                    filterContractDTO.getTextSearch(),
+                    filterContractDTO.getFromDate(),
+                    filterContractDTO.getToDate(),
+                    pageable
+            );
+
+            List<ContractResponseDTO> contractResponseDTOS = contractPage.getContent().stream()
+                    .map(contractMapper::toDto)
+                    .toList();
+
+            return new PageImpl<>(contractResponseDTOS, pageable, contractPage.getTotalElements());
+
+        } catch (CustomException ce) {
+            throw ce;
+        } catch (Exception e) {
             log.error("Error in getAllShares: ", e);
             throw new RuntimeException("ERROR_WHILE_FETCHING_SHARES");
         }
