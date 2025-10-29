@@ -1,7 +1,7 @@
 
-netstat -ano | findstr :8083
+netstat -ano | findstr :8082
 
-taskkill /PID 9504 /F
+taskkill /PID 32748 /F
 
 
 
