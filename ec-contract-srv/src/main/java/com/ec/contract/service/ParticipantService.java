@@ -156,7 +156,7 @@ public class ParticipantService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public ParticipantDTO getParticipantById(Integer participantId) {
         try{
             Participant participant = participantRepository.findById(participantId)
@@ -171,6 +171,24 @@ public class ParticipantService {
             throw e;
         } catch (Exception ex) {
             log.info("Error getting participants for contractId {}: {}", participantId, ex.getMessage());
+            throw ex;
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<ParticipantDTO> getParticipantsByContractId(Integer contractId) {
+        try{
+            Collection<Participant> participantList = participantRepository.findByContractIdOrderByOrderingAsc(contractId);
+
+            List<ParticipantDTO> participantDTOList = participantMapper.toDtoList((List<Participant>) participantList);
+
+            sortRecipient(participantDTOList);
+
+            return participantDTOList;
+        }catch (CustomException e) {
+            throw e;
+        } catch (Exception ex) {
+            log.info("Error getting participants for contractId {}: {}", contractId, ex.getMessage());
             throw ex;
         }
     }

@@ -1,6 +1,7 @@
 package com.ec.customer.controller;
 
 import com.ec.customer.model.DTO.request.OrganizationRequestDTO;
+import com.ec.customer.model.DTO.response.OrganizationResponseDTO;
 import com.ec.customer.service.OrganizationService;
 import com.ec.library.response.Response;
 import io.swagger.v3.oas.annotations.Operation;
@@ -48,6 +49,12 @@ public class OrganizationController {
     @GetMapping("/{organizationId}")
     public Response<?> getOrganization(@PathVariable("organizationId") Integer organizationId){
         return Response.success(organizationService.getOrganizationById(organizationId));
+    }
+
+    @GetMapping("/internal/get-by-email-customer")
+    @Operation(summary = "Lấy thông tin tổ chức theo khách hàng ",description = "Lấy thông tin tổ chức theo khách hàng (dùng cho nội bộ service)")
+    public OrganizationResponseDTO getOrganizationByCustomerEmail(@RequestParam("customerEmail") String customerEmail){
+        return organizationService.getOrganizationByCustomerEmail(customerEmail);
     }
 
 }

@@ -4,11 +4,14 @@ import com.ec.customer.common.constant.DefineStatus;
 import com.ec.customer.mapper.OrganizationMapper;
 import com.ec.customer.model.DTO.request.OrganizationRequestDTO;
 import com.ec.customer.model.DTO.response.OrganizationResponseDTO;
+import com.ec.customer.model.entity.Customer;
 import com.ec.customer.model.entity.Organization;
+import com.ec.customer.repository.CustomerRepository;
 import com.ec.customer.repository.OrganizationRepository;
 import com.ec.library.exception.CustomException;
 import com.ec.library.exception.ResponseCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -21,14 +24,17 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OrganizationService {
 
     private final OrganizationRepository organizationRepository;
     private final OrganizationMapper organizationMapper;
+    private final CustomerService customerService;
+    private final CustomerRepository customerRepository;
 
     @Transactional
-    public OrganizationResponseDTO createOrganization(OrganizationRequestDTO organizationRequestDTO){
-        try{
+    public OrganizationResponseDTO createOrganization(OrganizationRequestDTO organizationRequestDTO) {
+        try {
             Organization organization = Organization.builder()
                     .name(organizationRequestDTO.getName())
                     .email(organizationRequestDTO.getEmail())
@@ -41,7 +47,7 @@ public class OrganizationService {
             organizationRepository.save(organization);
 
             return organizationMapper.toDTO(organization);
-        }catch (CustomException e) {
+        } catch (CustomException e) {
             throw e;
         } catch (Exception e) {
             throw new RuntimeException("Có lỗi trong quá trình tạo tổ chức : " + e.getMessage());
@@ -120,6 +126,27 @@ public class OrganizationService {
             throw e;
         } catch (Exception e) {
             throw new RuntimeException("Có lỗi trong quá trình tìm kiếm tổ chức: " + e.getMessage());
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public OrganizationResponseDTO getOrganizationByCustomerEmail(String customerEmail) {
+        try {
+
+            log.info("Tìm tổ chức cho khách hàng với mail: {}", customerEmail);
+
+            Customer customer = customerRepository.findByEmail(customerEmail).orElse(null);
+
+            if (customer == null) return null;
+
+            Organization organization = organizationRepository.findById(customer.getOrganization().getId()).orElse(null);
+
+            if (organization == null) return null;
+
+            return organizationMapper.toDTO(organization);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Có lỗi trong quá trình tìm kiếm tổ chức theo khách hàng: " + e.getMessage());
         }
     }
 }

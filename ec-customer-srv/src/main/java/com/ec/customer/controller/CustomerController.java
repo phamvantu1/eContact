@@ -59,6 +59,12 @@ public class CustomerController {
         return ResponseEntity.ok(customerService.getCustomerByEmail(email));
     }
 
+    @Operation(summary = "Lấy thông tin user theo customerId")
+    @GetMapping("/internal/get-by-id")
+    public ResponseEntity<?> getCustomerById(@RequestParam(name = "customerId") Integer customerId){
+        return ResponseEntity.ok(customerService.getCustomerByIdV1(customerId));
+    }
+
     @Operation(summary = "Đăng ký user ( FE không dùng )", description = "Dùng để call service từ auth-service")
     @PostMapping("/internal/register")
     public ResponseEntity<?> registerCustomer( @RequestBody CustomerRequestDTO customerRequestDTO){

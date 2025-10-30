@@ -32,4 +32,10 @@ public class ParticipantController {
     public Response<?> getParticipantById(@PathVariable(name = "participantId") Integer participantId) {
         return Response.success(participantService.getParticipantById(participantId));
     }
+
+    @GetMapping("/by-contract/{contractId}")
+    @Operation(summary = "Lấy danh sách tổ chức tham gia hợp đồng theo ID hợp đồng", description = "Lấy danh sách các tổ chức tham gia hợp đồng dựa trên ID hợp đồng.")
+    public Response<?> getParticipantsByContractId(@PathVariable(name = "contractId") Integer contractId) {
+        return Response.success(participantService.getParticipantsByContractId(contractId));
+    }
 }

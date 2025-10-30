@@ -73,6 +73,11 @@ public class ContractController {
         return Response.success(contractService.updateContract(contractId, contractRequestDTO));
     }
 
+    @GetMapping("/bpmn-flow/{contractId}")
+    @Operation(summary = "Lấy luồng BPMN của hợp đồng theo ID", description = "Lấy thông tin luồng BPMN của một hợp đồng dựa trên ID hợp đồng.")
+    public Response<?> getBpmnFlowByContractId(@PathVariable(name = "contractId") Integer contractId) {
+        return Response.success(contractService.getBpmnFlowByContractId(contractId));
+    }
 
 
 }

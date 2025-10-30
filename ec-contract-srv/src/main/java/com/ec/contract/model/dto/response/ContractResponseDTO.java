@@ -45,4 +45,12 @@ public class ContractResponseDTO {
 
     private Set<ParticipantDTO> participants;
 
+    private Integer createdBy;
+
+    private Integer updatedBy;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
+
 }

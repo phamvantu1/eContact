@@ -153,9 +153,25 @@ public class CustomerService {
         try {
             log.info("Email nhận được: {}", email);
             Customer customer = customerRepository.findByEmail(email).orElse(null);
-
+            log.info("Khách hàng tìm thấy: {}", customer);
             if (customer == null) {
                 return Response.success(Map.of("error", "Không tìm thấy người dùng với email: " + email));
+            }
+
+            return Response.success(customerMapper.toResponseDTO(customer));
+
+        } catch (Exception e) {
+            throw new RuntimeException("Có lỗi trong quá trình xóa người dùng : " + e.getMessage());
+        }
+    }
+
+    public Response<?> getCustomerByIdV1(Integer customerId) {
+        try {
+            log.info("customerId nhận được: {}", customerId);
+            Customer customer = customerRepository.findById(customerId).orElse(null);
+
+            if (customer == null) {
+                return Response.success(Map.of("error", "Không tìm thấy người dùng với customerId: " + customerId));
             }
 
             return Response.success(customerMapper.toResponseDTO(customer));
