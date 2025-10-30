@@ -35,14 +35,15 @@ II luồng view
 - tại màn tài liệu tại
 
 + tải lên file đính kèm : ( hooàn thành ) chính là lưu tài liệu vào db
-+ Xem tài liệu liên quan : (hoàn thành ) chính là ref trong api get contract detail
++ Xem tài liệu liên quan : (hoàn thành) chính là ref trong api get contract detail
 + Gia hạn ký (hoàn thành ) chính là api sửa hợp đồng
 + Hủy tài liệu : ( hoàn thành )  ( api change status )
 + Chia sẻ tài liệu ( chỉ hđ có hoàn thành mới đc chia sẻ ) ( hoàn thành)
++ xem luồng ký ( hoàn thành )
 
 
 
-+ xem luồng ký
+
 + ủy quyền / chuyển tiếp
 + Tạo tài liệu giữ luồng ký ( làm sau )
 + sao chép (chưa hoàn thành ) ( api clone hợp đồng thì sẽ lưu và trả ra 1 hợp đồng mới, gọi api chi tiết hợp đồng mới, tài liệu của hợp đồng mới, fields của hợp đồng mới )
