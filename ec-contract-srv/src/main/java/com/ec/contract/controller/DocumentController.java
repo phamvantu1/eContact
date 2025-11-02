@@ -19,7 +19,7 @@ import java.util.Map;
 @RequestMapping("/documents")
 @Slf4j
 @RequiredArgsConstructor
-@Tag(name = "Document API", description = "Quản lý thông tin tài liệu")
+@Tag(name = "Document Controller API", description = "Quản lý thông tin tài liệu")
 public class DocumentController {
 
     private final ContractRepository contractRepository;

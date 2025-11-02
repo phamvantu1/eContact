@@ -31,6 +31,7 @@ public class JwtUtil {
         claims.put("permissions", customer.getPermissions());
         claims.put("customerId", customer.getId());
         claims.put("email", customer.getEmail());
+        claims.put("id", customer.getId());
 
         return Jwts.builder()
                 .setClaims(claims)

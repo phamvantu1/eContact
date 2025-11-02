@@ -2,6 +2,7 @@ package com.ec.contract.service;
 
 import com.ec.contract.constant.ContractStatus;
 import com.ec.contract.model.dto.response.RefDTO;
+import com.ec.contract.model.entity.Contract;
 import com.ec.contract.repository.ContractRefRepository;
 import com.ec.contract.repository.ContractRepository;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,10 +23,16 @@ public class ContractRefService {
     private final ContractRepository contractRepository;
 
 
-    public Page<RefDTO> getAllContractRefs(Integer page, Integer size){
+    @Transactional(readOnly = true)
+    public Page<RefDTO> getAllContractRefs(Integer page, Integer size, String textSearch, Integer organizationId) {
         try{
             Pageable pageable = PageRequest.of(page, size);
-            var contractPage = contractRepository.findByStatus(ContractStatus.SIGNED.getDbVal(), pageable);
+            Page<Contract> contractPage = contractRepository.findByStatus(ContractStatus.SIGNED.getDbVal(),
+                    textSearch,
+                    organizationId,
+                    pageable);
+
+            log.info("Fetched {} contract references", contractPage.getNumberOfElements());
 
             return  contractPage.map(contract -> {
                 RefDTO refDTO = new RefDTO();

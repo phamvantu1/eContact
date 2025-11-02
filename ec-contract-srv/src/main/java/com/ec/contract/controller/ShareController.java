@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/shares")
 @RequiredArgsConstructor
 @Slf4j
-@Tag(name = "Share API", description = "Quản lý chia sẻ hợp đồng")
+@Tag(name = "Share Controller API", description = "Quản lý chia sẻ hợp đồng")
 public class ShareController {
 
     private final ShareService shareService;

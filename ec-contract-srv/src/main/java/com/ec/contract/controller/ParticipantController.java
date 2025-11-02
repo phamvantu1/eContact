@@ -13,7 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/participants")
 @RequiredArgsConstructor
-@Tag(name = "Participant API", description = "Quản lý thông tin tổ chức tham gia hợp đồng")
+@Tag(name = "Participant Controller API", description = "Quản lý thông tin tổ chức tham gia hợp đồng")
 public class ParticipantController {
 
     private final ParticipantService participantService;

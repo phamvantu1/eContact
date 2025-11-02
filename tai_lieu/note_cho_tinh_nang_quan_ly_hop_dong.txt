@@ -19,6 +19,8 @@ còn ordering trong recipient của 1 participant thì
 - check lại đoạn status của participant tại sao truyền vafo toàn là 1
 
 
+recipient lúc tao hop dong status truyen vao la 0
+
 
 
 

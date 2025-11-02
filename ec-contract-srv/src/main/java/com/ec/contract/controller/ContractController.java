@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("")
 @RequiredArgsConstructor
-@Tag(name = "Contract API", description = "Quản lý thông tin hợp đồng")
+@Tag(name = "Contract Controller", description = "Quản lý thông tin hợp đồng")
 public class ContractController {
 
     private final ContractService contractService;

@@ -120,8 +120,6 @@ public class ContractService {
             Contract contract = contractRepository.findById(contractId)
                     .orElseThrow(() -> new CustomException(ResponseCode.CONTRACT_NOT_FOUND));
 
-            log.info("Fetched contract: {}", contract);
-
             List<Participant> listParticipants = participantRepository.findByContractIdOrderByOrderingAsc(contractId)
                     .stream().toList();
 

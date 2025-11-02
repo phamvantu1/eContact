@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/types")
 @RequiredArgsConstructor
-@Tag(name = "Type API", description = "Quản lý thông tin loại hợp đồng")
+@Tag(name = "Type Controller API", description = "Quản lý thông tin loại hợp đồng")
 public class TypeController {
 
     private final TypeService typeService;

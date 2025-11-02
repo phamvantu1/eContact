@@ -15,12 +15,20 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
 
     @Query(value = "SELECT * FROM contracts c " +
             "WHERE c.status = :status " +
+            "AND (:textSearch IS NULL OR c.contract_no ILIKE '%' || :textSearch || '%' OR c.name ILIKE '%' || :textSearch || '%') " +
+            "AND (:organizationId IS NULL OR c.organization_id = :organizationId ) " +
             "ORDER BY c.created_at DESC",
             countQuery = "SELECT count(*) FROM contracts c " +
-                    "WHERE c.status = :status",
+                    "WHERE c.status = :status " +
+                    "AND (:textSearch IS NULL OR c.contract_no ILIKE '%' || :textSearch || '%' OR c.name ILIKE '%' || :textSearch || '%') " +
+                    "AND (:organizationId IS NULL OR c.organization_id = :organizationId )",
             nativeQuery = true)
-    Page<Contract> findByStatus(@Param("status") Integer status,
-                                Pageable pageable);
+    Page<Contract> findByStatus(
+            @Param("status") Integer status,
+            @Param("textSearch") String textSearch,
+            @Param("organizationId") Integer organizationId,
+            Pageable pageable);
+
 
 
     @Query(value = "SELECT * FROM contracts c " +
