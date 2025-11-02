@@ -10,10 +10,7 @@ import com.ec.contract.model.dto.request.ContractRequestDTO;
 import com.ec.contract.model.dto.request.FilterContractDTO;
 import com.ec.contract.model.dto.response.ContractResponseDTO;
 import com.ec.contract.model.entity.*;
-import com.ec.contract.repository.ContractRefRepository;
-import com.ec.contract.repository.ContractRepository;
-import com.ec.contract.repository.FieldRepository;
-import com.ec.contract.repository.ParticipantRepository;
+import com.ec.contract.repository.*;
 import com.ec.library.exception.CustomException;
 import com.ec.library.exception.ResponseCode;
 import lombok.RequiredArgsConstructor;
@@ -47,11 +44,12 @@ public class ContractService {
     private final ParticipantRepository participantRepository;
     private final ParticipantService participantService;
     private final FieldRepository fieldRepository;
+    private final DocumentRepository documentRepository;
 
     public Map<String, String> checkCodeUnique(String code) {
         try {
             Boolean isUnique = contractRepository.existsByContractNo(code);
-            return Map.of("isUnique", String.valueOf(isUnique));
+            return Map.of("isExist", String.valueOf(isUnique));
         } catch (Exception e) {
             log.error("Error checking code uniqueness: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to check code uniqueness", e);
@@ -144,12 +142,23 @@ public class ContractService {
 
             participantService.sortRecipient(contractResponseDTO.getParticipants());
 
+            contractResponseDTO.getContractRefs().forEach(
+                    ref -> {
+                        Contract refContract = contractRepository.findById(ref.getRefId()).orElse(null);
+                        if (refContract != null) {
+                            ref.setRefName(refContract.getName());
+                            Document document = documentRepository.findByContractIdAndType(refContract.getId(), 1);
+                            ref.setPath(document != null ? document.getPath() : null);
+                        }
+                    }
+            );
+
             return contractResponseDTO;
 
         } catch (CustomException ex) {
             throw ex;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to get contract by id {}", e);
+            throw new RuntimeException("Failed to get contract by id : ", e);
         }
     }
 

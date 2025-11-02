@@ -14,6 +14,7 @@ import com.ec.contract.repository.ContractRepository;
 import com.ec.contract.repository.ShareRepository;
 import com.ec.contract.util.PasswordUtil;
 import com.ec.library.exception.CustomException;
+import com.ec.library.exception.ResponseCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -41,17 +42,21 @@ public class ShareService {
 
 
     @Transactional
-    public Optional<ShareListDto> createShare(ShareListDto shareListDto) {
+    public Object createShare(ShareListDto shareListDto) {
         try {
             final var contractOptional = contractRepository.findById(shareListDto.getContractId());
             if (contractOptional.isEmpty() || !Objects.equals(contractOptional.get().getStatus(), ContractStatus.SIGNED.getDbVal())) {
-                return Optional.empty();
+                log.info("Contract ID {} not found or not signed", shareListDto.getContractId());
+                throw new CustomException(ResponseCode.CONTRACT_NO_SIGNED);
             }
 
             var contract = contractOptional.get();
 
             ShareDto shareDto;
             if (shareListDto.getEmail() != null) {
+
+                log.info("Creating shares for contract ID {}: {}", contract.getId(), shareListDto.getEmail());
+
                 for (String email : shareListDto.getEmail()) {
                     if (email == null) continue;
                     email = email.trim();
@@ -116,6 +121,8 @@ public class ShareService {
             }
 
             return Optional.of(shareListDto);
+        } catch (CustomException ce) {
+            throw ce;
         } catch (Exception e) {
             log.error("Error in createShare: ", e);
             return Optional.empty();
@@ -124,7 +131,7 @@ public class ShareService {
 
     @Transactional(readOnly = true)
     public Page<ContractResponseDTO> getAllSharesContract(FilterContractDTO filterContractDTO,
-                                                  Authentication authentication) {
+                                                          Authentication authentication) {
         try {
             String email = authentication.getName();
 
