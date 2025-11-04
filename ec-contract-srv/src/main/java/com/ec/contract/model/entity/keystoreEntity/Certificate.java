@@ -21,7 +21,7 @@ import java.util.List;
 public class Certificate implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     private String status;
 
