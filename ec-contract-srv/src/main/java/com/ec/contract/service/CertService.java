@@ -5,7 +5,6 @@ import com.ec.contract.model.dto.OrganizationDTO;
 import com.ec.contract.model.dto.keystoreDTO.CertificateCustomersDto;
 import com.ec.contract.model.dto.keystoreDTO.CertificateDto;
 import com.ec.contract.model.dto.keystoreDTO.GetDataCertRequest;
-import com.ec.contract.model.dto.keystoreDTO.OrganizationResponse;
 import com.ec.contract.model.entity.Customer;
 import com.ec.contract.model.entity.keystoreEntity.Certificate;
 import com.ec.contract.model.entity.keystoreEntity.CertificateCustomer;

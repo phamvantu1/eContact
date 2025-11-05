@@ -29,10 +29,10 @@ public class CertController {
     @PostMapping("/import-cert")
     @Operation(summary = "Import chứng thư số", description = "Import chứng thư số từ file .p12 lên hệ thống")
     public Response<?> importCert(Authentication authentication,
-                                  @RequestParam("file") MultipartFile file,
+                                  @RequestParam(name = "file") MultipartFile file,
                                   @RequestParam(name = "list_email", required = false) String[] emails,
-                                  @RequestParam("password") String password,
-                                  @RequestParam("status") String status) {
+                                  @RequestParam(name = "password") String password,
+                                  @RequestParam(name = "status") String status) {
         try {
             String[] fileNameSplit = file.getOriginalFilename().split("\\.");
             if (!(fileNameSplit[fileNameSplit.length - 1].equals("p12"))) {
@@ -56,9 +56,9 @@ public class CertController {
     @PostMapping("/update-user-from-cert")
     @Operation(summary = "Cập nhật thông tin user từ chứng thư số", description = "Cập nhật thông tin user từ chứng thư số")
     public Response<?> addUserFromCert(Authentication authentication,
-                                       @RequestParam("certificateId") Integer certificateId,
-                                       @RequestParam("status") String status,
-                                       @RequestParam(value = "list_email", required = false) String[] emails) {
+                                       @RequestParam(name = "certificateId") Integer certificateId,
+                                       @RequestParam(name = "status") String status,
+                                       @RequestParam(name = "list_email", required = false) String[] emails) {
 
         var result = certService.updateUserFromCert(certificateId, emails, status, authentication);
         return Response.success(result);
@@ -67,24 +67,24 @@ public class CertController {
     @DeleteMapping("/remove-user-from-cert")
     @Operation(summary = "Xóa user khỏi chứng thư số", description = "Xóa user khỏi chứng thư số")
     public Response<?> removeUserFromCert(Authentication authentication,
-                                          @RequestParam("certificateId") Integer certificateId,
-                                          @RequestParam("customerIds") Integer[] customerIds) {
+                                          @RequestParam(name = "certificateId") Integer certificateId,
+                                          @RequestParam(name = "customerIds") Integer[] customerIds) {
         var result = certService.removeUserFromCert(certificateId, customerIds, authentication);
         return Response.success(result);
     }
 
     @GetMapping("/cert-information")
     @Operation(summary = "Lấy thông tin chứng thư số", description = "Lấy thông tin chứng thư số theo ID")
-    public Response<?> certInformation(@RequestParam("id") Integer id) throws CertificateException, IOException, KeyStoreException, NoSuchAlgorithmException {
+    public Response<?> certInformation(@RequestParam(name = "certificateId") Integer certificateId) throws CertificateException, IOException, KeyStoreException, NoSuchAlgorithmException {
 
-        var result = certService.getDataCert(new GetDataCertRequest(id, null));
+        var result = certService.getDataCert(new GetDataCertRequest(certificateId, null));
         return Response.success(result);
     }
 
     @GetMapping("/find-cert-by-id")
     @Operation(summary = "Lấy chứng thư số theo ID", description = "Lấy chứng thư số theo ID")
     public Response<?> findCertById(Authentication authentication,
-                                    @RequestParam("certificateId") Integer certificateId) {
+                                    @RequestParam(name = "certificateId") Integer certificateId) {
         var result = certService.findCertById(certificateId, authentication);
         return Response.success(result);
     }
