@@ -166,18 +166,22 @@ public class CertService {
             List<CertificateCustomer> certificateCustomersDtoLoginByEmailAndSDT = certificateCustomersRepository
                     .findByPhoneOrEmailAndLoginTypeByEmailAndSDT(email);
 
-            if(certificateCustomersDtoLoginByEmailAndSDT.isEmpty()){
+            if (certificateCustomersDtoLoginByEmailAndSDT.isEmpty()) {
                 log.info("Lấy dữ liệu chứng thư số theo user thành công nhưng không có dữ liệu bổ sung");
                 return certificateCustomersDto;
             }
 
             List<CertificateCustomersDto> certificateCustomersDtos = certificateCustomersDtoLoginByEmailAndSDT
-                    .stream().map(CertificateCustomersDto::EntityToDto).collect(Collectors.toList());
+                                                                    .stream()
+                                                                    .map(CertificateCustomersDto::EntityToDto).toList();
 
             for (CertificateCustomersDto otherDto : certificateCustomersDtos) {
+                log.info("Xử lý dữ liệu chứng thư số bổ sung cho user: {}", otherDto.getEmail());
                 if (otherDto.getCertificates() != null) {
                     for (CertificateDto cert : otherDto.getCertificates()) {
-                        if ("1".equals(cert.getStatus()) && !certificateCustomersDto.getCertificates().contains(cert)) {
+                        log.info("Xử lý chứng thư số: {} với trạng thái: {}", cert.getId(), cert.getStatus());
+                        if (cert.getStatus() == 1 && !certificateCustomersDto.getCertificates().contains(cert)) {
+                            log.info("Thêm chứng thư số: {} vào danh sách kết quả trả về", cert.getId());
                             certificateCustomersDto.getCertificates().add(cert);
                         }
                     }
@@ -185,17 +189,19 @@ public class CertService {
             }
 
             if (certificateCustomersDto.getId() == null) {
-                certificateCustomersDto.setId(certificateCustomersDtoLoginByEmailAndSDT.get(0).getId());
-                certificateCustomersDto.setPhone(certificateCustomersDtoLoginByEmailAndSDT.get(0).getPhone());
-                certificateCustomersDto.setEmail(certificateCustomersDtoLoginByEmailAndSDT.get(0).getEmail());
-                certificateCustomersDto.setOrganizationId(certificateCustomersDtoLoginByEmailAndSDT.get(0).getOrganizationId());
+                certificateCustomersDto.setId(certificateCustomersDtoLoginByEmailAndSDT.getFirst().getId());
+                certificateCustomersDto.setPhone(certificateCustomersDtoLoginByEmailAndSDT.getFirst().getPhone());
+                certificateCustomersDto.setEmail(certificateCustomersDtoLoginByEmailAndSDT.getFirst().getEmail());
+                certificateCustomersDto.setOrganizationId(certificateCustomersDtoLoginByEmailAndSDT.getFirst().getOrganizationId());
             }
 
             if (!(StringUtils.hasText(certificateCustomersDto.getEmail()))) {
                 return certificateCustomersDto;
             }
 
-            List<CertificateDto> dataRemove = certificateCustomersDto.getCertificates().stream().filter(a -> !(a.getStatus().equals("1"))).collect(Collectors.toList());
+            List<CertificateDto> dataRemove = certificateCustomersDto.getCertificates().stream()
+                    .filter(a -> (a.getStatus() != 1))
+                    .toList();
 
             certificateCustomersDto.getCertificates().removeAll(dataRemove);
 
