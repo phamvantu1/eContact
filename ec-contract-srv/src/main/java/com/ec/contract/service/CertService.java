@@ -81,28 +81,37 @@ public class CertService {
             if (aliasCount != 1) {
                 throw new CustomException(ResponseCode.CERT_REQUIRE_SUB);
             }
+
             String alias = keyStore.aliases().nextElement();
             X509Certificate certificate = (X509Certificate) keyStore.getCertificate(alias);
             String dataSubject = certificate.getSubjectDN().getName();
             String[] dataSubjectSplit = dataSubject.split(",");
             String subjectCert = null;
+
             for (String a : dataSubjectSplit) {
                 if (a.contains("CN=")) {
                     subjectCert = a.split("=")[1];
                 }
             }
+
             List<CertificateCustomer> certificateCustomers = new ArrayList<>();
+
             if (emails != null) {
                 Arrays.asList(emails).forEach(email -> {
+
                     Customer newCustomer = customerService.getCustomerByEmail(email);
+
                     if (!newCustomer.getOrganizationId().equals(organizationDTO.getId())) {
                         throw new CustomException(ResponseCode.EMAIL_NOT_IN_YOUR_ORGANIZATION);
                     }
+
                     Optional<CertificateCustomer> certificateCustomer = certificateCustomersRepository.findFirstByEmail(email);
+
                     CertificateCustomer customer = certificateCustomer.orElseGet(() -> certificateCustomersRepository.save(CertificateCustomer.builder()
                             .email(email)
                             .organizationId(organizationDTO.getId())
                             .build()));
+
                     certificateCustomers.add(customer);
                 });
             }
@@ -124,7 +133,9 @@ public class CertService {
                     .certificateCustomers(certificateCustomers)
                     .createAt(new Date())
                     .build();
+
             certificateRepository.save(cert);
+
             return Map.of("message", "Lưu dữ liệu file chứng thư số thành công");
         } catch (CustomException ce) {
             throw ce;
@@ -170,15 +181,19 @@ public class CertService {
                 certificateCustomersDto.setId(certificateCustomersDtoLoginByEmailAndSDT.get(0).getId());
                 certificateCustomersDto.setPhone(certificateCustomersDtoLoginByEmailAndSDT.get(0).getPhone());
                 certificateCustomersDto.setEmail(certificateCustomersDtoLoginByEmailAndSDT.get(0).getEmail());
-                certificateCustomersDto.setOrganization_id(certificateCustomersDtoLoginByEmailAndSDT.get(0).getOrganizationId());
+                certificateCustomersDto.setOrganizationId(certificateCustomersDtoLoginByEmailAndSDT.get(0).getOrganizationId());
             }
 
-            if (!(StringUtils.hasText(certificateCustomersDto.getEmail())) && !(StringUtils.hasText(certificateCustomersDto.getPhone()))) {
+            if (!(StringUtils.hasText(certificateCustomersDto.getEmail()))) {
                 return certificateCustomersDto;
             }
+
             List<CertificateDto> dataRemove = certificateCustomersDto.getCertificates().stream().filter(a -> !(a.getStatus().equals("1"))).collect(Collectors.toList());
+
             certificateCustomersDto.getCertificates().removeAll(dataRemove);
+
             return certificateCustomersDto;
+
         } catch (Exception e) {
             log.error("Lấy dữ liệu chứng thư số theo user thất bại {}", e);
             throw new RuntimeException("Lấy dữ liệu chứng thư số theo user thất bại");
@@ -194,6 +209,7 @@ public class CertService {
             OrganizationDTO organizationDTO = customerService.getOrganizationByCustomerEmail(currentEmail);
 
             Optional<Certificate> certificate = certificateRepository.findById(certificateId);
+
             if (certificate.isPresent()) {
 
                 if (StringUtils.hasText(status)) {
@@ -212,11 +228,13 @@ public class CertService {
                         break;
                     }
                 }
+
                 if (!checkOrgFromCert) {
                     if (!(certificate.get().getOrgAdminCreate().equals(organizationDTO.getId()))) {
-                        throw new RuntimeException("Tổ chức bạn không được cấp quyền quản lý chứng thư số này");
+                        throw new CustomException(ResponseCode.ORGANIZATION_DONT_EXIST);
                     }
                 }
+
                 List<String> dataEmailFromCert = certificate.get().getCertificateCustomers().stream()
                         .map(CertificateCustomer::getEmail)
                         .collect(Collectors.toList());
@@ -224,11 +242,15 @@ public class CertService {
 
                 if (emails != null) {
                     Arrays.asList(emails).forEach(e -> {
+
                         Customer customerEmail = customerService.getCustomerByEmail(e);
+
                         if (customerEmail == null) {
-                            throw new RuntimeException("Email không tồn tại trong hệ thống : ".concat(e));
+                            throw new CustomException(ResponseCode.EMAIL_NOT_FOUND);
                         }
+
                         Optional<CertificateCustomer> customer = certificateCustomersRepository.findFirstByEmail(e);
+
                         if (!(dataEmailFromCert.contains(e))) {
                             certificate.get().getCertificateCustomers().add(customer.orElseGet(() ->
                                     certificateCustomersRepository.save(CertificateCustomer.builder()
@@ -242,6 +264,8 @@ public class CertService {
 
             }
             return Map.of("message", "Cập nhật dữ liệu chứng thư số thành công");
+        } catch (CustomException ce) {
+            throw ce;
         } catch (Exception e) {
             log.error("Cập nhật dữ liệu chứng thư số thất bại {}", e);
             return Map.of("error", "Cập nhật dữ liệu chứng thư số thất bại");
@@ -265,7 +289,7 @@ public class CertService {
                 });
 
             } else {
-                throw new RuntimeException("Dữ liêu cert không tồn tại");
+                throw new CustomException(ResponseCode.CERT_NOT_FOUND);
             }
             return Map.of("message", "Xóa người dùng khỏi chứng thư số thành công");
         } catch (CustomException ce) {
@@ -281,11 +305,14 @@ public class CertService {
         try {
             String dataSubject = null;
             if (dataCertRequest.getIdCert() != null) {
+
                 Optional<Certificate> dataKeystore = certificateRepository.findById(dataCertRequest.getIdCert());
+
                 if (dataKeystore.isEmpty()) {
                     log.info("Dữ liệu chứng thư số server không tồn tại !!!");
                     return CertResponse.builder().build();
                 }
+
                 byte[] keyStoreData = dataKeystore.get().getKeystore();
                 String alias = dataKeystore.get().getAlias();
                 char[] password = dataKeystore.get().getPasswordKeystore().toCharArray();
@@ -298,7 +325,7 @@ public class CertService {
             }
 
             if (dataSubject == null) {
-                throw new RuntimeException("Dữ liệu chủ thể của chứng thư số trống !");
+                throw new CustomException(ResponseCode.DATA_SUBJECT_INVALID);
             }
 
             return setInformationCertificate(dataSubject);
@@ -372,6 +399,7 @@ public class CertService {
                     .orElseThrow(() -> new CustomException(ResponseCode.CERT_NOT_FOUND));
 
             List<CertificateCustomersDto> dataRemove = new ArrayList<>();
+
             certificateDataQuery.getCustomers().forEach(c -> {
                 if (!(organizationDTO.getId().equals(c.getId()))) {
                     dataRemove.add(c);
@@ -404,17 +432,22 @@ public class CertService {
             certificateDataQuery.forEach(certificateData -> {
                 List<CertificateCustomersDto> dataRemove = new ArrayList<>();
                 certificateData.getCustomers().forEach(c -> {
-                    if (!(organizationDTO.getId().equals(c.getOrganization_id()))) {
+                    if (!(organizationDTO.getId().equals(c.getOrganizationId()))) {
                         dataRemove.add(c);
                     }
                 });
                 certificateData.getCustomers().removeAll(dataRemove);
             });
+
             Pageable pageRequest = PageRequest.of(pageNumber, pageSize);
+
             int start = (int) pageRequest.getOffset();
+
             int end = Math.min((start + pageRequest.getPageSize()), certificateDataQuery.size());
+
             List<CertificateDto> pageContent = new ArrayList<>(certificateDataQuery.stream()
                     .sorted(Comparator.comparing(CertificateDto::getId).reversed()).collect(Collectors.toList())).subList(start, end);
+
             return new PageImpl<>(pageContent, pageRequest, certificateDataQuery.size());
         } catch (CustomException ce) {
             throw ce;

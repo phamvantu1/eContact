@@ -36,7 +36,7 @@ public class CertController {
         try {
             String[] fileNameSplit = file.getOriginalFilename().split("\\.");
             if (!(fileNameSplit[fileNameSplit.length - 1].equals("p12"))) {
-                throw new RuntimeException("Định dạng file không đúng !");
+                return Response.error(ResponseCode.FILE_DONT_TYPE_P12);
             }
             var result = certService.importCertToDatabase(file, emails, password, status, authentication);
 

@@ -16,7 +16,7 @@ public class CertResponse {
     private String company;
 
     // chức vụ
-    private String Position;
+    private String position;
 
     // mã số thuế
     private String mst;
@@ -36,14 +36,14 @@ public class CertResponse {
 
     // Thời gian hiệu lực
     private String validFrom;
-    private String validTo;
 
+    private String validTo;
 
     public static CertResponse certResponseEmpty() {
         return CertResponse.builder()
                 .name("")
                 .company("")
-                .Position("")
+                .position("")
                 .mst("")
                 .cccd("")
                 .cmnd("")

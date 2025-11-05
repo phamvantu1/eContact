@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CertificateCustomersRepository extends JpaRepository<CertificateCustomer, Integer> {
+
     Optional<CertificateCustomer> findFirstByEmail(String email);
 
     Optional<CertificateCustomer> findFirstByPhone(String phone);

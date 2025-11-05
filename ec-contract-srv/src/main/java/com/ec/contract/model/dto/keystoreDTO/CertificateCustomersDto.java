@@ -18,7 +18,7 @@ public class CertificateCustomersDto {
     private Integer id;
     private String email;
     private String phone;
-    private int organization_id;
+    private int organizationId;
     private List<CertificateDto> certificates;
 
     public static CertificateCustomersDto fromEntity(CertificateCustomer customer) {
@@ -26,7 +26,7 @@ public class CertificateCustomersDto {
                 .id(customer.getId())
                 .email(customer.getEmail())
                 .phone(customer.getPhone())
-                .organization_id(customer.getOrganizationId())
+                .organizationId(customer.getOrganizationId())
                 .certificates(new ArrayList<>())
                 .build();
     }
@@ -36,7 +36,7 @@ public class CertificateCustomersDto {
                 .id(customer.getId())
                 .email(customer.getEmail())
                 .phone(customer.getPhone())
-                .organization_id(customer.getOrganizationId())
+                .organizationId(customer.getOrganizationId())
                 .certificates(customer.getCertificates().stream().map(CertificateDto::EntityFromDto).collect(Collectors.toList()))
                 .build();
     }

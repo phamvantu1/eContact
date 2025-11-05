@@ -80,14 +80,12 @@ public enum ResponseCode {
     // cert
     CREATE_CERT_FAILED("ERR_500", "Tạo chứng thư số thất bại", HttpStatus.INTERNAL_SERVER_ERROR),
     CERT_IN_YOUR_ORGANIZATION("ERR_400", "Chứng thư số đã thuộc tổ chức của bạn", HttpStatus.BAD_REQUEST),
-    CERT_REQUIRE_SUB("ERR_400", "file chứng thư số yêu cầu phải có duy nhất 1 thông tin chủ thể", HttpStatus.BAD_REQUEST),
+    CERT_REQUIRE_SUB("ERR_400", "File chứng thư số yêu cầu phải có duy nhất 1 thông tin chủ thể", HttpStatus.BAD_REQUEST),
     USER_DONT_EXIST("ERR_404", "Dữ liệu người dùng trong chứng thư số không tồn tại", HttpStatus.NOT_FOUND),
     CERT_NOT_FOUND("ERR_404", "Không tìm thấy chứng thư số", HttpStatus.NOT_FOUND),
-
-
-
-
-
+    FILE_DONT_TYPE_P12("ERR_400", "File không phải là định dạng .p12", HttpStatus.BAD_REQUEST),
+    ORGANIZATION_DONT_EXIST("ERR_404", "Tổ chức bạn không được cấp quyền quản lý chứng thư số này", HttpStatus.NOT_FOUND),
+    DATA_SUBJECT_INVALID("ERR_400", "Dữ liệu chủ thể của chứng thư số trống !", HttpStatus.BAD_REQUEST),
 
 
     BAD_REQUEST("ERR_400", "Bad request", HttpStatus.BAD_REQUEST);

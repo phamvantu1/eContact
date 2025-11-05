@@ -10,7 +10,7 @@ spring:
         corsConfigurations:
           '[/**]':
             allowedOrigins:
-              - "http://localhost:5173"  # hoặc domain FE thật sự
+              - "http://localhost:3000"  # hoặc domain FE thật sự
             allowedMethods:
               - GET
               - POST

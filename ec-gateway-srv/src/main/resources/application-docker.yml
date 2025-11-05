@@ -37,7 +37,7 @@ spring:
         corsConfigurations:
           '[/**]':
             allowedOrigins:
-              - "${CORS_ALLOWED_ORIGIN:http://localhost:5173}"  # Bạn có thể ghi đè bằng domain FE thực sự
+              - "${CORS_ALLOWED_ORIGIN:http://localhost:3000}"  # Bạn có thể ghi đè bằng domain FE thực sự
             allowedMethods:
               - GET
               - POST
