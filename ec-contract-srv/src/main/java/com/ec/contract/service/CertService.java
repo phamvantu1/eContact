@@ -48,8 +48,10 @@ public class CertService {
 
     // lưu file keystore vào database
     @Transactional
-    public Map<String, String> importCertToDatabase(MultipartFile multipartFile, String[] emails, String password, String status, Authentication authentication) {
+    public Map<String, String> importCertToDatabase(MultipartFile multipartFile, String[] emails, String password, Integer status, Authentication authentication) {
         try {
+
+            log.info("password in this param : " + password);
 
             String currentEmail = authentication.getName();
 
@@ -153,7 +155,7 @@ public class CertService {
             String email = authentication.getName();
 
             CertificateCustomersDto certificateCustomersDto = certificateCustomersRepository
-                    .findByPhoneOrEmailAndLoginType(email)
+                    .findByEmail(email)
                     .map(CertificateCustomersDto::EntityToDto)
                     .orElseGet(() -> CertificateCustomersDto.builder().build());
 
@@ -163,6 +165,11 @@ public class CertService {
 
             List<CertificateCustomer> certificateCustomersDtoLoginByEmailAndSDT = certificateCustomersRepository
                     .findByPhoneOrEmailAndLoginTypeByEmailAndSDT(email);
+
+            if(certificateCustomersDtoLoginByEmailAndSDT.isEmpty()){
+                log.info("Lấy dữ liệu chứng thư số theo user thành công nhưng không có dữ liệu bổ sung");
+                return certificateCustomersDto;
+            }
 
             List<CertificateCustomersDto> certificateCustomersDtos = certificateCustomersDtoLoginByEmailAndSDT
                     .stream().map(CertificateCustomersDto::EntityToDto).collect(Collectors.toList());
@@ -201,7 +208,7 @@ public class CertService {
     }
 
     @Transactional
-    public Map<String, String> updateUserFromCert(Integer certificateId, String[] emails, String status, Authentication authentication) {
+    public Map<String, String> updateUserFromCert(Integer certificateId, String[] emails, Integer status, Authentication authentication) {
 
         try {
             String currentEmail = authentication.getName();
@@ -212,9 +219,8 @@ public class CertService {
 
             if (certificate.isPresent()) {
 
-                if (StringUtils.hasText(status)) {
-                    certificate.get().setStatus(status);
-                }
+                // cap nhap trang thai
+                certificate.get().setStatus(status);
 
                 boolean checkOrgFromCert = false;
 
@@ -417,7 +423,7 @@ public class CertService {
     }
 
     @Transactional(readOnly = true)
-    public Page<CertificateDto> findAllCertKeystore(String subject, String serial_number, String status, int pageSize, int pageNumber, Authentication authentication) {
+    public Page<CertificateDto> findAllCertKeystore(String subject, String serial_number, Integer status, int pageSize, int pageNumber, Authentication authentication) {
         try {
 
             String currentEmail = authentication.getName();

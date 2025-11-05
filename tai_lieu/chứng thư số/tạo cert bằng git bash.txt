@@ -1,0 +1,30 @@
+Bước 1: Cài Git for Windows
+
+Tải Git tại: https://git-scm.com/download/win
+
+Cài xong, mở Git Bash (nó có sẵn OpenSSL)
+
+Bước 2: Chạy lệnh tạo chứng thư số
+
+Mở Git Bash, chạy các lệnh sau (copy & paste luôn):
+
+
+# 1. Tạo private key 2048-bit
+openssl genrsa -out nhung3.key 2048
+
+# 2. Tạo CSR (certificate signing request)
+openssl req -new -key nhung3.key -out nhung3.csr \
+  -subj "/C=VN/ST=Ha Noi/L=Quan Cau Giay/O=MobiFone IT/T=GIAM DOC/UID=MST:0100686209-199/UID=CCCD:025199009534/CN=NGUYEN HONG NHUNG"
+
+# 3. Tạo certificate (tự cấp - self-signed)
+openssl req -x509 -new -nodes -key nhung3.key -sha256 -days 365 -out nhung3.crt \
+  -subj "/C=VN/ST=Ha Noi/L=Quan Cau Giay/O=MobiFone IT/T=GIAM DOC/UID=MST:0100686209-199/UID=CCCD:025199009534/CN=NGUYEN HONG NHUNG"
+
+# 4. Xuất PKCS12 (.p12) - với mật khẩu 123456
+openssl pkcs12 -export -out nhung3.p12 -inkey nhung3.key -in nhung3.crt -name "nhung3" -passout pass:123456
+
+
+
+
+5.  kiểm tra
+openssl pkcs12 -info -in nhung3.p12 -passin pass:123456

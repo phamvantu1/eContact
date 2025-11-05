@@ -18,7 +18,7 @@ public interface CertificateCustomersRepository extends JpaRepository<Certificat
     @Query(value = "SELECT * FROM certificate_customer c WHERE " +
             " (c.email = :email)  " +
             " LIMIT 1 ", nativeQuery = true)
-    Optional<CertificateCustomer> findByPhoneOrEmailAndLoginType(
+    Optional<CertificateCustomer> findByEmail(
             @Param("email") String email);
 
     @Query(value = "SELECT * FROM certificate_customer c WHERE " +

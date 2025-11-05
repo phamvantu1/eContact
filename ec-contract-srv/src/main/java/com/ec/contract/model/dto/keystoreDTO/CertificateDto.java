@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class CertificateDto {
     private Integer id;
 
-    private String status;
+    private Integer status;
     private Integer orgAdminCreate;
     private String keyStoreFileName;
     private String certInformation;

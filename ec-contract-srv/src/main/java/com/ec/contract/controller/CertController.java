@@ -32,7 +32,7 @@ public class CertController {
                                   @RequestParam(name = "file") MultipartFile file,
                                   @RequestParam(name = "list_email", required = false) String[] emails,
                                   @RequestParam(name = "password") String password,
-                                  @RequestParam(name = "status") String status) {
+                                  @RequestParam(name = "status") Integer status) {
         try {
             String[] fileNameSplit = file.getOriginalFilename().split("\\.");
             if (!(fileNameSplit[fileNameSplit.length - 1].equals("p12"))) {
@@ -57,7 +57,7 @@ public class CertController {
     @Operation(summary = "Cập nhật thông tin user từ chứng thư số", description = "Cập nhật thông tin user từ chứng thư số")
     public Response<?> addUserFromCert(Authentication authentication,
                                        @RequestParam(name = "certificateId") Integer certificateId,
-                                       @RequestParam(name = "status") String status,
+                                       @RequestParam(name = "status") Integer status,
                                        @RequestParam(name = "list_email", required = false) String[] emails) {
 
         var result = certService.updateUserFromCert(certificateId, emails, status, authentication);
@@ -94,7 +94,7 @@ public class CertController {
     public Response<?> findAllCert(Authentication authentication,
                                    @RequestParam(name = "subject", defaultValue = "", required = false) String subject,
                                    @RequestParam(name = "serial_number", defaultValue = "", required = false) String serial_number,
-                                   @RequestParam(name = "status", defaultValue = "", required = false) String status,
+                                   @RequestParam(name = "status", defaultValue = "1", required = false) Integer status,
                                    @RequestParam(name = "size", defaultValue = "10") int size,
                                    @RequestParam(name = "page", defaultValue = "0") int page) {
 

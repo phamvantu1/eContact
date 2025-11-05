@@ -23,7 +23,7 @@ public class Certificate implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private String status;
+    private Integer status;
 
     private Integer orgAdminCreate;
 
