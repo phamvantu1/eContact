@@ -3,9 +3,7 @@ package com.ec.contract.service;
 import com.ec.contract.constant.ContractStatus;
 import com.ec.contract.constant.RecipientRole;
 import com.ec.contract.mapper.ContractMapper;
-import com.ec.contract.model.dto.BpmnFlowRes;
-import com.ec.contract.model.dto.BpmnRecipientDto;
-import com.ec.contract.model.dto.ParticipantDTO;
+import com.ec.contract.model.dto.*;
 import com.ec.contract.model.dto.request.ContractRequestDTO;
 import com.ec.contract.model.dto.request.FilterContractDTO;
 import com.ec.contract.model.dto.response.ContractResponseDTO;
@@ -21,10 +19,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -45,6 +46,7 @@ public class ContractService {
     private final ParticipantService participantService;
     private final FieldRepository fieldRepository;
     private final DocumentRepository documentRepository;
+    private final DocumentService documentService;
 
     public Map<String, String> checkCodeUnique(String code) {
         try {
@@ -162,40 +164,51 @@ public class ContractService {
         }
     }
 
-    public ContractResponseDTO changeContractStatus(Integer contractId, Integer status) {
+    public ContractResponseDTO changeContractStatus(Integer contractId, Integer status, Optional<ContractChangeStatusRequest> request) {
         try {
-            Contract contract = contractRepository.findById(contractId)
-                    .orElseThrow(() -> new CustomException(ResponseCode.CONTRACT_NOT_FOUND));
 
-            contract.setStatus(status);
+            log.info("contractId chuyển trạng thái {} , trạng thái muốn chuyển {} ", contractId, status);
 
-            var result = contractRepository.save(contract);
+            log.info("request {}", request.orElse(null));
 
-            List<Participant> listParticipants = participantRepository.findByContractIdOrderByOrderingAsc(contractId)
-                    .stream().toList();
+            final var contract = changeStatus(
+                    contractId, status, request.orElse(null)
+            );
 
-            for (Participant participant : listParticipants) {
-                Set<Recipient> recipientSet = participant.getRecipients();
+            if (contract.isPresent()) {
+                final var contractStatusOptional = Arrays.stream(ContractStatus.values())
+                        .filter(contractStatus -> contractStatus.getDbVal().equals(status))
+                        .findFirst();
 
-                for (Recipient recipient : recipientSet) {
-                    Collection<Field> fieldCollection = fieldRepository.findAllByRecipientId(recipient.getId());
-                    recipient.setFields(Set.copyOf(fieldCollection));
+                if (contractStatusOptional.isPresent()) {
+                    WorkFlowDTO workFlowDto;
+                    switch (contractStatusOptional.get()) {
+
+                        case CREATED: // trường hợp chuyển từ trạng thái hợp đồng nháp sang tạo hợp đồng
+                            try {
+                                issue(modelMapper.map(contractOptional.get(), ContractDto.class));
+                            } catch (Exception e) {
+                                return ResponseEntity.internalServerError().build();
+                            }
+                            break;
+                        case CANCEL:
+                            ContractGlobalKey.contractNoList.remove(String.format("%s-%s", contract.getContractNo(), contract.getOrganizationId()));
+                            workFlowDto = WorkflowDto
+                                    .builder()
+                                    .contractId(id)
+                                    .approveType(3)
+                                    .recipientId(0)
+                                    .participantId(0)
+                                    .build();
+                            // Khởi tạo luồng huỷ HĐ
+                            bpmService.startWorkflow(workFlowDto);
+                            break;
+                    }
                 }
-
-                participant.setRecipients(recipientSet);
             }
 
-            contract.setParticipants(Set.copyOf(listParticipants));
-
-            List<ContractRef> contractRefList = contractRefRepository.findByContractId(contractId);
-
-            contract.setContractRefs(Set.copyOf(contractRefList));
-
-            var contractResponseDTO = contractMapper.toDto(contract);
-
-            participantService.sortRecipient(contractResponseDTO.getParticipants());
-
-            return contractResponseDTO;
+            return contractOptional.map(ResponseEntity::ok)
+                    .orElseGet(() -> ResponseEntity.badRequest().build());
 
         } catch (CustomException ex) {
             throw ex;
@@ -203,6 +216,75 @@ public class ContractService {
             throw new RuntimeException("Failed to change contract status", e);
         }
     }
+
+    private void issue(ContractResponseDTO contractDto) {
+
+        int contractId = contractDto.getId();
+        int orgId = contractDto.getOrganizationId();
+
+        //  gan contract_no
+        //processService.byPassContractNo(contractDto);
+
+        var workflowDto = WorkFlowDTO
+                .builder()
+                .contractId(contractId)
+                .approveType(0)
+                .recipientId(0)
+                .participantId(0)
+                .build();
+
+        // Khởi tạo luồng xử lý HĐ
+        var messageDtoOptional = bpmService.startWorkflow(workflowDto);
+
+        // Cập nhật trạng thái HĐ thành PROCESSING
+        if (messageDtoOptional.isPresent() && messageDtoOptional.get().isSuccess()) {
+            //log.info("update status");
+            contractService.changeStatus(contractId, ContractStatus.PROCESSING.getDbVal(), null);
+        }
+
+//        /* Save history file contract */
+//        try {
+//            documentService.saveDocumentHistoryByContractId(contractId);
+//        } catch (Exception e) {
+//            log.error("Can't save history file contract: {0}", e);
+//        }
+    }
+
+
+    public Optional<ContractResponseDTO> changeStatus(Integer id, Integer status, ContractChangeStatusRequest request) {
+        log.info("[changeStatus] id: {}, status: {}", id, status);
+
+        final var contractStatusOptional =
+                Arrays.stream(ContractStatus.values()).filter(cs -> Objects.equals(cs.getDbVal(), status)).findFirst();
+
+        if (contractStatusOptional.isPresent()) {
+            final var contractOptional = contractRepository.findById(id);
+
+            if (contractOptional.isPresent()) {
+
+                var contract = contractOptional.get();
+
+                contract.setStatus(status);
+
+                if (request != null && StringUtils.hasText(request.getReason())) {
+                    contract.setReasonReject(request.getReason());
+                    contract.setCancelDate(LocalDateTime.now());
+                }
+
+                contract = contractRepository.save(contract);
+
+                final var contractDto = modelMapper.map(
+                        contract,
+                        ContractResponseDTO.class
+                );
+
+                return Optional.of(contractDto);
+            }
+        }
+
+        return Optional.empty();
+    }
+
 
     public Page<ContractResponseDTO> getMyContracts(Authentication authentication,
                                                     FilterContractDTO filterContractDTO) {

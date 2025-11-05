@@ -1,14 +1,18 @@
 package com.ec.contract.controller;
 
+import com.ec.contract.model.dto.ContractChangeStatusRequest;
 import com.ec.contract.model.dto.request.ContractRequestDTO;
 import com.ec.contract.model.dto.request.FilterContractDTO;
 import com.ec.contract.service.ContractService;
 import com.ec.library.response.Response;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("")
@@ -38,11 +42,12 @@ public class ContractController {
         return Response.success(contractService.getContractById(contractId));
     }
 
-    @PutMapping("/change-status/{contractId}")
+    @PutMapping("{contractId}/change-status/{new-status}")
     @Operation(summary = "Thay đổi trạng thái hợp đồng", description = "Cập nhật trạng thái của một hợp đồng dựa trên ID hợp đồng và trạng thái mới.")
     public Response<?> changeContractStatus(@PathVariable(name = "contractId") Integer contractId,
-                                            @RequestParam(name = "status") Integer status) {
-        return Response.success(contractService.changeContractStatus(contractId, status));
+                                            @PathVariable(name = "new-status") Integer status,
+                                            @RequestBody @Valid Optional<ContractChangeStatusRequest> request) {
+        return Response.success(contractService.changeContractStatus(contractId, status, request));
     }
 
     @GetMapping("/my-contracts")

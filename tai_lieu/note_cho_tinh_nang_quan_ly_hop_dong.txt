@@ -49,3 +49,18 @@ II luồng view
 + ủy quyền / chuyển tiếp
 + Tạo tài liệu giữ luồng ký ( làm sau )
 + sao chép (chưa hoàn thành ) ( api clone hợp đồng thì sẽ lưu và trả ra 1 hợp đồng mới, gọi api chi tiết hợp đồng mới, tài liệu của hợp đồng mới, fields của hợp đồng mới )
+
+
+
+issue trong change-status
+//  gan contract_no
+        //processService.byPassContractNo(contractDto);
+        ============================
+//        /* Save history file contract */
+//        try {
+//            documentService.saveDocumentHistoryByContractId(contractId);
+//        } catch (Exception e) {
+//            log.error("Can't save history file contract: {0}", e);
+//        }
+
+

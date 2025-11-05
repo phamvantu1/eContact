@@ -39,6 +39,8 @@ public class ContractResponseDTO {
 
     private String reasonReject; // ly do tu choi hop dong
 
+    private LocalDateTime cancelDate;
+
     private LocalDateTime contractExpireTime; // ngay het han hop dong
 
     private Set<ContractRefResponseDTO> contractRefs;

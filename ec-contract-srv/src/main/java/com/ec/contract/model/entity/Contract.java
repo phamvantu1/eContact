@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Set;
 
 @Entity
@@ -41,6 +42,8 @@ public class Contract extends BaseEntity {
     private Integer organizationId; // to chuc
 
     private String reasonReject; // ly do tu choi hop dong
+
+    private LocalDateTime cancelDate;
 
     private Integer templateContractId;
 
