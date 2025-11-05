@@ -29,7 +29,7 @@ public class CertificateCustomer implements Serializable {
 
     private String phone;
 
-    private int OrganizationId;
+    private int organizationId;
 
     @OnDelete(action = OnDeleteAction.CASCADE)
     @ManyToMany(mappedBy = "certificateCustomers",fetch = FetchType.LAZY)

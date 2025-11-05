@@ -37,7 +37,7 @@ public enum ResponseCode {
 
     // organization
     ORGANIZATION_NOT_FOUND("ERR_404", "Không tìm thấy tổ chức", HttpStatus.NOT_FOUND),
-
+    EMAIL_NOT_IN_YOUR_ORGANIZATION("ERR_400", "Email không thuộc tổ chức của bạn", HttpStatus.BAD_REQUEST),
 
     // role
     ROLE_ALREADY_EXISTS("ERR_409", "Vai trò đã tồn tại", HttpStatus.CONFLICT),
@@ -75,6 +75,18 @@ public enum ResponseCode {
 
     // type
     TYPE_NOT_FOUND("ERR_404", "Không tìm thấy loại hợp đồng", HttpStatus.NOT_FOUND),
+
+
+    // cert
+    CREATE_CERT_FAILED("ERR_500", "Tạo chứng thư số thất bại", HttpStatus.INTERNAL_SERVER_ERROR),
+    CERT_IN_YOUR_ORGANIZATION("ERR_400", "Chứng thư số đã thuộc tổ chức của bạn", HttpStatus.BAD_REQUEST),
+    CERT_REQUIRE_SUB("ERR_400", "file chứng thư số yêu cầu phải có duy nhất 1 thông tin chủ thể", HttpStatus.BAD_REQUEST),
+    USER_DONT_EXIST("ERR_404", "Dữ liệu người dùng trong chứng thư số không tồn tại", HttpStatus.NOT_FOUND),
+    CERT_NOT_FOUND("ERR_404", "Không tìm thấy chứng thư số", HttpStatus.NOT_FOUND),
+
+
+
+
 
 
 
