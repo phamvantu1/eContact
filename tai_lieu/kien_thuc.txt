@@ -15,3 +15,41 @@ Name: tên người ký.
 M / Filter / SubFilter: thông tin kiểu chữ ký, thuật toán hash, timestamp.
 
 Tóm lại: PDFBox không “tự động xác minh chữ ký”, nó chỉ đọc cấu trúc chữ ký trong PDF.
+
+
+
+
+Chữ ký số trong PDF sẽ chứa các thông tin quan trọng sau:
+
+Khóa công khai (Public Key): Dùng để xác thực chữ ký. Khi một người khác mở tài liệu, họ sẽ sử dụng khóa công khai này để kiểm tra chữ ký số.
+
+Chữ ký (Signature): Đây là chữ ký số thực tế, được mã hóa từ nội dung của tài liệu PDF và khóa bí mật của người ký. Nó đảm bảo rằng tài liệu không bị thay đổi sau khi ký.
+
+Dấu thời gian (Timestamp): Thông tin về thời gian ký, giúp xác định liệu chữ ký có hợp lệ tại thời điểm ký hay không.
+
+Thông tin người ký: Các thông tin về người ký, chẳng hạn như tên, địa chỉ email, và thông tin về chứng thư số.
+
+Các thông tin khác: Bao gồm thông tin về tổ chức cấp chứng thư số (Certificate Authority), các thông số kỹ thuật liên quan đến thuật toán ký số (như thuật toán mã hóa sử dụng), v.v.
+
+
+
+
+Một tệp PDF đã ký sẽ có cấu trúc như sau:
+
+Phần metadata (siêu dữ liệu): Đây là phần chứa các thông tin chung về tài liệu, bao gồm ngày giờ tạo, thông tin về người tạo tài liệu.
+
+Phần nội dung (content): Đây là phần chứa nội dung văn bản và hình ảnh của tài liệu.
+
+Phần chữ ký số (signature field): Phần này là nơi chứa chữ ký số, được lưu dưới dạng một đối tượng trong tệp PDF. Đối tượng này có các trường dữ liệu mô tả về chữ ký (ví dụ: ID của chứng thư số, chữ ký đã mã hóa, khóa công khai, thông tin về thời gian ký, v.v.).
+
+
+
+
+
+🛠️ 3. Cơ chế đảm bảo tính toàn vẹn trong PDF là gì?
+
+PDF hỗ trợ Incremental Update (cập nhật theo kiểu bổ sung):
+
+Mỗi lần ký số = thêm một lớp dữ liệu mới vào file PDF
+
+Không sửa dữ liệu cũ → Các chữ ký cũ vẫn tham chiếu được nội dung chính xác như lúc chúng ký
