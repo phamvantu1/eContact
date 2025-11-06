@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -278,6 +279,21 @@ public class CustomerService {
 
         }catch (Exception e){
             throw new RuntimeException("Có lỗi trong quá trình lấy người dùng theo tổ chức  : " + e.getMessage());
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public CustomerResponseDTO getCustomerByToken(Authentication authentication){
+        try{
+            String email = authentication.getName();
+            Customer customer = customerRepository.findByEmail(email)
+                    .orElseThrow(() -> new CustomException(ResponseCode.CUSTOMER_NOT_FOUND));
+
+            return customerMapper.toResponseDTO(customer);
+        }catch (CustomException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Có lỗi trong quá trình lấy thông tin người dùng từ token  : " + e.getMessage());
         }
     }
 }
