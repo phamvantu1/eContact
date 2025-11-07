@@ -26,7 +26,7 @@ public class DocumentController {
     private final DocumentService documentService;
 
     @Operation(summary = "Kiểm tra số lượng trang tải lên", description = "Kiểm tra số lượng trang của tài liệu PDF được tải lên.")
-    @GetMapping("/get-page-size")
+    @PostMapping("/get-page-size")
     public ResponseEntity<Response<?>> getPageSize(@RequestParam(name = "file") MultipartFile file) {
         return ResponseEntity.ok(
                 Response.success(documentService.getSizePage(file))
