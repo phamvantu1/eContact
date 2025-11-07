@@ -34,7 +34,7 @@ public class DocumentController {
     }
 
     @Operation(summary = "Kiểm tra chữ ký số trong tài liệu", description = "Kiểm tra xem tài liệu PDF có chữ ký số hay không. Nếu có  chữ ký số, trả về true; ngược lại trả về false.")
-    @GetMapping("/check-signature")
+    @PostMapping("/check-signature")
     public ResponseEntity<Response<?>> checkSignature(@RequestParam(name = "file") MultipartFile file) {
 
         var result = documentService.checkSignature(file);
