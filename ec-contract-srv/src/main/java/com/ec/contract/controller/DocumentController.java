@@ -26,7 +26,7 @@ public class DocumentController {
     private final DocumentService documentService;
 
     @Operation(summary = "Kiểm tra số lượng trang tải lên", description = "Kiểm tra số lượng trang của tài liệu PDF được tải lên.")
-    @GetMapping("/get-page-size")
+    @PostMapping("/get-page-size")
     public ResponseEntity<Response<?>> getPageSize(@RequestParam(name = "file") MultipartFile file) {
         return ResponseEntity.ok(
                 Response.success(documentService.getSizePage(file))
@@ -34,7 +34,7 @@ public class DocumentController {
     }
 
     @Operation(summary = "Kiểm tra chữ ký số trong tài liệu", description = "Kiểm tra xem tài liệu PDF có chữ ký số hay không. Nếu có  chữ ký số, trả về true; ngược lại trả về false.")
-    @GetMapping("/check-signature")
+    @PostMapping("/check-signature")
     public ResponseEntity<Response<?>> checkSignature(@RequestParam(name = "file") MultipartFile file) {
 
         var result = documentService.checkSignature(file);

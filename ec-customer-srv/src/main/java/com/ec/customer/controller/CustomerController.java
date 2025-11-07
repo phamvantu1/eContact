@@ -7,6 +7,7 @@ import com.ec.library.response.Response;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -88,6 +89,12 @@ public class CustomerController {
     @Operation(summary = "Lấy danh sách user theo tổ chức")
     public ResponseEntity<?> getCustomerByOrganization(@RequestParam(name = "organizationId") Integer organizationId){
         return ResponseEntity.ok(customerService.getCustomerByOrganization(organizationId));
+    }
+
+    @GetMapping("/get-customer-by-token")
+    @Operation(summary = "Lấy thông tin user từ token")
+    public Response<?> getCustomerByToken(Authentication authentication){
+        return Response.success(customerService.getCustomerByToken(authentication));
     }
 
 

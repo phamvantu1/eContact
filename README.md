@@ -58,3 +58,14 @@
   (1, 'Xem danh sach hop dong'),
   (2, 'Tao danh sach hop dong'),
   (3, 'Xem lich su hop dong')
+
+10.  trinh duyet web minio ( local )
+    - url : http://localhost:9001
+    - username : minioadmin
+    - pass : minioadmin
+
+11. rabbitmq
+    - url : http://localhost:15672
+    - username : 
+    - passs : admin
+    - guest
