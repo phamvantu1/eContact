@@ -28,8 +28,9 @@ eureka:
     service-url:
       defaultZone: http://localhost:8761/eureka/
   instance:
-    prefer-ip-address: true
-    hostname: localhost
+    prefer-ip-address: true          # 👉 Đăng ký bằng IP thay vì hostname
+    hostname: localhost              # 👉 Ghi rõ để tránh lỗi DNS
+    instance-id: ${spring.application.name}:${server.port}   # Dễ phân biệt trong dashboard
 
 application:
   security:
