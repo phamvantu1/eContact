@@ -62,7 +62,7 @@
 10.  trinh duyet web minio ( local )
     - url : http://localhost:9001
     - username : minioadmin
-    - passs : minioadmin
+    - pass : minioadmin
 
 11. rabbitmq
     - url : http://localhost:15672
