@@ -45,14 +45,14 @@ public class ContractController {
         return Response.success(contractService.changeContractStatus(contractId, status));
     }
 
-    @GetMapping("/my-contracts")
+    @PostMapping("/my-contracts")
     @Operation(summary = "Danh sách hợp đồng mình đã tạo", description = "Danh sách hợp đồng mình đã tạo")
     public Response<?> getMyContracts(Authentication authentication,
                                       @RequestBody FilterContractDTO filterContractDTO) {
         return Response.success(contractService.getMyContracts(authentication, filterContractDTO));
     }
 
-    @GetMapping("/my-process")
+    @PostMapping("/my-process")
     @Operation(summary = "Danh sách hợp đồng mình tham gia xử lý",
             description = "Danh sách hợp đồng mình tham gia xử lý, status 1 thì là chờ xử lý, 2 là đã xử lý")
     public Response<?> getMyProcessContracts(Authentication authentication,
@@ -60,7 +60,7 @@ public class ContractController {
         return Response.success(contractService.getMyProcessContracts(authentication, filterContractDTO));
     }
 
-    @GetMapping("/contract-by-organization")
+    @PostMapping("/contract-by-organization")
     @Operation(summary = "Danh sách hợp đồng theo tổ chức", description = "Danh sách hợp đồng theo tổ chức")
     public Response<?> getContractsByOrganization(@RequestBody FilterContractDTO filterContractDTO) {
         return Response.success(contractService.getContractsByOrganization(filterContractDTO));
