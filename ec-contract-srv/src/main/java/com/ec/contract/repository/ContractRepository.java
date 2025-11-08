@@ -15,12 +15,12 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
 
     @Query(value = "SELECT * FROM contracts c " +
             "WHERE c.status = :status " +
-            "AND (:textSearch IS NULL OR c.contract_no ILIKE '%' || :textSearch || '%' OR c.name ILIKE '%' || :textSearch || '%') " +
+            "and (c.contract_no ILIKE CONCAT('%', :textSearch, '%') OR c.name ILIKE CONCAT('%', :textSearch, '%')) " +
             "AND (:organizationId IS NULL OR c.organization_id = :organizationId ) " +
             "ORDER BY c.created_at DESC",
             countQuery = "SELECT count(*) FROM contracts c " +
                     "WHERE c.status = :status " +
-                    "AND (:textSearch IS NULL OR c.contract_no ILIKE '%' || :textSearch || '%' OR c.name ILIKE '%' || :textSearch || '%') " +
+                    "and (c.contract_no ILIKE CONCAT('%', :textSearch, '%') OR c.name ILIKE CONCAT('%', :textSearch, '%')) " +
                     "AND (:organizationId IS NULL OR c.organization_id = :organizationId )",
             nativeQuery = true)
     Page<Contract> findByStatus(
@@ -34,14 +34,14 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
     @Query(value = "SELECT * FROM contracts c " +
             "WHERE c.created_by = :customerId " +
             "AND c.status = :status " +
-            "AND (:textSearch IS NULL OR c.contract_no ILIKE %:textSearch% OR c.name ILIKE %:textSearch%) " +
+            "and (c.contract_no ILIKE CONCAT('%', :textSearch, '%') OR c.name ILIKE CONCAT('%', :textSearch, '%')) " +
             "AND (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
             "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) " +
             "ORDER BY c.created_at DESC",
             countQuery = "SELECT count(*) FROM contracts c " +
                     "WHERE c.created_by = :customerId " +
                     "AND c.status = :status " +
-                    "AND (:textSearch IS NULL OR c.contract_no ILIKE %:textSearch% OR c.name ILIKE %:textSearch%) " +
+                    "and (c.contract_no ILIKE CONCAT('%', :textSearch, '%') OR c.name ILIKE CONCAT('%', :textSearch, '%')) " +
                     "AND (:fromDate IS NULL  OR c.created_at >= CAST(:fromDate AS timestamp)) " +
                     "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp))",
             nativeQuery = true)
@@ -57,7 +57,7 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
             "JOIN recipients r ON r.participant_id = p.id " +
             "Where r.email = :email " +
             "AND r.status IN (:listStatus) " +
-            "AND (:textSearch IS NULL OR c.contract_no ILIKE %:textSearch% OR c.name ILIKE %:textSearch%) " +
+            "and (c.contract_no ILIKE CONCAT('%', :textSearch, '%') OR c.name ILIKE CONCAT('%', :textSearch, '%')) " +
             "AND (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
             "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) " +
             "ORDER BY c.created_at DESC",
@@ -66,7 +66,7 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
                     "JOIN recipients r ON r.participant_id = p.id " +
                     "Where r.email = :email " +
                     "AND r.status IN (:listStatus) " +
-                    "AND (:textSearch IS NULL OR c.contract_no ILIKE %:textSearch% OR c.name ILIKE %:textSearch%) " +
+                    "and (c.contract_no ILIKE CONCAT('%', :textSearch, '%') OR c.name ILIKE CONCAT('%', :textSearch, '%')) " +
                     "AND (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
                     "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp))"
             , nativeQuery = true)
@@ -81,14 +81,14 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
     @Query(value = "SELECT * FROM contracts c " +
             "WHERE c.created_by in (:listCustomerIds) " +
             "AND c.status = :status " +
-            "AND (:textSearch IS NULL OR c.contract_no ILIKE %:textSearch% OR c.name ILIKE %:textSearch%) " +
+            "and (c.contract_no ILIKE CONCAT('%', :textSearch, '%') OR c.name ILIKE CONCAT('%', :textSearch, '%')) " +
             "AND (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
             "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) " +
             "ORDER BY c.created_at DESC",
             countQuery = "SELECT count(*) FROM contracts c " +
                     "WHERE c.created_by = :customerId " +
                     "AND c.status = :status " +
-                    "AND (:textSearch IS NULL OR c.contract_no ILIKE %:textSearch% OR c.name ILIKE %:textSearch%) " +
+                    "and (c.contract_no ILIKE CONCAT('%', :textSearch, '%') OR c.name ILIKE CONCAT('%', :textSearch, '%')) " +
                     "AND (:fromDate IS NULL  OR c.created_at >= CAST(:fromDate AS timestamp)) " +
                     "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp))",
             nativeQuery = true)
