@@ -59,6 +59,7 @@ public enum ResponseCode {
     // contract
     CONTRACT_NOT_FOUND("ERR_404", "Không tìm thấy hợp đồng", HttpStatus.NOT_FOUND),
     CONTRACT_NO_SIGNED("ERR_400", "Hợp đồng chưa được ký", HttpStatus.BAD_REQUEST),
+    FAIL_CHANGE_CONTRACT_STATUS("ERR_500", "Thay đổi trạng thái hợp đồng thất bại", HttpStatus.INTERNAL_SERVER_ERROR),
 
 
     // recipient

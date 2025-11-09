@@ -57,4 +57,10 @@ public class OrganizationController {
         return organizationService.getOrganizationByCustomerEmail(customerEmail);
     }
 
+    @GetMapping("/internal/get-by-id")
+    @Operation(summary = "Lấy thông tin tổ chức theo id",description = "Lấy thông tin tổ chức theo id(dùng cho nội bộ service)")
+    public OrganizationResponseDTO getOrganizationById(@RequestParam("organizationId") Integer organizationId){
+        return organizationService.getOrganizationByIdInternal(organizationId);
+    }
+
 }

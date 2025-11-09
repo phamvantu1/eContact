@@ -149,4 +149,25 @@ public class OrganizationService {
             throw new RuntimeException("Có lỗi trong quá trình tìm kiếm tổ chức theo khách hàng: " + e.getMessage());
         }
     }
+
+    @Transactional(readOnly = true)
+    public OrganizationResponseDTO getOrganizationByIdInternal(Integer organizationId) {
+        try {
+
+            log.info("Tìm tổ chức cho id: {}", organizationId);
+
+            Customer customer = customerRepository.findById(organizationId).orElse(null);
+
+            if (customer == null) return null;
+
+            Organization organization = organizationRepository.findById(customer.getOrganization().getId()).orElse(null);
+
+            if (organization == null) return null;
+
+            return organizationMapper.toDTO(organization);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Có lỗi trong quá trình tìm kiếm tổ chức theo id : " + e.getMessage());
+        }
+    }
 }

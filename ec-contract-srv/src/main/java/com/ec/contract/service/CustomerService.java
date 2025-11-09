@@ -215,5 +215,24 @@ public class CustomerService {
         return null;
     }
 
+    public OrganizationDTO getOrganizationById(Integer organizationId) {
+        try {
+
+            String url = ServiceEndpoints.CUSTOMER_API + "/organizations/internal/get-by-id?organizationId=" + organizationId;
+
+            log.info("Calling Organization Service at URL: {}", url);
+
+            ResponseEntity<OrganizationDTO> response =
+                    restTemplate.getForEntity(url, OrganizationDTO.class);
+
+            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+                return response.getBody();
+            }
+        } catch (Exception e) {
+            log.error("Error calling Organization Service for customerEmail={}", organizationId, e);
+        }
+        return null;
+    }
+
 
 }

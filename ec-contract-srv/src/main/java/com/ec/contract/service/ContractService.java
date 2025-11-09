@@ -47,6 +47,7 @@ public class ContractService {
     private final FieldRepository fieldRepository;
     private final DocumentRepository documentRepository;
     private final DocumentService documentService;
+    private final BpmnService bpmnService;
 
     public Map<String, String> checkCodeUnique(String code) {
         try {
@@ -181,34 +182,25 @@ public class ContractService {
                         .findFirst();
 
                 if (contractStatusOptional.isPresent()) {
-                    WorkFlowDTO workFlowDto;
                     switch (contractStatusOptional.get()) {
-
                         case CREATED: // trường hợp chuyển từ trạng thái hợp đồng nháp sang tạo hợp đồng
+                            log.info("bat dau chuyen trang thai tao hop dong: {}", contractStatusOptional.get());
                             try {
-                                issue(modelMapper.map(contractOptional.get(), ContractDto.class));
+                                issue(contract.get());
                             } catch (Exception e) {
-                                return ResponseEntity.internalServerError().build();
+                                throw new CustomException(ResponseCode.FAIL_CHANGE_CONTRACT_STATUS);
                             }
                             break;
                         case CANCEL:
-                            ContractGlobalKey.contractNoList.remove(String.format("%s-%s", contract.getContractNo(), contract.getOrganizationId()));
-                            workFlowDto = WorkflowDto
-                                    .builder()
-                                    .contractId(id)
-                                    .approveType(3)
-                                    .recipientId(0)
-                                    .participantId(0)
-                                    .build();
+                            log.info("bat dau chuyen trang thai huy hop dong: {}", contractStatusOptional.get());
                             // Khởi tạo luồng huỷ HĐ
-                            bpmService.startWorkflow(workFlowDto);
+                            bpmnService.cancelContract(contract.get());
                             break;
                     }
                 }
             }
 
-            return contractOptional.map(ResponseEntity::ok)
-                    .orElseGet(() -> ResponseEntity.badRequest().build());
+            return contract.get();
 
         } catch (CustomException ex) {
             throw ex;
@@ -219,46 +211,31 @@ public class ContractService {
 
     private void issue(ContractResponseDTO contractDto) {
 
-        int contractId = contractDto.getId();
-        int orgId = contractDto.getOrganizationId();
+        try {
+            int contractId = contractDto.getId();
 
-        //  gan contract_no
-        //processService.byPassContractNo(contractDto);
+            // Khởi tạo luồng xử lý HĐ
+            bpmnService.startContract(contractDto);
 
-        var workflowDto = WorkFlowDTO
-                .builder()
-                .contractId(contractId)
-                .approveType(0)
-                .recipientId(0)
-                .participantId(0)
-                .build();
+            // Cập nhật trạng thái HĐ thành PROCESSING
 
-        // Khởi tạo luồng xử lý HĐ
-        var messageDtoOptional = bpmService.startWorkflow(workflowDto);
+            changeStatus(contractId, ContractStatus.PROCESSING.getDbVal(), null);
 
-        // Cập nhật trạng thái HĐ thành PROCESSING
-        if (messageDtoOptional.isPresent() && messageDtoOptional.get().isSuccess()) {
-            //log.info("update status");
-            contractService.changeStatus(contractId, ContractStatus.PROCESSING.getDbVal(), null);
+        } catch (Exception e) {
+            log.error("Failed to issue contract: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to issue contract", e);
         }
-
-//        /* Save history file contract */
-//        try {
-//            documentService.saveDocumentHistoryByContractId(contractId);
-//        } catch (Exception e) {
-//            log.error("Can't save history file contract: {0}", e);
-//        }
     }
 
 
-    public Optional<ContractResponseDTO> changeStatus(Integer id, Integer status, ContractChangeStatusRequest request) {
-        log.info("[changeStatus] id: {}, status: {}", id, status);
+    public Optional<ContractResponseDTO> changeStatus(Integer contractId, Integer status, ContractChangeStatusRequest request) {
+        log.info("[changeStatus] id: {}, status: {}", contractId, status);
 
         final var contractStatusOptional =
                 Arrays.stream(ContractStatus.values()).filter(cs -> Objects.equals(cs.getDbVal(), status)).findFirst();
 
         if (contractStatusOptional.isPresent()) {
-            final var contractOptional = contractRepository.findById(id);
+            final var contractOptional = contractRepository.findById(contractId);
 
             if (contractOptional.isPresent()) {
 
@@ -271,14 +248,27 @@ public class ContractService {
                     contract.setCancelDate(LocalDateTime.now());
                 }
 
+                List<Participant> listParticipants = participantRepository.findByContractIdOrderByOrderingAsc(contractId)
+                        .stream().toList();
+
+                for (Participant participant : listParticipants) {
+                    Set<Recipient> recipientSet = participant.getRecipients();
+
+                    for (Recipient recipient : recipientSet) {
+                        Collection<Field> fieldCollection = fieldRepository.findAllByRecipientId(recipient.getId());
+                        recipient.setFields(Set.copyOf(fieldCollection));
+                    }
+
+                    participant.setRecipients(recipientSet);
+                }
+
+                contract.setParticipants(Set.copyOf(listParticipants));
+
                 contract = contractRepository.save(contract);
 
-                final var contractDto = modelMapper.map(
-                        contract,
-                        ContractResponseDTO.class
-                );
+                var result = contractMapper.toDto(contract);
 
-                return Optional.of(contractDto);
+                return Optional.of(result);
             }
         }
 
