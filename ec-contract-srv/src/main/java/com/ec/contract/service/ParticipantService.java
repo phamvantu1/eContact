@@ -4,6 +4,7 @@ import com.ec.contract.mapper.ParticipantMapper;
 import com.ec.contract.model.dto.ParticipantDTO;
 import com.ec.contract.model.dto.RecipientDTO;
 import com.ec.contract.model.entity.Contract;
+import com.ec.contract.model.entity.Field;
 import com.ec.contract.model.entity.Participant;
 import com.ec.contract.model.entity.Recipient;
 import com.ec.contract.repository.ContractRepository;
@@ -141,6 +142,17 @@ public class ParticipantService {
             }
 
             final var participantList = participantRepository.saveAll(participantCollection);
+
+            for(Participant participant: participantList) {
+                Set<Recipient> recipientSet = participant.getRecipients();
+
+                for(Recipient recipient : recipientSet) {
+                    Collection<Field> fieldCollection = fieldRepository.findAllByRecipientId(recipient.getId());
+                    for(Field field : fieldCollection) {
+                        recipient.addField(field);
+                    }
+                }
+            }
 
             var result = participantMapper.toDtoList(participantList);
 

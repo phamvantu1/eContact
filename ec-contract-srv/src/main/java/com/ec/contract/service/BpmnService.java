@@ -9,6 +9,7 @@ import com.ec.contract.model.dto.response.ContractResponseDTO;
 import com.ec.contract.model.entity.Customer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -157,6 +158,64 @@ public class BpmnService {
         } catch (Exception e) {
             log.error("error", e);
 
+        }
+    }
+
+    public void handleCoordinatorService(final JobClient client, final ActivatedJob job) {
+        log.info(downLineTerminal + "--- Đi vào coordinator-contract ---" + downLineTerminal);
+        logging(job);
+
+        Map<String, Object> zeebeVariables = new HashMap<>();
+        String error = null;
+
+        try {
+            // get variables
+            int contractId = Integer.parseInt(job.getVariablesAsMap().get("contractId").toString());
+            int actionType = Integer.parseInt(job.getVariablesAsMap().get("actionType").toString());
+            int approveType = Integer.parseInt(job.getVariablesAsMap().get("approveType").toString());
+            int recipientId = Integer.parseInt(job.getVariablesAsMap().get("recipientId").toString());
+            int participantId = Integer.parseInt(job.getVariablesAsMap().get("participantId").toString());
+            String contractJson = job.getVariablesAsMap().get("contract").toString();
+
+            ContractDto contractDto = objectMapper.readValue(contractJson, ContractDto.class);
+
+            // dieu phoi?
+            if (actionType != RecipientRole.COORDINATOR.getDbVal().intValue())
+                return;
+
+            // check truong hop uy quyen neu cac ben ky khac co order < hon chua xu ly het thi dung lai
+            // Nguoi dang thuc hien
+            ParticipantDto currentParticipantDto = getCurrentParticipant(contractDto, recipientId);
+
+//            for (ParticipantDto participantDto : contractDto.getParticipants()) {
+//
+//                if (participantDto.getOrdering() < currentParticipantDto.getOrdering()) {
+//
+//                    List<RecipientDto> recipients = participantDto.getRecipients();
+//                    for (RecipientDto recipientDto : recipients) {
+//
+//                        // chua xu ly
+//                        if (recipientDto.getProcessAt() == null) {
+//
+//                            log.info("coordinator: recipient={},participant={} don't finish", recipientId);
+//                            return;
+//                        }
+//                    }
+//                }
+//            }
+
+            // xu ly nghiep vu
+            error = processCoordinatorContract(contractDto, contractId, actionType, approveType, participantId, recipientId);
+        } catch (Exception e) {
+            log.error("error", e);
+
+            error = ExceptionUtils.getFullStackTrace(e);
+        } finally {
+            if (error != null) {
+                zeebeVariables.put("error", error);
+            }
+
+            client.newCompleteCommand(job.getKey()).variables(zeebeVariables).send().join();
         }
     }
 

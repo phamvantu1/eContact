@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -67,5 +68,16 @@ public class Recipient extends BaseEntity {
     @JsonIgnore
     @JsonManagedReference
     private Set<Field> fields;
+
+    public void addField(Field field) {
+        if (field != null) {
+            if (fields == null) {
+                fields = new HashSet<>();
+            }
+
+            field.setRecipient(this);
+            fields.add(field);
+        }
+    }
 
 }
