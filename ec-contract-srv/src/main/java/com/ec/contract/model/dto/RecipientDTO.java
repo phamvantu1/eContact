@@ -50,6 +50,9 @@ public class RecipientDTO implements Serializable, Comparable<RecipientDTO> {
 
     private Set<FieldDto> fields;
 
+    @JsonIgnore
+    private ParticipantDTO participant;
+
     // dieu phoi -> xem xet -> ky -> van thu
     @Override
     public int compareTo(RecipientDTO other) {

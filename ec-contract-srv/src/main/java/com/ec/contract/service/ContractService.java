@@ -19,7 +19,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -511,6 +510,14 @@ public class ContractService {
             throw new RuntimeException("Failed to get BPMN flow by contract id", e);
         }
 
+    }
+
+    public void sortParallel(ContractResponseDTO contractDto, List<RecipientDTO> recipients) {
+        Collections.sort(recipients, Comparator
+                .<RecipientDTO>comparingInt(recipient -> recipient.getParticipant().getOrdering())
+                .thenComparingInt(RecipientDTO::getRole)
+                .thenComparingInt(RecipientDTO::getOrdering)
+        );
     }
 
 

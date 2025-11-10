@@ -167,6 +167,7 @@ public class BpmnService {
     public void handleCoordinatorService(ContractResponseDTO contractDto, Integer recipientId ) {
 
         try {
+            log.info("start handleCoordinatorService for contract: {}", contractDto.getId());
             // xu ly nghiep vu
             processCoordinatorContract(contractDto, recipientId);
         } catch (Exception e) {
@@ -176,10 +177,6 @@ public class BpmnService {
     }
 
     private void processCoordinatorContract(ContractResponseDTO contractDto,  int recipientId) {
-
-        // Lay thong tin customer tao HD
-        var customerDto = customerService.getCustomerById(contractDto.getCustomerId());
-        var organizationDto = customerService.getCustomerByOrganizationId(contractDto.getOrganizationId());
 
         // to chuc dang thuc hien
         var currentParticipant = getCurrentParticipant(contractDto, recipientId);
@@ -247,12 +244,14 @@ public class BpmnService {
         // check nguoi dieu phoi hop dong
         int minOrder = -1;
 
-        RecipientDTO recipientDto = null;
         var participants = contractDto.getParticipants();
+
         for (var participant : participants) {
+
             if (minOrder > -1 && participant.getOrdering() > minOrder) {
                 return;
             }
+
             //TODO phamtu thứ tự xử lý của các tổ chức
             if (participant.getOrdering() > currentParticipant.getOrdering()) {
                 for (var recipient : participant.getRecipients()) {
@@ -262,7 +261,6 @@ public class BpmnService {
                         recipientService.changeRecipientProcessing(recipient.getId());
 
                         minOrder = participant.getOrdering();
-                        recipientDto = recipient;
                     }
                 }
             }
@@ -274,58 +272,10 @@ public class BpmnService {
 
         // khong con nguoi dieu phoi nao chuyen luong xu ly ve to chuc co thu tu xu ly dau tien
         minOrder = contractDto.getParticipants().stream().findFirst().get().getOrdering();
+
         int minOrderingReviewer = 1;
         int minOrderingSigner = 1;
 
-        // kiểm tra tổ chức số thứ tự nhỏ nhất có tổ chức xử lý song song hay không
-        var participantsDefault = contractDto.getParticipants();
-
-        int minOrderingParticipant = participantsDefault.stream().map(ParticipantDTO::getOrdering).min(Integer::compareTo).orElse(minOrder);
-
-        var isOrganization = participantsDefault.stream().anyMatch(p -> p.getOrdering() == minOrderingParticipant && (Objects.equals(p.getType(), ParticipantType.MY_ORGANIZATION.getDbVal()) || Objects.equals(p.getType(), ParticipantType.ORGANIZATION.getDbVal())));
-
-        var participantDuplicate = isOrganization && participantsDefault.stream().filter(p -> p.getOrdering() == minOrderingParticipant).count() > 1;
-
-        if (participantDuplicate) {
-            participants = participantsDefault;
-            minOrder = minOrderingParticipant;
-            var recipientsNextProcess = participants.stream().filter(p -> p.getOrdering() == minOrderingParticipant).flatMap(p -> p.getRecipients().stream()).collect(Collectors.toList());
-            minOrderingReviewer = recipientsNextProcess.stream().filter(r -> Objects.equals(r.getRole(), RecipientRole.REVIEWER.getDbVal())).map(RecipientDTO::getOrdering).min(Integer::compareTo).orElse(minOrderingReviewer);
-            minOrderingSigner = recipientsNextProcess.stream().filter(r -> Objects.equals(r.getRole(), RecipientRole.SIGNER.getDbVal())).map(RecipientDTO::getOrdering).min(Integer::compareTo).orElse(minOrderingSigner);
-        }
-
-        var hasMyOrganization = participantsDefault.stream().anyMatch(p -> p.getOrdering() == minOrderingParticipant && Objects.equals(p.getType(), ParticipantType.MY_ORGANIZATION.getDbVal()));
-
-        var hasPartnerOrganization = participantsDefault.stream().anyMatch(p -> p.getOrdering() == minOrderingParticipant && Objects.equals(p.getType(), ParticipantType.ORGANIZATION.getDbVal()));
-
-        var hasPersonal = participantsDefault.stream().anyMatch(p -> p.getOrdering() == minOrderingParticipant && Objects.equals(p.getType(), ParticipantType.PERSONAL.getDbVal()));
-        // Kiểm tra điều kiện hợp lệ
-        var participantDuplicate2 = hasMyOrganization && hasPersonal;
-
-        if (participantDuplicate2) {
-            log.info("Xử lý khi các tổ chức và cá nhân có cùng số thứ tự");
-            participants = participantsDefault;
-            minOrder = minOrderingParticipant;
-            var recipientsNextProcess = participants.stream().filter(p -> p.getOrdering() == minOrderingParticipant).flatMap(p -> p.getRecipients().stream()).collect(Collectors.toList());
-            minOrderingReviewer = recipientsNextProcess.stream().filter(r -> Objects.equals(r.getRole(), RecipientRole.REVIEWER.getDbVal())).map(RecipientDTO::getOrdering).min(Integer::compareTo).orElse(minOrderingReviewer);
-            log.info("Xử lý khi các tổ chức và cá nhân có cùng số thứ tự minOrderingReviewer: "+ minOrderingReviewer);
-            minOrderingSigner = recipientsNextProcess.stream()
-                    .filter(Objects::nonNull) // Loại bỏ phần tử null
-//                    .filter(r -> Objects.equals(r.getRole(), RecipientRole.SIGNER.getDbVal())
-//                            && r.getParticipantId() != null // Kiểm tra participant không null
-//                            && r.getParticipantId().getType() == ParticipantType.PERSONAL.getDbVal())
-                    .map(r -> {
-                        Integer ordering = r.getOrdering();
-                        if (ordering == null) {
-                            throw new NullPointerException("Ordering value is null for recipient: " + r);
-                        }
-                        return ordering;
-                    })
-                    .min(Integer::compareTo)
-                    .orElse(minOrderingSigner);
-            log.info("Xử lý khi các tổ chức và cá nhân có cùng số thứ tự minOrderingSigner: "+ minOrderingSigner);
-
-        }
         boolean findReviewr = false;
         for (var participant : participants) {
             if (participant.getOrdering() > minOrder) {
@@ -340,7 +290,7 @@ public class BpmnService {
                     recipientService.changeRecipientProcessing(recipient.getId());
 
                     findReviewr = true;
-                    recipientDto = recipient;
+
                 }
             }
         }
@@ -351,6 +301,7 @@ public class BpmnService {
 
         // khong co nguoi xem xet chuyen den nguoi ky
         for (var participant : participants) {
+
             if (participant.getOrdering() > minOrder) {
                 break;
             }
@@ -413,6 +364,182 @@ public class BpmnService {
         }
 
         return null;
+    }
+
+    public void reviewContract(ContractResponseDTO contractDto, Integer recipientId) {
+
+        try {
+            log.info("Contract review : {}", contractDto);
+            // xu ly nghiep vu
+             processReviewContract(contractDto, recipientId);
+        } catch (Exception e) {
+            log.error("error", e);
+        }
+    }
+
+    private String processReviewContract(ContractResponseDTO contractDto, int recipientId) {
+
+        log.info("[processReviewContract][contract-{}] recipient-{}", contractDto.getId(), recipientId);
+
+        // Nguoi dang thuc hien
+        RecipientDTO currentRecipient = getCurrentRecipient(contractDto, recipientId);
+        ParticipantDTO currentParticipant = getCurrentParticipant(contractDto, recipientId);
+
+        try {
+
+            boolean find = false;
+
+            // true là hết rồi , false là còn xem xét
+            boolean reviewerIsProcessed = checkReviewerIsProcessed(contractDto, currentParticipant);
+
+            List<RecipientDTO> recipients = new ArrayList<>();
+
+            for (var participant : contractDto.getParticipants()) {
+                for (var recipient : participant.getRecipients()) {
+                    recipient.setParticipant(participant);
+                    recipients.add(recipient);
+                }
+            }
+            contractService.sortParallel(contractDto, recipients);
+
+            int prevOrder = -1;
+            RecipientDTO nextRecipientDto = null;
+
+            for (RecipientDTO recipientDto : recipients) {
+                // con nguoi xem xet cung thu tu voi nguoi xem xet trong cung to chuc chua xu ly thi dung
+                if (recipientDto.getId() != recipientId
+                        && recipientDto.getRole() == RecipientRole.REVIEWER.getDbVal()
+                        && recipientDto.getParticipant().equals(currentParticipant)
+                        && recipientDto.getOrdering() == currentRecipient.getOrdering()
+                        && recipientDto.getStatus() == 1
+                ) {
+                    log.info("recipient-{} haven't processed yet", recipientId);
+                    return null;
+                }
+
+                // TODO: check them truong hop gui thong tin nguoi xu ly cua doi tac tiep theo
+                if (find && recipientDto.getId() != recipientId && recipientDto.getStatus() == 0) {
+                    // la nguoi ky
+                    if (recipientDto.getRole() == RecipientRole.SIGNER.getDbVal().intValue()) {
+                        if (reviewerIsProcessed) {
+                            log.info("[processReviewContract][contract-{}] xong qua trinh xem xet chuyen ky",  contractDto.getId());
+                            reviewerToSigner(contractDto);
+                            return null;
+                        }
+                    } else if (recipientDto.getRole() == RecipientRole.REVIEWER.getDbVal() // chuyen den nguoi xem xet tiep cua cung to chuc
+                            && recipientDto.getParticipant().getId() == currentParticipant.getId()) {
+
+                        log.info("[processReviewContract][contract-{}] find other reviewer of participant-{} ",  contractDto.getId(), currentParticipant.getId());
+                        if (prevOrder != -1 && prevOrder != recipientDto.getOrdering()) {
+                            break;
+                        }
+
+                        recipientDto.setStatus(RecipientStatus.PROCESSING.getDbVal());
+                        recipientService.changeRecipientProcessing(recipientDto.getId());
+                    }
+                    prevOrder = recipientDto.getOrdering();
+                } else if (recipientDto.getId() == recipientId) {
+                    find = true;
+                }
+
+            } // end loop recipients
+
+            // TODO: Kiem tra da hoan thanh ky HD
+        } catch (Exception e) {
+
+            log.error("error", e);
+
+        } finally {
+            // dong y
+            checkFinish(contractDto);
+
+        }
+
+        return null;
+
+    }
+
+    /**
+     * Cap nhat trang thai cua tat ca Signer
+     *
+     * @param contractDto
+     */
+    private void reviewerToSigner(ContractResponseDTO contractDto) {
+
+        int minOrder = -1;
+        for (var participantDto : contractDto.getParticipants()) {
+            for (var recipientDto : participantDto.getRecipients()) {
+                if (recipientDto.getRole() == RecipientRole.SIGNER.getDbVal()
+                        && recipientDto.getOrdering() == 1
+                        && recipientDto.getStatus() == 0
+                ) {
+                    if (minOrder == -1 || participantDto.getOrdering() < minOrder) {
+                        minOrder = participantDto.getOrdering();
+                    }
+
+                    if (participantDto.getOrdering() == minOrder) {
+                        recipientDto.setStatus(RecipientStatus.PROCESSING.getDbVal());
+                        recipientService.changeRecipientProcessing(recipientDto.getId());
+                    }
+                }
+            }
+        }
+    }
+
+
+    /**
+     * Kiem tra co to chuc nao cung thu tu xu ly khong
+     *
+     * @param contractDto
+     * @param currentParticipant
+     * @return
+     */
+    protected boolean participantEqualOrder(ContractResponseDTO contractDto, ParticipantDTO currentParticipant) {
+
+        for (ParticipantDTO participantDto : contractDto.getParticipants()) {
+
+            // co to chuc khac co cung thu tu Ordering
+            if (participantDto.getOrdering() == currentParticipant.getOrdering() && participantDto.getId() != currentParticipant.getId()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Kiem tra tat ca nguoi review da xu ly hay chua
+     *
+     * @param contractDto
+     * @param currentParticipant
+     * @return
+     */
+    protected boolean checkReviewerIsProcessed(ContractResponseDTO contractDto, ParticipantDTO currentParticipant) {
+
+        // To chuc cua nguoi dang xu ly
+        for (RecipientDTO recipientDto : currentParticipant.getRecipients()) {
+
+            // Con bat ky recipient nao role < SIGN chua xu ly
+            if (recipientDto.getRole() < RecipientRole.SIGNER.getDbVal() && recipientDto.getProcessAt() == null) {
+                return false;
+            }
+        }
+
+        // Cac to chuc khac co cung thu tu xu ly
+        for (ParticipantDTO participantDto : contractDto.getParticipants()) {
+            if (Objects.equals(participantDto.getOrdering(), currentParticipant.getOrdering())) {
+
+                for (RecipientDTO recipientDto : participantDto.getRecipients()) {
+
+                    // Con bat ky recipient nao role < SIGN chua xu ly
+                    if (recipientDto.getRole() < RecipientRole.SIGNER.getDbVal() && recipientDto.getProcessAt() == null) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 
 }

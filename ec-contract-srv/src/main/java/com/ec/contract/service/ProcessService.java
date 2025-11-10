@@ -2,25 +2,35 @@ package com.ec.contract.service;
 
 import com.ec.contract.constant.RecipientRole;
 import com.ec.contract.constant.RecipientStatus;
+import com.ec.contract.mapper.ContractMapper;
 import com.ec.contract.model.dto.ParticipantDTO;
 import com.ec.contract.model.dto.RecipientDTO;
+import com.ec.contract.model.dto.response.ContractResponseDTO;
+import com.ec.contract.model.entity.Contract;
+import com.ec.contract.model.entity.Field;
+import com.ec.contract.model.entity.Participant;
 import com.ec.contract.model.entity.Recipient;
 import com.ec.contract.repository.ContractRepository;
 import com.ec.contract.repository.FieldRepository;
 import com.ec.contract.repository.ParticipantRepository;
 import com.ec.contract.repository.RecipientRepository;
+import com.ec.library.exception.CustomException;
+import com.ec.library.exception.ResponseCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +48,8 @@ public class ProcessService {
     private final ContractRepository contractRepository;
     private final ObjectMapper objectMapper;
     private final ContractService contractService;
+    private final BpmnService bpmnService;
+    private final ContractMapper contractMapper;
 
     @Transactional
     public Optional<ParticipantDTO> updateRecipientForCoordinator(Authentication authentication,
@@ -77,27 +89,67 @@ public class ProcessService {
                     recipient.setProcessAt(LocalDateTime.now());
                     recipientRepository.save(recipient);
 
-                    // call bpmn
-                    var workflowDto = WorkflowDto.builder()
-                            .contractId(participant.getContractId())
-                            .approveType(ContractApproveType.APPROVAL.getDbVal())
-                            .actionType(recipient.getRole().getDbVal())
-                            .participantId(updated.getId())
-                            .recipientId(recipient.getId())
-                            .build();
+                    Contract contract = contractRepository.findById(participant.getContractId())
+                            .orElseThrow(() -> new CustomException(ResponseCode.CONTRACT_NOT_FOUND));
 
-                    bpmService.startWorkflow(workflowDto);
+                    List<Participant> listParticipants = participantRepository.findByContractIdOrderByOrderingAsc(contract.getId())
+                            .stream().toList();
+
+                    for (Participant par : listParticipants) {
+                        Set<Recipient> recipientSet = par.getRecipients();
+
+                        for (Recipient reci : recipientSet) {
+                            Collection<Field> fieldCollection = fieldRepository.findAllByRecipientId(reci.getId());
+                            reci.setFields(Set.copyOf(fieldCollection));
+                        }
+
+                        par.setRecipients(recipientSet);
+                    }
+
+                    contract.setParticipants(Set.copyOf(listParticipants));
+
+                    ContractResponseDTO contractResponseDTO = contractMapper.toDto(contract);
+
+                    bpmnService.handleCoordinatorService(contractResponseDTO, recipientId);
                 }
 
                 return Optional.ofNullable(
-                        modelMapper.map(updated, ParticipantDto.class)
+                        modelMapper.map(updated, ParticipantDTO.class)
                 );
             }
-        } catch (Exception e) {
+        }catch (CustomException ce){
+            log.error("Error updateRecipientForCoordinator: {}", ce.getMessage());
+            throw ce;
+        }
+        catch (Exception e) {
+            log.error("Error catch updateRecipientForCoordinator: {}", e.getMessage());
             // TODO: handle exception
         }
 
         return Optional.empty();
+    }
+
+
+    @Transactional
+    public RecipientDTO approval(int recipientId) {
+
+        log.info("approval recipient: {} ", recipientId);
+
+        var recipient = recipientRepository.findById(recipientId);
+
+        if (recipient.isPresent()) {
+
+            try {
+
+                var recipientOptional = recipientService.approval(recipientId);
+
+                return recipientOptional.get();
+
+            } catch (Exception e) {
+                log.error("Đã có lỗi xảy ra trong quá trình xử lý hàm process approval", e);
+            }
+        }
+        return null;
     }
 
 }
