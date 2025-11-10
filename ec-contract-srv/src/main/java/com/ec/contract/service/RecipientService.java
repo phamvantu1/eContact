@@ -78,8 +78,7 @@ public class RecipientService {
      * @return Thông tin khách hàng đã được cập nhật thành công
      */
     @Transactional
-    public Optional<RecipientDTO> approval(
-            int recipientId) {
+    public Optional<RecipientDTO> approval(int recipientId) {
         var recipientOptional = recipientRepository.findById(recipientId);
 
         if (recipientOptional.isPresent()) {

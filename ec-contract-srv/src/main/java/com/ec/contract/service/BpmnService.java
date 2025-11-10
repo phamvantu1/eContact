@@ -1,7 +1,6 @@
 package com.ec.contract.service;
 
 import com.ec.contract.constant.ContractStatus;
-import com.ec.contract.constant.ParticipantType;
 import com.ec.contract.constant.RecipientRole;
 import com.ec.contract.constant.RecipientStatus;
 import com.ec.contract.model.dto.OrganizationDTO;
@@ -11,11 +10,9 @@ import com.ec.contract.model.dto.response.ContractResponseDTO;
 import com.ec.contract.model.entity.Customer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -377,7 +374,7 @@ public class BpmnService {
         }
     }
 
-    private String processReviewContract(ContractResponseDTO contractDto, int recipientId) {
+    private void processReviewContract(ContractResponseDTO contractDto, int recipientId) {
 
         log.info("[processReviewContract][contract-{}] recipient-{}", contractDto.getId(), recipientId);
 
@@ -414,7 +411,7 @@ public class BpmnService {
                         && recipientDto.getStatus() == 1
                 ) {
                     log.info("recipient-{} haven't processed yet", recipientId);
-                    return null;
+                    return;
                 }
 
                 // TODO: check them truong hop gui thong tin nguoi xu ly cua doi tac tiep theo
@@ -424,7 +421,7 @@ public class BpmnService {
                         if (reviewerIsProcessed) {
                             log.info("[processReviewContract][contract-{}] xong qua trinh xem xet chuyen ky",  contractDto.getId());
                             reviewerToSigner(contractDto);
-                            return null;
+                            return;
                         }
                     } else if (recipientDto.getRole() == RecipientRole.REVIEWER.getDbVal() // chuyen den nguoi xem xet tiep cua cung to chuc
                             && recipientDto.getParticipant().getId() == currentParticipant.getId()) {
@@ -454,8 +451,6 @@ public class BpmnService {
             checkFinish(contractDto);
 
         }
-
-        return null;
 
     }
 
