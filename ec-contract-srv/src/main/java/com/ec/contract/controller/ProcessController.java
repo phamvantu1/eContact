@@ -6,6 +6,7 @@ import com.ec.library.response.Response;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,5 +51,22 @@ public class ProcessController {
         return Response.success(processService.approval(recipientId));
 
     }
+
+    @PostMapping("/certificate")
+    public ResponseEntity<MessageDto> KeystoreSignFile(
+            @CurrentCustomer CustomerUser customerUser,
+            @RequestParam("id") int recipientId,
+            @Valid @RequestBody CertificateDtoRequest certificateDtoRequest) {
+        certificateDtoRequest.setEmail(customerUser.getEmail());
+        certificateDtoRequest.setPhone(customerUser.getPhone());
+        final var response = signService.SignKeystore(recipientId, certificateDtoRequest);
+        if (response.isSuccess()) {
+            documentService.saveDocumentHistoryByRecipientId(recipientId);
+        }
+        signService.changEndContractProcessedByRecipientId(recipientId);
+        return ResponseEntity.ok(response);
+
+    }
+
 
 }
