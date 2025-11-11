@@ -78,6 +78,10 @@ public enum ResponseCode {
     TYPE_NOT_FOUND("ERR_404", "Không tìm thấy loại hợp đồng", HttpStatus.NOT_FOUND),
 
 
+    // field
+    FIELD_SIGN_NOT_FOUND("ERR_404", "Không tìm thấy ô ký số", HttpStatus.NOT_FOUND),
+
+
     // cert
     CREATE_CERT_FAILED("ERR_500", "Tạo chứng thư số thất bại", HttpStatus.INTERNAL_SERVER_ERROR),
     CERT_IN_YOUR_ORGANIZATION("ERR_400", "Chứng thư số đã thuộc tổ chức của bạn", HttpStatus.BAD_REQUEST),
