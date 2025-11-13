@@ -15,10 +15,13 @@ import com.ec.library.exception.CustomException;
 import com.ec.library.exception.ResponseCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -32,11 +35,14 @@ public class ParticipantService {
     private final RecipientRepository recipientRepository;
     private final ParticipantMapper participantMapper;
     private final FieldRepository fieldRepository;
+    private final ModelMapper modelMapper;
 
     @Transactional
     public List<ParticipantDTO> createParticipant(List<ParticipantDTO> participantDTOList,
                                                   Integer contractId) {
         try {
+
+            log.info("start createParticipant for contractId: {}", contractId);
 
             Contract contract = contractRepository.findById(contractId)
                     .orElseThrow(() -> new CustomException(ResponseCode.CONTRACT_NOT_FOUND));
@@ -163,7 +169,7 @@ public class ParticipantService {
         } catch (CustomException e) {
             throw e;
         } catch (Exception ex) {
-            log.info("Error creating participants for contractId {}: {}", contractId, ex.getMessage());
+            log.error("Error creating participants for contractId {}: {}", contractId, ex.getMessage());
             throw ex;
         }
     }
@@ -182,7 +188,7 @@ public class ParticipantService {
         }catch (CustomException e) {
             throw e;
         } catch (Exception ex) {
-            log.info("Error getting participants for contractId {}: {}", participantId, ex.getMessage());
+            log.error("Error getting participants for contractId {}: {}", participantId, ex.getMessage());
             throw ex;
         }
     }
@@ -200,7 +206,7 @@ public class ParticipantService {
         }catch (CustomException e) {
             throw e;
         } catch (Exception ex) {
-            log.info("Error getting participants for contractId {}: {}", contractId, ex.getMessage());
+            log.error("Error getting participants for contractId {}: {}", contractId, ex.getMessage());
             throw ex;
         }
     }

@@ -1,6 +1,7 @@
 package com.ec.contract.controller;
 
 import com.ec.contract.model.dto.RecipientDTO;
+import com.ec.contract.model.dto.keystoreDTO.CertificateDtoRequest;
 import com.ec.contract.service.*;
 import com.ec.library.response.Response;
 import jakarta.validation.Valid;
@@ -18,6 +19,7 @@ import java.util.Collection;
 @Slf4j
 public class ProcessController {
     private final ProcessService processService;
+    private final SignService signService;
 
     @PutMapping("/coordinator/{participantId}/{recipientId}")
     public Response<?> coordinator(
@@ -53,17 +55,17 @@ public class ProcessController {
     }
 
     @PostMapping("/certificate")
-    public ResponseEntity<MessageDto> KeystoreSignFile(
-            @CurrentCustomer CustomerUser customerUser,
-            @RequestParam("id") int recipientId,
+    public ResponseEntity<?> KeystoreSignFile(
+            Authentication authentication,
+            @RequestParam("recipientId") int recipientId,
             @Valid @RequestBody CertificateDtoRequest certificateDtoRequest) {
-        certificateDtoRequest.setEmail(customerUser.getEmail());
-        certificateDtoRequest.setPhone(customerUser.getPhone());
+        certificateDtoRequest.setEmail(authentication.getName());
+
         final var response = signService.SignKeystore(recipientId, certificateDtoRequest);
-        if (response.isSuccess()) {
-            documentService.saveDocumentHistoryByRecipientId(recipientId);
-        }
-        signService.changEndContractProcessedByRecipientId(recipientId);
+//        if (response.isSuccess()) {
+//            documentService.saveDocumentHistoryByRecipientId(recipientId);
+//        }
+//        signService.changEndContractProcessedByRecipientId(recipientId);
         return ResponseEntity.ok(response);
 
     }

@@ -16,12 +16,11 @@ public class CertificateDtoRequest {
     private String phone;
 
     @NotNull
-    @JsonProperty("cert_id")
-    private Integer certificate_id;
+    private Integer certId;
 
     private String isTimestamp = "false";
 //    @NotBlank
-    @JsonProperty("image_base64")
+
     private String imageBase64;
 
     private FieldDto field;

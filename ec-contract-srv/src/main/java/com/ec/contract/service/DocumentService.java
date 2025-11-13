@@ -3,6 +3,7 @@ package com.ec.contract.service;
 import com.ec.contract.constant.BaseStatus;
 import com.ec.contract.constant.DocumentType;
 import com.ec.contract.mapper.DocumentMapper;
+import com.ec.contract.model.dto.UploadFileDto;
 import com.ec.contract.model.dto.request.DocumentUploadDTO;
 import com.ec.contract.model.dto.response.DocumentResponseDTO;
 import com.ec.contract.model.entity.Contract;
@@ -17,9 +18,19 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.interactive.digitalsignature.PDSignature;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.mock.web.MockMultipartFile;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -149,6 +160,30 @@ public class DocumentService {
               log.error("Error fetching documents by contract ID {}: {}", contractId, e.getMessage(), e);
               throw new RuntimeException("Failed to fetch documents by contract ID", e);
        }
+    }
+
+    public String replace(String newFilePath) throws Exception {
+        log.info(String.format("start replace file <- %s",  newFilePath));
+        log.info("Request replace file trên minio , path file cũ : {} , ", newFilePath);
+        final var headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        File file = new File(newFilePath);
+        FileInputStream input = new FileInputStream(file);
+
+        MultipartFile multipartFile = new MockMultipartFile(
+                "file",                  // tên field form
+                file.getName(),          // tên file gốc
+                "application/pdf",       // ✅ MIME type cho PDF
+                input                    // dữ liệu file
+        );
+
+        // 2️⃣ Gọi hàm uploadDocument() (bạn đã có sẵn)
+        DocumentResponseDTO uploadResponse = uploadDocument(multipartFile);
+
+        log.info("Response trả về request replace file trên Minio : {}", uploadResponse);
+
+        return "success";
     }
 
 }

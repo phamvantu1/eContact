@@ -10,11 +10,11 @@ import lombok.*;
 public class CoordinateDto {
 	private Integer page;
  
-    private int coordinateX;
+    private int boxX;
 
-    private int coordinateY;
+    private int boxY;
 
-    private int width;
+    private int boxW;
 
-    private int height;
+    private int boxH;
 }

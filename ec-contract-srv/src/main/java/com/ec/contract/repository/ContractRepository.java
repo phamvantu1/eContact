@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ContractRepository extends JpaRepository<Contract, Integer> {
 
@@ -98,5 +99,21 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
                                                @Param("fromDate") String fromDate,
                                                @Param("toDate") String toDate,
                                                Pageable pageable);
+
+
+    /**
+     * Lấy hợp đồng theo recipientId
+     * @return
+     */
+    @Query(
+            value = " select c.* from contracts c " +
+                    " join participants p on c.id = p.contract_id " +
+                    " join recipients r on p.id = r.participant_id " +
+                    " where r.id = :recipientId ",
+            nativeQuery = true
+    )
+    Optional<Contract> findByRecipientId(
+            @Param("recipientId") Integer recipientId
+    );
 
 }

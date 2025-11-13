@@ -56,6 +56,10 @@ public class Recipient extends BaseEntity {
 
     private Integer delegateTo; // nguoi duoc uy quyen
 
+    private LocalDateTime signStart;
+
+    private LocalDateTime signEnd;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

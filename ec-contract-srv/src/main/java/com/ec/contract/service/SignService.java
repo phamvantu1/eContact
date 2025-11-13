@@ -7,17 +7,31 @@ import com.ec.contract.model.dto.ImageGenerateDto;
 import com.ec.contract.model.dto.keystoreDTO.CertificateDtoRequest;
 import com.ec.contract.model.dto.keystoreDTO.GetDataCertRequest;
 import com.ec.contract.model.dto.signatureDto.SignatureDtoRequest;
+import com.ec.contract.model.entity.Contract;
 import com.ec.contract.model.entity.Field;
+import com.ec.contract.model.entity.keystoreEntity.Certificate;
 import com.ec.contract.repository.*;
+import com.ec.contract.service.signatureContainer.MyExternalSignatureContainer;
 import com.ec.contract.util.ImageUtils;
 import com.ec.contract.util.StringUtil;
 import com.ec.library.exception.CustomException;
 import com.ec.library.exception.ResponseCode;
 import com.ec.library.response.Response;
+import com.itextpdf.io.image.ImageData;
+import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfReader;
+import com.itextpdf.kernel.pdf.StampingProperties;
+import com.itextpdf.signatures.ExternalBlankSignatureContainer;
+import com.itextpdf.signatures.IExternalSignatureContainer;
+import com.itextpdf.signatures.PdfSignatureAppearance;
+import com.itextpdf.signatures.PdfSigner;
+import com.itextpdf.kernel.geom.Rectangle;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,10 +40,12 @@ import org.springframework.util.StringUtils;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.*;
 import java.net.URL;
+import java.security.KeyStore;
+import java.security.PrivateKey;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
 
@@ -52,6 +68,7 @@ public class SignService {
     private static final String spaceGenImage = "              ";
     private static final double cell_text_ratio = 0.7;
     private static final double cell_image_ratio = 0.3;
+    private final RecipientService recipientService;
 
     // ký cert mềm
     @Transactional
@@ -61,7 +78,7 @@ public class SignService {
         final var recipient = recipientRepository.findById(recipientId).orElse(null);
         CertResponse certResponse = new CertResponse();
         try {
-            certResponse = certService.getDataCert(new GetDataCertRequest(certificateDtoRequest.getCertificate_id(), null));
+            certResponse = certService.getDataCert(new GetDataCertRequest(certificateDtoRequest.getCertId(), null));
         } catch (Exception e) {
             log.error("lấy dữ liệu chứng thư số thất bại ", e);
             return Response.error(null, "Lấy thông tin chữ ký của chủ thể thất bại!");
@@ -136,43 +153,248 @@ public class SignService {
             var keyStoreCoordinateOptional = convertCoordinateToPKI(modelMapper.map(certificateDtoRequest.getField(), Field.class), presignedUrl);
             var dataField = keyStoreCoordinateOptional.get();
             Field fieldConvertCoordinate = modelMapper.map(dataField, Field.class);
+
             String signMessage = replaceFileAfterSignKeystore(fieldConvertCoordinate, contractId, presignedUrl,
-                    doc.getFilename(), certificateDtoRequest);
+                    doc.getFileName(), certificateDtoRequest);
+
             if (signMessage.equals("success")) {
                 log.info("sign contract success");
 
-                if (contract != null) {
-                    customerService.decreaseNumberOfTimestamp(contract.getOrganizationId());
-                }
                 // chuyen trang thai cua feild
                 if (fieldSign.isPresent()) {
-                    fieldSign.get().setStatus(BaseStatus.ACTIVE);
+                    fieldSign.get().setStatus(BaseStatus.ACTIVE.ordinal());
                     fieldRepository.save(fieldSign.get());
                 }
+
                 log.info("Sign Keystore for recipient: {} successfully!", recipientId);
-                recipientService.updateStartSignAndSignEnd(recipientId, dateActionSign);
-                return MessageDto.builder()
-                        .success(true)
-                        .message("successful")
-                        .build();
+
+                recipientService.updateStartSignAndSignEnd(recipientId, LocalDateTime.now());
+
+                return Response.success("Ký chứng thư số thành công!");
 
             }
-            backupFileSignFail(recipientId);
-            return MessageDto.builder()
-                    .success(false)
-                    .message(signMessage)
-                    .build();
+
+//            backupFileSignFail(recipientId);
+//            return MessageDto.builder()
+//                    .success(false)
+//                    .message(signMessage)
+//                    .build();
 
 
         } catch (Exception e) {
             log.error("Đã có lỗi xảy ra trong quá trình ký chứng thư số {}", e);
         }
-        backupFileSignFail(recipientId);
+
+//        backupFileSignFail(recipientId);
+
         log.info("Sign keystore for recipient: {} has error!", recipientId);
-        return MessageDto.builder()
-                .success(false)
-                .message("Unexpected error")
-                .build();
+        return Response.error(null, "Đã có lỗi xảy ra trong quá trình ký chứng thư số!");
+    }
+
+    // kí file cert mềm
+    private String replaceFileAfterSignKeystore(Field field, int contractId, String presignedUrl, String fileName, CertificateDtoRequest certificateDtoRequest) {
+        log.info("\n \n ----- BAT DAU THUC HIEN KY CHUNG THU SO ----- \n \n - field DATA: " + field + "\n \n");
+        final var tempFolder = "./tmp/" + UUID.randomUUID();
+
+        InputStream is = null;
+        FileOutputStream fos = null;
+
+        try {
+            // make a directory
+            FileUtils.forceMkdir(new File(tempFolder));
+
+            Optional<Certificate> dataKeystore = certificateRepository.findById(certificateDtoRequest.getCertId());
+            if (dataKeystore.isEmpty()) {
+                log.info("Dữ liệu Certificate rỗng id :{}", certificateDtoRequest.getCertId());
+                return "Đã có lỗi xảy ra trong quá trình ký";
+            }
+            List<String> email = new ArrayList<>();
+
+            dataKeystore.get().getCertificateCustomers().forEach(a -> {
+                email.add(a.getEmail());
+            });
+
+
+
+            if ( (email.isEmpty()) || (!( email.contains(certificateDtoRequest.getEmail()))) ) {
+                return "Bạn không được cấp quyền sử dụng với chứng thư số này";
+            }
+            if (dataKeystore.get().getKeystoreDateEnd().compareTo(new Date()) < 0) {
+                return "Certificate đã hết hạn";
+            }
+//            if (!(dataKeystore.get().getStatus().equals("1"))) {
+//                return "Certificate đã bị vô hiệu hóa";
+//            }
+
+            byte[] keyStoreData = dataKeystore.get().getKeystore();
+            String alias = dataKeystore.get().getAlias();
+            char[] password = dataKeystore.get().getPasswordKeystore().toCharArray();
+
+            KeyStore keyStore = KeyStore.getInstance("PKCS12");
+            keyStore.load(new ByteArrayInputStream(keyStoreData), password);
+
+            PrivateKey pk = null;
+            try {
+                pk = (PrivateKey) keyStore.getKey(alias, password);
+            } catch (Exception e) {
+                log.error("Lỗi file dữ liệu keystore {}",e);
+                return "false";
+            }
+
+            java.security.cert.Certificate[] chain = keyStore.getCertificateChain(alias);
+
+            byte[] bytes = IOUtils.toByteArray(
+                    new URL(presignedUrl));
+            var pdfDoc = new PdfDocument(new PdfReader(new ByteArrayInputStream(bytes)));
+            int rotation = pdfDoc.getPage(field.getPage()).getRotation();
+            String fieldName = UUID.randomUUID().toString().toUpperCase(Locale.ROOT).replace("-", "");
+            ImageData imageData = ImageDataFactory.create(Base64.getDecoder().decode(certificateDtoRequest.getImageBase64()));
+            if (rotation == 0 && certificateDtoRequest.getType().equals(FieldType.DIGITAL_SIGN.getDbVal())) {
+                double toYOld = Double.sum(field.getBoxY(), field.getBoxH());
+                double newHeight = (imageData.getHeight() / imageData.getWidth()) * field.getBoxW();
+                field.setBoxH(newHeight);
+                field.setBoxY(toYOld - newHeight);
+            }
+
+            changDbFieldName(fieldName, contractId);
+
+            float x = (float) field.getBoxX().floatValue();
+
+            InputStream inputStream = this.emptySignature(new ByteArrayInputStream(bytes), fieldName, chain,field.getBoxX().floatValue()
+                    , field.getBoxY().floatValue(), field.getBoxW().floatValue(), field.getBoxH().floatValue(), Integer.valueOf(field.getPage()), certificateDtoRequest.getImageBase64());
+            byte[] datafileSign = this.createSignature(inputStream, pk, fieldName, chain, certificateDtoRequest.getIsTimestamp());
+            try {
+                pdfDoc.close();
+                inputStream.close();
+            } catch (Exception e) {
+                log.error("Lỗi close thư viện");
+            }
+
+            is = new ByteArrayInputStream(datafileSign);
+            fos = new FileOutputStream(tempFolder + "/" + fileName);
+
+
+            // download file
+            int inByte;
+            while ((inByte = is.read()) != -1) {
+                fos.write(inByte);
+            }
+
+            // get document
+            final var documentCollection = documentRepository
+                    .findAllByContractIdAndStatusOrderByIdDesc(
+                            contractId, BaseStatus.ACTIVE.ordinal());
+            final var docOptional = documentCollection.stream().filter(
+                    document -> document.getType() == DocumentType.GOC.getDbVal()).findFirst();
+
+            if (docOptional.isPresent()) {
+                final var doc = docOptional.get();
+
+                final var uploadFileDtoOptional = documentService
+                        .replace(tempFolder + "/" + fileName);
+
+                if (uploadFileDtoOptional.equals("success")) {
+                    return "success";
+                } else {
+                    return "false";
+                }
+            }
+
+        }  catch (Exception e) {
+            log.error("Đã có lỗi xảy ra trong quá trình ký chứng thư số", e);
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException ex) {
+                    log.error("can't close input stream", ex);
+                }
+            }
+
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException ex) {
+                    log.error("can't close file output stream");
+                }
+            }
+
+            try {
+                FileUtils.forceDelete(new File(tempFolder));
+            } catch (IOException ex) {
+                log.error("can't delete directory, path = {}", tempFolder);
+            }
+        }
+
+        return "false";
+    }
+
+    public byte[] createSignature(InputStream inputStream, PrivateKey privateKey, String fieldName, java.security.cert.Certificate[] chain, String isTimestamp) {
+        try {
+            PdfReader reader = new PdfReader(inputStream);
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            PdfSigner signer = new PdfSigner(reader, byteArrayOutputStream, new StampingProperties());
+
+            IExternalSignatureContainer external = new MyExternalSignatureContainer(privateKey, chain);
+
+            // Signs a PDF where space was already reserved. The field must cover the whole document.
+            signer.signDeferred(signer.getDocument(), fieldName, byteArrayOutputStream, external);
+            byte[] dataSignSuccess = byteArrayOutputStream.toByteArray();
+            byteArrayOutputStream.close();
+            return dataSignSuccess;
+        } catch (Exception e) {
+            log.error("lỗi tạo tại hàm createSignature {}",e);
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public InputStream emptySignature(InputStream inputStream, String fieldName, java.security.cert.Certificate[] chain, float toX,
+                                      float toY, float toW, float toH, Integer pageNumber, String imageBase64) {
+        try {
+
+            byte[] image = Base64.getDecoder().decode(imageBase64);
+
+            PdfReader reader = new PdfReader(inputStream);
+            StampingProperties stampingProperties = new StampingProperties();
+            //For any signature in the Pdf but the first one, you need to use appendMode
+            stampingProperties = stampingProperties.useAppendMode();
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            PdfSigner signer = new PdfSigner(reader, byteArrayOutputStream, stampingProperties);
+            PdfSignatureAppearance appearance = signer.getSignatureAppearance();
+            appearance
+//                .setPageRect(new Rectangle(toX, toY, toH, toW))
+                    .setPageRect(new Rectangle( toX,  toY, toW,  toH))
+                    .setPageNumber(pageNumber)
+                    .setSignatureGraphic(ImageDataFactory.create(image))
+                    .setRenderingMode(PdfSignatureAppearance.RenderingMode.GRAPHIC)
+                    .setCertificate(chain[0]);
+            signer.setFieldName(fieldName);
+
+            /* ExternalBlankSignatureContainer constructor will create the PdfDictionary for the signature
+             * information and will insert the /Filter and /SubFilter values into this dictionary.
+             * It will leave just a blank placeholder for the signature that is to be inserted later.
+             */
+            IExternalSignatureContainer external = new ExternalBlankSignatureContainer(PdfName.Adobe_PPKLite,
+                    PdfName.Adbe_pkcs7_detached);
+
+            // Sign the document using an external container.
+            // 8192 is the size of the empty signature placeholder.
+            signer.signExternalContainer(external, 200000);
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+            byteArrayOutputStream.close();
+            return byteArrayInputStream;
+        }catch (Exception e){
+            log.error("lỗi tạo tại hàm emptySignature {}",e);
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    private void changDbFieldName(String fieldName, Integer fieldId) {
+        Optional<Field> fieldOptional = fieldRepository.findById(fieldId);
+        if (fieldOptional.isPresent()) {
+            fieldOptional.get().setFieldName(fieldName);
+            fieldRepository.save(fieldOptional.get());
+        }
     }
 
     /**
@@ -190,6 +412,8 @@ public class SignService {
     )
      */
     public Optional<CoordinateDto> convertCoordinateToPKI(Field field, String presignedUrl) {
+
+        log.info("+========convertCoordinateToPKI - field: {}", field);
         var pageIndex = field.getPage();
         double toX = field.getBoxX();
         double toY = field.getBoxY();
@@ -234,10 +458,10 @@ public class SignService {
 
             return Optional.of(
                     CoordinateDto.builder()
-                            .coordinateX(toX1)
-                            .coordinateY(toY1)
-                            .width(toX2)
-                            .height(toY2)
+                            .boxX(toX1)
+                            .boxX(toY1)
+                            .boxW(toX2)
+                            .boxH(toY2)
                             .page(pageIndex)
                             .build()
             );

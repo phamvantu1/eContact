@@ -14,8 +14,11 @@ import com.ec.library.exception.ResponseCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.context.annotation.Lazy;
+
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -30,10 +33,18 @@ public class RecipientService {
     private final RecipientMapper recipientMapper;
     private final FieldRepository fieldRepository;
     private final ModelMapper modelMapper;
-    private final BpmnService bpmnService;
+
     private final ContractService contractService;
     private final ParticipantService participantService;
     private final ParticipantRepository participantRepository;
+
+
+    private BpmnService bpmnService; // không final
+
+    @Autowired
+    public void setBpmnService(@Lazy BpmnService bpmnService) {
+        this.bpmnService = bpmnService;
+    }
 
     @Transactional(readOnly = true)
     public RecipientDTO getRecipientById(Integer recipientId) {
@@ -106,6 +117,21 @@ public class RecipientService {
         }
 
         return Optional.empty();
+    }
+
+    @Transactional
+    public void updateStartSignAndSignEnd(Integer recipientId , LocalDateTime actionDate){
+        try {
+            var recipientOptional = recipientRepository.findById(recipientId);
+            if (recipientOptional.isPresent()){
+                var recipient = recipientOptional.get();
+                recipient.setSignStart(actionDate);
+                recipient.setSignEnd(LocalDateTime.now());
+                recipientRepository.save(recipient);
+            }
+        }catch (Exception e){
+            log.error("Lỗi cập nhật startSign and SignEnd recipient",e);
+        }
     }
 
 }

@@ -44,7 +44,15 @@ public class RecipientDTO implements Serializable, Comparable<RecipientDTO> {
 
     private Integer signType;
 
+    private String reasonReject;
+
     private String cardId;
+
+    private Integer delegateTo; // nguoi duoc uy quyen
+
+    private LocalDateTime signStart;
+
+    private LocalDateTime signEnd;
 
     private Integer participantId;
 

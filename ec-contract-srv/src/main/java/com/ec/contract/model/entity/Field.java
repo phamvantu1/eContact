@@ -41,6 +41,10 @@ public class Field extends BaseEntity {
 
     private Integer typeImageSignature = 3;
 
+    private String fieldName;
+
+    private Integer status;
+
     @Column(name = "recipient_id")
     private Integer recipientId;
 

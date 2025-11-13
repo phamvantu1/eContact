@@ -23,6 +23,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.context.annotation.Lazy;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -46,7 +47,13 @@ public class ContractService {
     private final FieldRepository fieldRepository;
     private final DocumentRepository documentRepository;
     private final DocumentService documentService;
-    private final BpmnService bpmnService;
+
+    private BpmnService bpmnService; // không final
+
+    @Autowired
+    public void setBpmnService(@Lazy BpmnService bpmnService) {
+        this.bpmnService = bpmnService;
+    }
 
     public Map<String, String> checkCodeUnique(String code) {
         try {
@@ -176,6 +183,7 @@ public class ContractService {
             );
 
             if (contract.isPresent()) {
+                log.info("start ---aaaahbagba");
                 final var contractStatusOptional = Arrays.stream(ContractStatus.values())
                         .filter(contractStatus -> contractStatus.getDbVal().equals(status))
                         .findFirst();
@@ -228,49 +236,58 @@ public class ContractService {
 
 
     public Optional<ContractResponseDTO> changeStatus(Integer contractId, Integer status, ContractChangeStatusRequest request) {
-        log.info("[changeStatus] id: {}, status: {}", contractId, status);
 
-        final var contractStatusOptional =
-                Arrays.stream(ContractStatus.values()).filter(cs -> Objects.equals(cs.getDbVal(), status)).findFirst();
+        try{
+            log.info("[changeStatus] id: {}, status: {}", contractId, status);
 
-        if (contractStatusOptional.isPresent()) {
-            final var contractOptional = contractRepository.findById(contractId);
+            final var contractStatusOptional =
+                    Arrays.stream(ContractStatus.values()).filter(cs -> Objects.equals(cs.getDbVal(), status)).findFirst();
 
-            if (contractOptional.isPresent()) {
+            if (contractStatusOptional.isPresent()) {
+                final var contractOptional = contractRepository.findById(contractId);
 
-                var contract = contractOptional.get();
+                if (contractOptional.isPresent()) {
 
-                contract.setStatus(status);
+                    var contract = contractOptional.get();
 
-                if (request != null && StringUtils.hasText(request.getReason())) {
-                    contract.setReasonReject(request.getReason());
-                    contract.setCancelDate(LocalDateTime.now());
-                }
+                    contract.setStatus(status);
 
-                List<Participant> listParticipants = participantRepository.findByContractIdOrderByOrderingAsc(contractId)
-                        .stream().toList();
+                    contract = contractRepository.save(contract);
 
-                for (Participant participant : listParticipants) {
-                    Set<Recipient> recipientSet = participant.getRecipients();
-
-                    for (Recipient recipient : recipientSet) {
-                        Collection<Field> fieldCollection = fieldRepository.findAllByRecipientId(recipient.getId());
-                        recipient.setFields(Set.copyOf(fieldCollection));
+                    if (request != null && StringUtils.hasText(request.getReason())) {
+                        contract.setReasonReject(request.getReason());
+                        contract.setCancelDate(LocalDateTime.now());
                     }
 
-                    participant.setRecipients(recipientSet);
+                    List<Participant> listParticipants = participantRepository.findByContractIdOrderByOrderingAsc(contractId)
+                            .stream().toList();
+
+                    for (Participant participant : listParticipants) {
+                        Set<Recipient> recipientSet = participant.getRecipients();
+
+                        for (Recipient recipient : recipientSet) {
+                            Collection<Field> fieldCollection = fieldRepository.findAllByRecipientId(recipient.getId());
+                            recipient.setFields(Set.copyOf(fieldCollection));
+                        }
+
+                        participant.setRecipients(recipientSet);
+                    }
+
+                    contract.setParticipants(Set.copyOf(listParticipants));
+
+                    log.info("[changeStatus] Updated contract status to {}", status);
+
+                    var result = contractMapper.toDto(contract);
+
+                    return Optional.of(result);
                 }
-
-                contract.setParticipants(Set.copyOf(listParticipants));
-
-                contract = contractRepository.save(contract);
-
-                var result = contractMapper.toDto(contract);
-
-                return Optional.of(result);
             }
-        }
 
+
+        }catch (Exception e){
+            log.error("Failed to change contract status: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to change contract status", e);
+        }
         return Optional.empty();
     }
 

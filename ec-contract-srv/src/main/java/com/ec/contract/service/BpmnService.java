@@ -10,7 +10,9 @@ import com.ec.contract.model.dto.response.ContractResponseDTO;
 import com.ec.contract.model.entity.Customer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Lazy;
 
 import java.util.*;
 
@@ -20,10 +22,18 @@ import java.util.*;
 public class BpmnService {
 
     private final CustomerService customerService;
-    private final RecipientService recipientService;
     private final ContractService contractService;
 
+    private RecipientService recipientService; // không final
+
+    @Autowired
+    public void setRecipientService(@Lazy RecipientService recipientService) {
+        this.recipientService = recipientService;
+    }
+
     public void startContract(ContractResponseDTO contractResponseDTO) {
+
+        log.info("-------Start process for contract: {}", contractResponseDTO.getId());
 
         ContractResponseDTO contractDto = null;
 
