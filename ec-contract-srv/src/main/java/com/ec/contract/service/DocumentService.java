@@ -162,28 +162,51 @@ public class DocumentService {
        }
     }
 
-    public String replace(String newFilePath) throws Exception {
-        log.info(String.format("start replace file <- %s",  newFilePath));
-        log.info("Request replace file trên minio , path file cũ : {} , ", newFilePath);
-        final var headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+    public String replace(String newFilePath, Document document) throws Exception {
+       try{
+           log.info(String.format("start replace file <- %s",  newFilePath));
+           log.info("Request replace file trên minio , path file cũ : {} , ", newFilePath);
+           final var headers = new HttpHeaders();
+           headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-        File file = new File(newFilePath);
-        FileInputStream input = new FileInputStream(file);
+           File file = new File(newFilePath);
+           FileInputStream input = new FileInputStream(file);
 
-        MultipartFile multipartFile = new MockMultipartFile(
-                "file",                  // tên field form
-                file.getName(),          // tên file gốc
-                "application/pdf",       // ✅ MIME type cho PDF
-                input                    // dữ liệu file
-        );
+           MultipartFile multipartFile = new MockMultipartFile(
+                   "file",                  // tên field form
+                   file.getName(),          // tên file gốc
+                   "application/pdf",       // ✅ MIME type cho PDF
+                   input                    // dữ liệu file
+           );
 
-        // 2️⃣ Gọi hàm uploadDocument() (bạn đã có sẵn)
-        DocumentResponseDTO uploadResponse = uploadDocument(multipartFile);
+           // 2️⃣ Gọi hàm uploadDocument() (bạn đã có sẵn)
+           DocumentResponseDTO uploadResponse = uploadDocument(multipartFile);
 
-        log.info("Response trả về request replace file trên Minio : {}", uploadResponse);
+           log.info("Response trả về request replace file trên Minio : {}", uploadResponse);
 
-        return "success";
+           if(document != null){
+               document.setType(DocumentType.HISTORY.getDbVal());
+
+               documentRepository.save(document);
+
+               Document newDocument = Document.builder()
+                       .name(document.getName())
+                       .path(uploadResponse.getPath())        // chính là objectName trong MinIO
+                       .fileName(uploadResponse.getFileName())
+                       .bucketName(bucketName)
+                       .contractId(document.getContractId())
+                       .type(DocumentType.FINALLY.getDbVal())
+                       .status(BaseStatus.ACTIVE.ordinal())
+                       .build();
+
+               documentRepository.save(newDocument);
+           }
+
+           return "success";
+       }catch (Exception e){
+              log.error("Error replacing file in MinIO: {}", e.getMessage(), e);
+              throw new RuntimeException("Failed to replace file in MinIO", e);
+       }
     }
 
 }

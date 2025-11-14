@@ -110,7 +110,7 @@ public class SignService {
 
             //Lấy thông tin file hợp đồng
             final var docOptional = docCollection.stream().filter(
-                    document -> Objects.equals(document.getType(), DocumentType.GOC.getDbVal())
+                    document -> Objects.equals(document.getType(), DocumentType.FINALLY.getDbVal())
             ).findFirst();
 
             if (docOptional.isEmpty()) {
@@ -285,13 +285,13 @@ public class SignService {
                     .findAllByContractIdAndStatusOrderByIdDesc(
                             contractId, BaseStatus.ACTIVE.ordinal());
             final var docOptional = documentCollection.stream().filter(
-                    document -> document.getType() == DocumentType.GOC.getDbVal()).findFirst();
+                    document -> document.getType() == DocumentType.FINALLY.getDbVal()).findFirst();
 
             if (docOptional.isPresent()) {
                 final var doc = docOptional.get();
 
                 final var uploadFileDtoOptional = documentService
-                        .replace(tempFolder + "/" + fileName);
+                        .replace(tempFolder + "/" + fileName, doc);
 
                 if (uploadFileDtoOptional.equals("success")) {
                     return "success";

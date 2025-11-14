@@ -1,17 +1,23 @@
 package com.ec.contract.constant;
 
-public enum DocumentType {
+public enum DocumentType implements IDbValue<Integer> {
 
-    GOC(1), // file gốc
-    VIEW(2),
-    DINH_KEM(3);
+    PRIMARY(1),
+    FINALLY(2),
+    ATTACH(3),
+    BATCH(4),
+    COMPRESS(5),
+    BACKUP(6),
+    IMG_EKYC(7),
+    HISTORY(8);
 
     final Integer dbVal;
 
-    DocumentType(Integer dbVal) {
+    DocumentType(final Integer dbVal) {
         this.dbVal = dbVal;
     }
 
+    @Override
     public Integer getDbVal() {
         return dbVal;
     }
