@@ -57,7 +57,9 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
             "JOIN participants p ON c.id = p.contract_id " +
             "JOIN recipients r ON r.participant_id = p.id " +
             "Where r.email = :email " +
-            "AND r.status IN (:listStatus) " +
+            " and ( (:status = 1 and r.status = 1 and c.status not in(31, 32) ) " +
+            " or (:status = 2 and ( r.status = 2 or r.status = 3 or c.status in (31 , 32)) ) )" +
+            "AND c.status IN (:listStatus) " +
             "and (c.contract_no ILIKE CONCAT('%', :textSearch, '%') OR c.name ILIKE CONCAT('%', :textSearch, '%')) " +
             "AND (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
             "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) " +
@@ -66,7 +68,9 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
                     "JOIN participants p ON c.id = p.contract_id " +
                     "JOIN recipients r ON r.participant_id = p.id " +
                     "Where r.email = :email " +
-                    "AND r.status IN (:listStatus) " +
+                    " and ( (:status = 1 and r.status = 1 and c.status not in(31, 32) ) " +
+                    " or (:status = 2 and ( r.status = 2 or r.status = 3 or c.status in (31 , 32)) ) )" +
+                    "AND c.status IN (:listStatus) " +
                     "and (c.contract_no ILIKE CONCAT('%', :textSearch, '%') OR c.name ILIKE CONCAT('%', :textSearch, '%')) " +
                     "AND (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
                     "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp))"
@@ -76,6 +80,7 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
                                           @Param("textSearch") String textSearch,
                                           @Param("fromDate") String fromDate,
                                           @Param("toDate") String toDate,
+                                          @Param("status") Integer status,
                                           Pageable pageable);
 
 

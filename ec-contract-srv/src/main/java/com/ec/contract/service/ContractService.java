@@ -336,6 +336,7 @@ public class ContractService {
                     filterContractDTO.getTextSearch(),
                     filterContractDTO.getFromDate(),
                     filterContractDTO.getToDate(),
+                    filterContractDTO.getStatus(),
                     pageable);
 
             List<ContractResponseDTO> contractResponseDTOList = contractPage.getContent()
