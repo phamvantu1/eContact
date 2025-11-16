@@ -141,7 +141,7 @@ public class ProcessService {
 
             try {
 
-                var recipientOptional = recipientService.approval(recipientId);
+                var recipientOptional = recipientService.approval(recipientId, recipient.get().getRole());
 
                 return recipientOptional.get();
 

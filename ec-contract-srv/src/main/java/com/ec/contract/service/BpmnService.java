@@ -1,6 +1,7 @@
 package com.ec.contract.service;
 
 import com.ec.contract.constant.ContractStatus;
+import com.ec.contract.constant.ParticipantType;
 import com.ec.contract.constant.RecipientRole;
 import com.ec.contract.constant.RecipientStatus;
 import com.ec.contract.model.dto.OrganizationDTO;
@@ -10,6 +11,7 @@ import com.ec.contract.model.dto.response.ContractResponseDTO;
 import com.ec.contract.model.entity.Customer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.context.annotation.Lazy;
@@ -159,6 +161,227 @@ public class BpmnService {
         }
     }
 
+    public void signContract(ContractResponseDTO contractDto, int recipientId) {
+
+        log.info("=====start bpmn sign contract======");
+
+        try {
+            // xu ly nghiep vu
+            processSignContract(contractDto, recipientId);
+
+            // Kiem tra nguoi ky cuoi cung
+        } catch (Exception e) {
+            log.error("error", e);
+        }
+    }
+
+    private String processSignContract(ContractResponseDTO contractDto, int recipientId) {
+
+        String error = null;
+
+        // Nguoi dang thuc hien
+        var currentRecipient = getCurrentRecipient(contractDto, recipientId);
+        var currentParticipant = getCurrentParticipant(contractDto, recipientId);
+
+        // co nguoi ky cung thu tu trong cung to chuc chua xu ly thi dung
+        for (var recipientDto : currentParticipant.getRecipients()) {
+            if (recipientDto.getId() != recipientId
+                    && recipientDto.getRole() == RecipientRole.SIGNER.getDbVal()
+                    && recipientDto.getOrdering() == currentRecipient.getOrdering()
+                    && recipientDto.getStatus() == 1) {
+                return null;
+            }
+        }
+
+        // kiem tra signer da xu ly het chua  , true la hết rồi
+        boolean signerIsProcessed = checkSignerIsProcessed(contractDto, currentParticipant);
+
+        try {
+            RecipientDTO nextRecipientDto = null;
+            if (signerIsProcessed) {
+                log.info("[processSignContract][contract-{}] chuyen van thu", contractDto.getId());
+
+                singerToArchiver(contractDto, currentParticipant);
+
+            } else {
+                log.info("[processSignContract][contract-{}] find other signer", contractDto.getId());
+
+                // Tìm người ký còn lại của tổ chức
+                int prevOrder = -1;
+                for (var recipientDto : currentParticipant.getRecipients()) {
+                    if (recipientDto.getRole() == RecipientRole.SIGNER.getDbVal().intValue()
+                            && recipientDto.getStatus() == 0) {
+
+                        if (prevOrder != -1 && prevOrder != recipientDto.getOrdering()) {
+                            break;
+                        }
+
+                        updateStatusAndNotice(recipientDto);
+
+                        prevOrder = recipientDto.getOrdering();
+
+                        nextRecipientDto = recipientDto;
+
+                    }
+
+                }
+                if (nextRecipientDto != null) {
+//                    sendNoticeConfigTransfer(contractDto, dto, customerDto, organizationDto, approveType, recipientId, nextRecipientDto);
+                }
+
+            }
+            return null;
+        } catch (Exception e) {
+
+            log.error("error", e);
+            error = ExceptionUtils.getFullStackTrace(e);
+        } finally {
+//             dong y
+
+            checkFinish(contractDto);
+
+//            sendStatusRecipient(String.valueOf(WebhookType.GET_RECIPIENT_STATUS),contractDto.getId(), contractDto.getOrganizationId());
+        }
+
+        return error;
+    }
+
+    private void updateStatusAndNotice(RecipientDTO recipientDto) {
+
+        recipientDto.setStatus(RecipientStatus.PROCESSING.getDbVal());
+        recipientService.changeRecipientProcessing(recipientDto.getId());
+
+    }
+
+    private void singerToArchiver(ContractResponseDTO contractDto, ParticipantDTO currentParticipant) {
+
+        int minOrder = -1;
+        List<RecipientDTO> recipients = new ArrayList<>();
+
+        for (var participantDto : contractDto.getParticipants()) {
+            if (participantDto.getOrdering() > currentParticipant.getOrdering()) {
+                break;
+            }
+
+            for (var recipientDto : participantDto.getRecipients()) {
+                if (recipientDto.getRole() == RecipientRole.ARCHIVER.getDbVal()
+                        && recipientDto.getOrdering() == 1
+                        && recipientDto.getStatus() == 0) {
+
+                    if (minOrder == -1 || participantDto.getOrdering() < minOrder) {
+                        minOrder = participantDto.getOrdering();
+                    }
+
+                    if (participantDto.getOrdering() == minOrder) {
+                        recipientDto.setParticipant(participantDto);
+                        recipients.add(recipientDto);
+                    }
+                }
+            }
+        }
+
+        for (var recipientDto : recipients) {
+            noticeToRecipient(recipientDto);
+        }
+
+        if (recipients.size() > 0) {
+
+            log.info("[SingerToArchiver] sms/email config email sms config");
+
+            return;
+        }
+
+        log.info("khong co van thu chuyen luong xu ly sang to chuc tiep theo");
+        switchToNextParticipant(contractDto, currentParticipant);
+    }
+
+    private void noticeToRecipient(RecipientDTO recipientDto) {
+
+        // cap nhat trang thai dang xu ly
+        recipientDto.setStatus(RecipientStatus.PROCESSING.getDbVal());
+        recipientService.changeRecipientProcessing(recipientDto.getId());
+
+    }
+
+    private void switchToNextParticipant(ContractResponseDTO contractDto, ParticipantDTO currentParticipant) {
+
+        int minOrder = -1;
+        for (var participantDto : contractDto.getParticipants()) {
+            if (participantDto.getOrdering() > currentParticipant.getOrdering()) {
+                minOrder = participantDto.getOrdering();
+                break;
+            }
+        }
+
+
+        boolean findReviewer = false;
+        for (var participantDto : contractDto.getParticipants()) {
+            if (participantDto.getOrdering() == minOrder) {
+                for (var recipientDto : participantDto.getRecipients()) {
+                    if (recipientDto.getRole() == RecipientRole.REVIEWER.getDbVal()
+                            && recipientDto.getOrdering() == 1) {
+                        noticeToRecipient(recipientDto);
+
+                        findReviewer = true;
+                    }
+                }
+            }
+        }
+
+        if (findReviewer) {
+            return;
+        }
+
+        // khong co nguoi xem xet chuyen den nguoi ky
+        for (var participantDto : contractDto.getParticipants()) {
+            if (participantDto.getOrdering() == minOrder) {
+                for (var recipientDto : participantDto.getRecipients()) {
+                    if (recipientDto.getRole() == RecipientRole.SIGNER.getDbVal()
+                            && recipientDto.getOrdering() == 1) {
+
+                        noticeToRecipient(recipientDto);
+                    }
+                }
+            }
+        }
+
+    }
+
+    /**
+     * Kiem tra tat ca nguoi signer da xu ly hay chua
+     *
+     * @param contractDto
+     * @param currentParticipant
+     * @return
+     */
+    protected boolean checkSignerIsProcessed(ContractResponseDTO contractDto, ParticipantDTO currentParticipant) {
+
+        // To chuc cua nguoi dang xu ly
+        for (RecipientDTO recipientDto : currentParticipant.getRecipients()) {
+
+            // Con bat ky recipient nao role = SIGN chua xu ly
+            if (recipientDto.getRole() == RecipientRole.SIGNER.getDbVal().intValue() && recipientDto.getProcessAt() == null) {
+                return false;
+            }
+        }
+
+        // Cac to chuc khac co cung thu tu xu ly
+        for (ParticipantDTO participantDto : contractDto.getParticipants()) {
+            if (participantDto.getOrdering() == currentParticipant.getOrdering()) {
+
+                for (RecipientDTO recipientDto : participantDto.getRecipients()) {
+
+                    // Con bat ky recipient nao role < SIGN chua xu ly
+                    if (recipientDto.getRole() == RecipientRole.SIGNER.getDbVal().intValue() && recipientDto.getProcessAt() == null) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
     public void cancelContract(ContractResponseDTO contractDto) {
 
         try {
@@ -171,7 +394,7 @@ public class BpmnService {
         }
     }
 
-    public void handleCoordinatorService(ContractResponseDTO contractDto, Integer recipientId ) {
+    public void handleCoordinatorService(ContractResponseDTO contractDto, Integer recipientId) {
 
         try {
             log.info("start handleCoordinatorService for contract: {}", contractDto.getId());
@@ -183,7 +406,7 @@ public class BpmnService {
         }
     }
 
-    private void processCoordinatorContract(ContractResponseDTO contractDto,  int recipientId) {
+    private void processCoordinatorContract(ContractResponseDTO contractDto, int recipientId) {
 
         // to chuc dang thuc hien
         var currentParticipant = getCurrentParticipant(contractDto, recipientId);
@@ -194,7 +417,7 @@ public class BpmnService {
             log.error("error when processCoordinatorContract : ", e);
 
         } finally {
-                checkFinish(contractDto);
+            checkFinish(contractDto);
         }
     }
 
@@ -235,7 +458,7 @@ public class BpmnService {
         }
     }
 
-    private boolean checkSignFinish(ContractResponseDTO contractDto){
+    private boolean checkSignFinish(ContractResponseDTO contractDto) {
         boolean finish = true;
         for (ParticipantDTO participantDto : contractDto.getParticipants()) {
             for (RecipientDTO recipientDto : participantDto.getRecipients()) {
@@ -378,7 +601,7 @@ public class BpmnService {
         try {
             log.info("Contract review : {}", contractDto);
             // xu ly nghiep vu
-             processReviewContract(contractDto, recipientId);
+            processReviewContract(contractDto, recipientId);
         } catch (Exception e) {
             log.error("error", e);
         }
@@ -429,14 +652,14 @@ public class BpmnService {
                     // la nguoi ky
                     if (recipientDto.getRole() == RecipientRole.SIGNER.getDbVal().intValue()) {
                         if (reviewerIsProcessed) {
-                            log.info("[processReviewContract][contract-{}] xong qua trinh xem xet chuyen ky",  contractDto.getId());
+                            log.info("[processReviewContract][contract-{}] xong qua trinh xem xet chuyen ky", contractDto.getId());
                             reviewerToSigner(contractDto);
                             return;
                         }
                     } else if (recipientDto.getRole() == RecipientRole.REVIEWER.getDbVal() // chuyen den nguoi xem xet tiep cua cung to chuc
                             && recipientDto.getParticipant().getId() == currentParticipant.getId()) {
 
-                        log.info("[processReviewContract][contract-{}] find other reviewer of participant-{} ",  contractDto.getId(), currentParticipant.getId());
+                        log.info("[processReviewContract][contract-{}] find other reviewer of participant-{} ", contractDto.getId(), currentParticipant.getId());
                         if (prevOrder != -1 && prevOrder != recipientDto.getOrdering()) {
                             break;
                         }

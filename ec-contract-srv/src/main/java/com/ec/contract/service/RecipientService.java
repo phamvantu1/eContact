@@ -15,13 +15,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.context.annotation.Lazy;
-
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.Optional;
 
 @Service
@@ -89,7 +87,7 @@ public class RecipientService {
      * @return Thông tin khách hàng đã được cập nhật thành công
      */
     @Transactional
-    public Optional<RecipientDTO> approval(int recipientId) {
+    public Optional<RecipientDTO> approval(int recipientId , int recipientRole) {
         var recipientOptional = recipientRepository.findById(recipientId);
 
         if (recipientOptional.isPresent()) {
@@ -107,13 +105,13 @@ public class RecipientService {
 
             ContractResponseDTO contractResponseDTO = contractService.getContractById(participant.getContractId());
 
-            bpmnService.reviewContract(contractResponseDTO, recipientId);
+            if(recipientRole == 2) bpmnService.reviewContract(contractResponseDTO, recipientId);
+
+            if(recipientRole == 3 || recipientRole == 4) bpmnService.signContract(contractResponseDTO, recipientId);
 
             var recipientDto = modelMapper.map(updated, RecipientDTO.class);
 
-            return Optional.of(
-                    recipientDto
-            );
+            return Optional.of(recipientDto);
         }
 
         return Optional.empty();

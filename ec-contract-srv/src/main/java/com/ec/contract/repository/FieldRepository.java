@@ -16,6 +16,8 @@ public interface FieldRepository extends JpaRepository<Field, Integer> {
 
     List<Field> findByContractId(Integer contractId);
 
+    Collection<Field> findByContractIdOrderByTypeAsc(int contractId);
+
     Optional<Field> findFirstByRecipientIdAndType(int recipientId, Integer type);
 
 }

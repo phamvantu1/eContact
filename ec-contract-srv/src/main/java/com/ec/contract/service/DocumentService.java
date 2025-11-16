@@ -3,7 +3,6 @@ package com.ec.contract.service;
 import com.ec.contract.constant.BaseStatus;
 import com.ec.contract.constant.DocumentType;
 import com.ec.contract.mapper.DocumentMapper;
-import com.ec.contract.model.dto.UploadFileDto;
 import com.ec.contract.model.dto.request.DocumentUploadDTO;
 import com.ec.contract.model.dto.response.DocumentResponseDTO;
 import com.ec.contract.model.entity.Contract;
@@ -16,26 +15,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.interactive.digitalsignature.PDSignature;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

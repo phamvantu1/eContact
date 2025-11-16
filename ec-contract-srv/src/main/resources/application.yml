@@ -41,3 +41,6 @@ application:
       refresh-token:
         expiration: 604800000
 
+  temporary:
+    directory: ./tmp
+

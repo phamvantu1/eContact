@@ -15,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -23,7 +25,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-import org.springframework.context.annotation.Lazy;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -46,9 +47,15 @@ public class ContractService {
     private final ParticipantService participantService;
     private final FieldRepository fieldRepository;
     private final DocumentRepository documentRepository;
-    private final DocumentService documentService;
+    private final ChangeFileService changeFileService;
 
     private BpmnService bpmnService; // không final
+
+    @Value("${minio.bucket-name}")
+    private String bucketName;
+
+    @Value("${application.temporary.directory}")
+    private String tempFolder;
 
     @Autowired
     public void setBpmnService(@Lazy BpmnService bpmnService) {
@@ -225,15 +232,17 @@ public class ContractService {
             bpmnService.startContract(contractDto);
 
             // Cập nhật trạng thái HĐ thành PROCESSING
-
             changeStatus(contractId, ContractStatus.PROCESSING.getDbVal(), null);
+
+            changeFileService.byPassContractUid(contractDto.getId());
+
+//            changeFileService.byPassContractNo(contractDto);
 
         } catch (Exception e) {
             log.error("Failed to issue contract: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to issue contract", e);
         }
     }
-
 
     public Optional<ContractResponseDTO> changeStatus(Integer contractId, Integer status, ContractChangeStatusRequest request) {
 
@@ -290,7 +299,6 @@ public class ContractService {
         }
         return Optional.empty();
     }
-
 
     public Page<ContractResponseDTO> getMyContracts(Authentication authentication,
                                                     FilterContractDTO filterContractDTO) {
