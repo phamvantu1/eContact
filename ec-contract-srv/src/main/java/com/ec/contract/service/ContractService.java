@@ -3,6 +3,7 @@ package com.ec.contract.service;
 import com.ec.contract.constant.ContractStatus;
 import com.ec.contract.constant.RecipientRole;
 import com.ec.contract.mapper.ContractMapper;
+import com.ec.contract.mapper.ParticipantMapper;
 import com.ec.contract.model.dto.*;
 import com.ec.contract.model.dto.request.ContractRequestDTO;
 import com.ec.contract.model.dto.request.FilterContractDTO;
@@ -48,6 +49,7 @@ public class ContractService {
     private final FieldRepository fieldRepository;
     private final DocumentRepository documentRepository;
     private final ChangeFileService changeFileService;
+    private final ParticipantMapper participantMapper;
 
     private BpmnService bpmnService; // không final
 
@@ -132,43 +134,52 @@ public class ContractService {
     public ContractResponseDTO getContractById(Integer contractId) {
         try {
 
+            log.info("=====start get contract by id :{}", contractId);
+
+            // Lấy hợp đồng
             Contract contract = contractRepository.findById(contractId)
                     .orElseThrow(() -> new CustomException(ResponseCode.CONTRACT_NOT_FOUND));
 
-            List<Participant> listParticipants = participantRepository.findByContractIdOrderByOrderingAsc(contractId)
-                    .stream().toList();
+            // Lấy danh sách participant theo hợp đồng
+            List<Participant> listParticipants = participantRepository.findByContractIdOrderByOrderingAsc(contractId).stream().toList();
 
-            for (Participant participant : listParticipants) {
-                Set<Recipient> recipientSet = participant.getRecipients();
+//            for (Participant participant : listParticipants) {
+//                Set<Recipient> recipientSet = participant.getRecipients();
+//
+////                for (Recipient recipient : recipientSet) {
+////                    // Lấy danh sách field và dùng HashSet mutable
+////                    Collection<Field> fieldCollection = fieldRepository.findAllByRecipientId(recipient.getId());
+////                    recipient.setFields(new HashSet<>(fieldCollection));
+////                }
+//
+//                // Không cần set lại recipientSet, nhưng nếu muốn chắc chắn là mutable:
+//                participant.setRecipients(new HashSet<>(recipientSet));
+//            }
 
-                for (Recipient recipient : recipientSet) {
-                    Collection<Field> fieldCollection = fieldRepository.findAllByRecipientId(recipient.getId());
-                    recipient.setFields(Set.copyOf(fieldCollection));
-                }
+//            // Dùng HashSet mutable cho participants
+//            contract.setParticipants(new HashSet<>(listParticipants));
 
-                participant.setRecipients(recipientSet);
-            }
-
-            contract.setParticipants(Set.copyOf(listParticipants));
-
+            // Lấy danh sách contract references
             List<ContractRef> contractRefList = contractRefRepository.findByContractId(contractId);
+            contract.setContractRefs(new HashSet<>(contractRefList));
 
-            contract.setContractRefs(Set.copyOf(contractRefList));
-
+            // Map entity sang DTO
             var contractResponseDTO = contractMapper.toDto(contract);
 
+            contractResponseDTO.setParticipants(new HashSet<>(participantMapper.toDtoList(listParticipants)));
+
+            // Sắp xếp recipient trong DTO
             participantService.sortRecipient(contractResponseDTO.getParticipants());
 
-            contractResponseDTO.getContractRefs().forEach(
-                    ref -> {
-                        Contract refContract = contractRepository.findById(ref.getRefId()).orElse(null);
-                        if (refContract != null) {
-                            ref.setRefName(refContract.getName());
-                            Document document = documentRepository.findByContractIdAndType(refContract.getId(), 1);
-                            ref.setPath(document != null ? document.getPath() : null);
-                        }
-                    }
-            );
+            // Lấy thông tin refName và path cho contractRefs
+            contractResponseDTO.getContractRefs().forEach(ref -> {
+                Contract refContract = contractRepository.findById(ref.getRefId()).orElse(null);
+                if (refContract != null) {
+                    ref.setRefName(refContract.getName());
+                    Document document = documentRepository.findByContractIdAndType(refContract.getId(), 1);
+                    ref.setPath(document != null ? document.getPath() : null);
+                }
+            });
 
             return contractResponseDTO;
 
@@ -268,7 +279,7 @@ public class ContractService {
             return Optional.of(result);
 
         } catch (Exception e) {
-            log.error("Failed to change contract status saSSSSSS: {}", e.getMessage(), e);
+            log.error("Failed to change contract status saSSSSSS: {}",  e.getMessage(), e);
             throw new RuntimeException("Failed to change contract status agaaaaaa", e);
         }
     }

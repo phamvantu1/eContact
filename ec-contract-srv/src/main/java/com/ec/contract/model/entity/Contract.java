@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -57,5 +58,5 @@ public class Contract extends BaseEntity {
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @OrderBy("ordering asc")
     @JsonManagedReference
-    private Set<Participant> participants;
+    private Set<Participant> participants =  new HashSet<>();
 }

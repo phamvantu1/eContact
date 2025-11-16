@@ -42,7 +42,7 @@ public class ParticipantService {
                                                   Integer contractId) {
         try {
 
-            log.info("start createParticipant for contractId: {}", contractId);
+            log.info("start createParticipant for contractId: {}, request : {}", contractId , participantDTOList);
 
             Contract contract = contractRepository.findById(contractId)
                     .orElseThrow(() -> new CustomException(ResponseCode.CONTRACT_NOT_FOUND));
@@ -133,8 +133,12 @@ public class ParticipantService {
                     recipient.setStatus(recipientDto.getStatus());
                     recipient.setParticipant(participant);
 
+                    log.info("this recipient email is : {} ", recipient.getEmail());
+
                     updatedRecipients.add(recipient);
                 }
+
+                log.info("updatedRecipients size is " + updatedRecipients.size());
 
                 // orphanRemoval sẽ tự xóa những recipient cũ không còn trong updatedRecipients
                 participant.getRecipients().clear();

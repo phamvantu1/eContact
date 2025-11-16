@@ -582,11 +582,11 @@ public class BpmnService {
      */
     public ParticipantDTO getCurrentParticipant(ContractResponseDTO contractDto, int recipientId) {
 
-        log.info("participant of contract {}", contractDto.getParticipants());
+        log.info("----participant of contract {}", contractDto.getParticipants());
 
         for (ParticipantDTO participant : contractDto.getParticipants()) {
 
-            log.info("participant of contract {}", contractDto.getParticipants());
+            log.info("this --- participant of contract {}", contractDto.getParticipants());
 
             Set<RecipientDTO> recipients = participant.getRecipients();
             for (RecipientDTO recipientDto : recipients) {
@@ -615,7 +615,7 @@ public class BpmnService {
 
     private void processReviewContract(ContractResponseDTO contractDto, int recipientId) {
 
-        log.info("[processReviewContract][contract-{}] recipient-{}", contractDto.getId(), recipientId);
+        log.info("-----start --- [processReviewContract][contract-{}] recipient-{}", contractDto.getId(), recipientId);
 
         // Nguoi dang thuc hien
         RecipientDTO currentRecipient = getCurrentRecipient(contractDto, recipientId);
@@ -640,9 +640,9 @@ public class BpmnService {
 
             int prevOrder = -1;
 
-            RecipientDTO nextRecipientDto = null;
 
             for (RecipientDTO recipientDto : recipients) {
+                log.info("this code here check code he he participant id {}", recipientDto.getParticipant().getId());
                 // con nguoi xem xet cung thu tu voi nguoi xem xet trong cung to chuc chua xu ly thi dung
                 if (recipientDto.getId() != recipientId
                         && recipientDto.getRole() == RecipientRole.REVIEWER.getDbVal()
@@ -656,17 +656,18 @@ public class BpmnService {
 
                 // TODO: check them truong hop gui thong tin nguoi xu ly cua doi tac tiep theo
                 if (find && recipientDto.getId() != recipientId && recipientDto.getStatus() == 0) {
+                    log.info("this code is here check code recipient");
                     // la nguoi ky
                     if (recipientDto.getRole() == RecipientRole.SIGNER.getDbVal().intValue()) {
                         if (reviewerIsProcessed) {
-                            log.info("[processReviewContract][contract-{}] xong qua trinh xem xet chuyen ky", contractDto.getId());
+                            log.info("pham tu log this here [processReviewContract][contract-{}] xong qua trinh xem xet chuyen ky", contractDto.getId());
                             reviewerToSigner(contractDto);
                             return;
                         }
                     } else if (recipientDto.getRole() == RecipientRole.REVIEWER.getDbVal() // chuyen den nguoi xem xet tiep cua cung to chuc
                             && recipientDto.getParticipant().getId() == currentParticipant.getId()) {
 
-                        log.info("[processReviewContract][contract-{}] find other reviewer of participant-{} ", contractDto.getId(), currentParticipant.getId());
+                        log.info("phamtu this code [processReviewContract][contract-{}] find other reviewer of participant-{} ", contractDto.getId(), currentParticipant.getId());
                         if (prevOrder != -1 && prevOrder != recipientDto.getOrdering()) {
                             break;
                         }
@@ -676,6 +677,7 @@ public class BpmnService {
                     }
                     prevOrder = recipientDto.getOrdering();
                 } else if (recipientDto.getId() == recipientId) {
+                    log.info("check find is true");
                     find = true;
                 }
 
@@ -759,7 +761,7 @@ public class BpmnService {
             }
         }
 
-        // Cac to chuc khac co cung thu tu xu ly
+//        // Cac to chuc khac co cung thu tu xu ly
         for (ParticipantDTO participantDto : contractDto.getParticipants()) {
             if (Objects.equals(participantDto.getOrdering(), currentParticipant.getOrdering())) {
 

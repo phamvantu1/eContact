@@ -17,6 +17,7 @@ import java.util.Set;
 @ToString(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "recipients")
+@EqualsAndHashCode
 public class Recipient extends BaseEntity {
 
     @Id
@@ -70,7 +71,7 @@ public class Recipient extends BaseEntity {
     @ToString.Exclude
     @JsonIgnore
     @JsonManagedReference
-    private Set<Field> fields;
+    private Set<Field> fields = new HashSet<>();
 
     public void addField(Field field) {
         if (field != null) {

@@ -121,7 +121,7 @@ public class RecipientService {
             throw ex;
         } catch (Exception e) {
             log.error("error approval haaaauhaa: {}", e.getMessage());
-            throw new RuntimeException("Failed to fetch recipient by id", e);
+            throw new RuntimeException("Failed to approval by recipientId", e);
         }
         return null;
     }
