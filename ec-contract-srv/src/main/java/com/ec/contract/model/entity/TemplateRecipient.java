@@ -18,6 +18,7 @@ import java.util.Set;
 @ToString(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "template_recipients")
+@EqualsAndHashCode
 public class TemplateRecipient extends BaseEntity {
 
     @Id
