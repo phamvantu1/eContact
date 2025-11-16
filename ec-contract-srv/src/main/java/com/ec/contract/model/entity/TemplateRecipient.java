@@ -14,10 +14,11 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @ToString(onlyExplicitlyIncluded = true)
 @Entity
-@Table(name = "recipients")
-public class Recipient extends BaseEntity {
+@Table(name = "template_recipients")
+public class TemplateRecipient extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -64,15 +65,15 @@ public class Recipient extends BaseEntity {
     @EqualsAndHashCode.Exclude
     @JsonIgnore
     @JoinColumn(name = "participant_id")
-    private Participant participant;
+    private TemplateParticipant participant;
 
     @OneToMany(mappedBy = "recipient", fetch = FetchType.LAZY)
     @ToString.Exclude
     @JsonIgnore
     @JsonManagedReference
-    private Set<Field> fields;
+    private Set<TemplateField> fields;
 
-    public void addField(Field field) {
+    public void addField(TemplateField field) {
         if (field != null) {
             if (fields == null) {
                 fields = new HashSet<>();

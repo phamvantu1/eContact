@@ -3,6 +3,7 @@ package com.ec.contract.service;
 import com.ec.contract.constant.RecipientRole;
 import com.ec.contract.constant.RecipientStatus;
 import com.ec.contract.mapper.ContractMapper;
+import com.ec.contract.mapper.ParticipantMapper;
 import com.ec.contract.model.dto.ParticipantDTO;
 import com.ec.contract.model.dto.RecipientDTO;
 import com.ec.contract.model.dto.response.ContractResponseDTO;
@@ -27,32 +28,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ProcessService {
 
-    private final DocumentService documentService;
     private final ParticipantRepository participantRepository;
     private final FieldRepository fieldRepository;
     private final RecipientRepository recipientRepository;
-    private final FieldService fieldService;
-    private final ModelMapper modelMapper;
-    private final CustomerService customerService;
     private final RecipientService recipientService;
     private final ContractRepository contractRepository;
-    private final ObjectMapper objectMapper;
-    private final ContractService contractService;
     private final BpmnService bpmnService;
     private final ContractMapper contractMapper;
+    private final ParticipantMapper participantMapper;
 
     @Transactional
-    public Optional<ParticipantDTO> updateRecipientForCoordinator(Authentication authentication,
+    public ParticipantDTO updateRecipientForCoordinator(Authentication authentication,
                                                                   int participantId,
                                                                   int recipientId,
                                                                   Collection<RecipientDTO> recipientDtoCollection) {
@@ -77,7 +70,6 @@ public class ProcessService {
                     participant.addRecipient(recipient);
                 }
 
-
                 final var updated = participantRepository.save(participant);
 
                 final var recipientOptional = recipientRepository.findById(recipientId);
@@ -92,30 +84,12 @@ public class ProcessService {
                     Contract contract = contractRepository.findById(participant.getContractId())
                             .orElseThrow(() -> new CustomException(ResponseCode.CONTRACT_NOT_FOUND));
 
-                    List<Participant> listParticipants = participantRepository.findByContractIdOrderByOrderingAsc(contract.getId())
-                            .stream().toList();
-
-                    for (Participant par : listParticipants) {
-                        Set<Recipient> recipientSet = par.getRecipients();
-
-                        for (Recipient reci : recipientSet) {
-                            Collection<Field> fieldCollection = fieldRepository.findAllByRecipientId(reci.getId());
-                            reci.setFields(Set.copyOf(fieldCollection));
-                        }
-
-                        par.setRecipients(recipientSet);
-                    }
-
-                    contract.setParticipants(Set.copyOf(listParticipants));
-
                     ContractResponseDTO contractResponseDTO = contractMapper.toDto(contract);
 
                     bpmnService.handleCoordinatorService(contractResponseDTO, recipientId);
                 }
 
-                return Optional.ofNullable(
-                        modelMapper.map(updated, ParticipantDTO.class)
-                );
+                return participantMapper.toDto(updated);
             }
         }catch (CustomException ce){
             log.error("Error updateRecipientForCoordinator: {}", ce.getMessage());
@@ -124,11 +98,12 @@ public class ProcessService {
         catch (Exception e) {
             log.error("Error catch updateRecipientForCoordinator: {}", e.getMessage());
             // TODO: handle exception
+            throw e;
         }
 
-        return Optional.empty();
-    }
+        return null;
 
+    }
 
     @Transactional
     public RecipientDTO approval(int recipientId) {
@@ -140,11 +115,7 @@ public class ProcessService {
         if (recipient.isPresent()) {
 
             try {
-
-                var recipientOptional = recipientService.approval(recipientId, recipient.get().getRole());
-
-                return recipientOptional.get();
-
+                return recipientService.approval(recipientId, recipient.get().getRole());
             } catch (Exception e) {
                 log.error("Đã có lỗi xảy ra trong quá trình xử lý hàm process approval", e);
             }

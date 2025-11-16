@@ -10,10 +10,11 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @ToString(onlyExplicitlyIncluded = true)
 @Entity
-@Table(name = "fields")
-public class Field extends BaseEntity {
+@Table(name = "template_fields")
+public class TemplateField extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -52,5 +53,5 @@ public class Field extends BaseEntity {
     @JoinColumn(name = "recipient_id", insertable = false, updatable = false)
     @ToString.Exclude
     @JsonBackReference
-    private Recipient recipient;
+    private TemplateRecipient recipient;
 }

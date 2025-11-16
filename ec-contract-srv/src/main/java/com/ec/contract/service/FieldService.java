@@ -18,10 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,8 +27,6 @@ public class FieldService {
 
     private final ContractRepository contractRepository;
     private final FieldRepository fieldRepository;
-    private final ParticipantService participantService;
-    private final RecipientService recipientService;
     private final RecipientRepository recipientRepository;
     private final FieldMapper fieldMapper;
     private final DocumentRepository documentRepository;
@@ -69,5 +64,34 @@ public class FieldService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public FieldDto getFieldById(Integer fieldId){
+        try{
+            Field field = fieldRepository.findById(fieldId)
+                    .orElseThrow(() -> new CustomException(ResponseCode.FIELD_NOT_FOUND));
+            return fieldMapper.toDto(field);
+        }catch (CustomException e) {
+            throw e;
+        }catch (Exception e){
+            log.error("Error get fields: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to create fields", e);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<FieldDto> getByContract(Integer contractId){
+        try{
+
+            List<Field> fieldList = fieldRepository.findByContractId(contractId);
+
+            return fieldMapper.toDtoList(fieldList);
+
+        }catch (CustomException e) {
+            throw e;
+        }catch (Exception e){
+            log.error("Error get fields: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to create fields", e);
+        }
+    }
 
 }

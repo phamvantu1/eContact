@@ -80,6 +80,7 @@ public enum ResponseCode {
 
     // field
     FIELD_SIGN_NOT_FOUND("ERR_404", "Không tìm thấy ô ký số", HttpStatus.NOT_FOUND),
+    FIELD_NOT_FOUND("ERR_404", "Không tìm thấy Field", HttpStatus.NOT_FOUND),
 
 
     // cert

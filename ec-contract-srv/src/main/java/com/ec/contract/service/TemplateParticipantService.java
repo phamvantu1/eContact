@@ -1,41 +1,37 @@
 package com.ec.contract.service;
 
-import com.ec.contract.mapper.ParticipantMapper;
+import com.ec.contract.mapper.TemplateParticipantMapper;
 import com.ec.contract.model.dto.ParticipantDTO;
 import com.ec.contract.model.dto.RecipientDTO;
-import com.ec.contract.model.entity.Contract;
-import com.ec.contract.model.entity.Field;
-import com.ec.contract.model.entity.Participant;
-import com.ec.contract.model.entity.Recipient;
-import com.ec.contract.repository.ContractRepository;
-import com.ec.contract.repository.FieldRepository;
-import com.ec.contract.repository.ParticipantRepository;
-import com.ec.contract.repository.RecipientRepository;
+import com.ec.contract.model.entity.TemplateContract;
+import com.ec.contract.model.entity.TemplateField;
+import com.ec.contract.model.entity.TemplateParticipant;
+import com.ec.contract.model.entity.TemplateRecipient;
+import com.ec.contract.repository.TemplateContractRepository;
+import com.ec.contract.repository.TemplateFieldRepository;
+import com.ec.contract.repository.TemplateParticipantRepository;
+import com.ec.contract.repository.TemplateRecipientRepository;
 import com.ec.library.exception.CustomException;
 import com.ec.library.exception.ResponseCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ParticipantService {
+public class TemplateParticipantService {
 
-    private final ParticipantRepository participantRepository;
-    private final ContractRepository contractRepository;
-    private final RecipientRepository recipientRepository;
-    private final ParticipantMapper participantMapper;
-    private final FieldRepository fieldRepository;
-    private final ModelMapper modelMapper;
+    private final TemplateContractRepository templateContractRepository;
+    private final TemplateParticipantRepository templateParticipantRepository;
+    private final TemplateRecipientRepository templateRecipientRepository;
+    private final TemplateFieldRepository templateFieldRepository;
+    private final TemplateParticipantMapper templateParticipantMapper;
 
     @Transactional
     public List<ParticipantDTO> createParticipant(List<ParticipantDTO> participantDTOList,
@@ -44,7 +40,7 @@ public class ParticipantService {
 
             log.info("start createParticipant for contractId: {}", contractId);
 
-            Contract contract = contractRepository.findById(contractId)
+            TemplateContract contract = templateContractRepository.findById(contractId)
                     .orElseThrow(() -> new CustomException(ResponseCode.CONTRACT_NOT_FOUND));
 
             if (hasDuplicateRecipientEmail(participantDTOList)) {
@@ -55,7 +51,7 @@ public class ParticipantService {
             // xoa cac doi tac bi trung
             participantDTOList = removeParticipantDuplicates(participantDTOList);
 
-            var currentParticipants = participantRepository.findByContractIdOrderByOrderingAsc(contractId);
+            var currentParticipants = templateParticipantRepository.findByContractIdOrderByOrderingAsc(contractId);
 
             // xu ly truong hop FE khong truyen participant id
             for (var participantDto : participantDTOList) {
@@ -66,7 +62,7 @@ public class ParticipantService {
                             .orElse(null);
 
                     if (tmpRecipient != null) {
-                        var r = recipientRepository.findById(tmpRecipient.getId()).orElse(null);
+                        var r = templateRecipientRepository.findById(tmpRecipient.getId()).orElse(null);
                         if (r != null) {
                             participantDto.setId(r.getParticipant().getId());
                         }
@@ -86,43 +82,43 @@ public class ParticipantService {
                 }
 
                 if (!exists) {
-                    participantRepository.deleteById(p.getId());
+                    templateParticipantRepository.deleteById(p.getId());
                 }
             }
 
-            final Collection<Participant> participantCollection = new ArrayList<>();
+            final Collection<TemplateParticipant> participantCollection = new ArrayList<>();
 
             for (var participantDto : participantDTOList) {
-                Participant participant;
+                TemplateParticipant participant;
 
                 if (participantDto.getId() != null) {
-                    participant = participantRepository.findById(participantDto.getId())
+                    participant = templateParticipantRepository.findById(participantDto.getId())
                             .orElseThrow(() -> new CustomException(ResponseCode.PARTICIPANT_NOT_FOUND));
                 } else {
-                    participant = new Participant();
+                    participant = new TemplateParticipant();
                 }
 
                 BeanUtils.copyProperties(participantDto, participant,
                         "type", "status", "recipients");
 
                 // 🧠 Lấy danh sách recipient hiện tại
-                Set<Recipient> existingRecipients = participant.getRecipients() != null
+                Set<TemplateRecipient> existingRecipients = participant.getRecipients() != null
                         ? participant.getRecipients()
                         : new HashSet<>();
 
-                Set<Recipient> updatedRecipients = new HashSet<>();
+                Set<TemplateRecipient> updatedRecipients = new HashSet<>();
 
                 for (var recipientDto : participantDto.getRecipients()) {
-                    Recipient recipient;
+                    TemplateRecipient recipient;
 
                     if (recipientDto.getId() != null) {
                         // Tìm recipient cũ trong danh sách hiện tại
                         recipient = existingRecipients.stream()
                                 .filter(r -> r.getId().equals(recipientDto.getId()))
                                 .findFirst()
-                                .orElse(new Recipient());
+                                .orElse(new TemplateRecipient());
                     } else {
-                        recipient = new Recipient();
+                        recipient = new TemplateRecipient();
                     }
 
                     BeanUtils.copyProperties(recipientDto, recipient,
@@ -147,20 +143,20 @@ public class ParticipantService {
                 participantCollection.add(participant);
             }
 
-            final var participantList = participantRepository.saveAll(participantCollection);
+            final var participantList = templateParticipantRepository.saveAll(participantCollection);
 
-            for(Participant participant: participantList) {
-                Set<Recipient> recipientSet = participant.getRecipients();
+            for(TemplateParticipant participant: participantList) {
+                Set<TemplateRecipient> recipientSet = participant.getRecipients();
 
-                for(Recipient recipient : recipientSet) {
-                    Collection<Field> fieldCollection = fieldRepository.findAllByRecipientId(recipient.getId());
-                    for(Field field : fieldCollection) {
+                for(TemplateRecipient recipient : recipientSet) {
+                    Collection<TemplateField> fieldCollection = templateFieldRepository.findAllByRecipientId(recipient.getId());
+                    for(TemplateField field : fieldCollection) {
                         recipient.addField(field);
                     }
                 }
             }
 
-            var result = participantMapper.toDtoList(participantList);
+            var result = templateParticipantMapper.toDtoList(participantList);
 
             sortRecipient(result);
 
@@ -173,61 +169,22 @@ public class ParticipantService {
             throw ex;
         }
     }
-
-    @Transactional(readOnly = true)
-    public ParticipantDTO getParticipantById(Integer participantId) {
-        try{
-            Participant participant = participantRepository.findById(participantId)
-                    .orElseThrow(() -> new CustomException(ResponseCode.PARTICIPANT_NOT_FOUND));
-
-            ParticipantDTO participantDTO = participantMapper.toDto(participant);
-
-            sortRecipient(List.of(participantDTO));
-
-            return participantDTO;
-        }catch (CustomException e) {
-            throw e;
-        } catch (Exception ex) {
-            log.error("Error getting participants for contractId {}: {}", participantId, ex.getMessage());
-            throw ex;
+    private boolean hasDuplicateRecipientEmail(List<ParticipantDTO> participantDTOList) {
+        if (participantDTOList == null || participantDTOList.isEmpty()) {
+            return false;
         }
-    }
 
-    @Transactional(readOnly = true)
-    public List<ParticipantDTO> getParticipantsByContractId(Integer contractId) {
-        try{
-            Collection<Participant> participantList = participantRepository.findByContractIdOrderByOrderingAsc(contractId);
-
-            List<ParticipantDTO> participantDTOList = participantMapper.toDtoList((List<Participant>) participantList);
-
-            sortRecipient(participantDTOList);
-
-            return participantDTOList;
-        }catch (CustomException e) {
-            throw e;
-        } catch (Exception ex) {
-            log.error("Error getting participants for contractId {}: {}", contractId, ex.getMessage());
-            throw ex;
-        }
-    }
-
-    @Transactional(readOnly = true)
-    public ParticipantDTO getByRecipientId(Integer recipientId) {
-        try{
-
-            Recipient recipient = recipientRepository.findById(recipientId).orElseThrow(() -> new CustomException(ResponseCode.RECIPIENT_NOT_FOUND));
-
-            Participant participant = participantRepository.findById(recipient.getParticipant().getId())
-                    .orElseThrow(() -> new CustomException(ResponseCode.PARTICIPANT_NOT_FOUND));
-
-            return participantMapper.toDto(participant);
-
-        }catch (CustomException e) {
-            throw e;
-        } catch (Exception ex) {
-            log.error("Error getting participants for recipientId {}: {}", recipientId, ex.getMessage());
-            throw ex;
-        }
+        // Duyệt tất cả recipients trong tất cả participants
+        return participantDTOList.stream()
+                .filter(p -> p.getRecipients() != null)
+                .flatMap(p -> p.getRecipients().stream())
+                .map(RecipientDTO::getEmail)
+                .filter(Objects::nonNull)
+                .map(String::toLowerCase) // bỏ qua hoa/thường
+                .collect(java.util.stream.Collectors.groupingBy(e -> e, java.util.stream.Collectors.counting()))
+                .values()
+                .stream()
+                .anyMatch(count -> count > 1);
     }
 
     private List<ParticipantDTO> removeParticipantDuplicates(List<ParticipantDTO> participantDTOList) {
@@ -247,24 +204,6 @@ public class ParticipantService {
         return uniqueParticipants;
     }
 
-    private boolean hasDuplicateRecipientEmail(List<ParticipantDTO> participantDTOList) {
-        if (participantDTOList == null || participantDTOList.isEmpty()) {
-            return false;
-        }
-
-        // Duyệt tất cả recipients trong tất cả participants
-        return participantDTOList.stream()
-                .filter(p -> p.getRecipients() != null)
-                .flatMap(p -> p.getRecipients().stream())
-                .map(RecipientDTO::getEmail)
-                .filter(Objects::nonNull)
-                .map(String::toLowerCase) // bỏ qua hoa/thường
-                .collect(java.util.stream.Collectors.groupingBy(e -> e, java.util.stream.Collectors.counting()))
-                .values()
-                .stream()
-                .anyMatch(count -> count > 1);
-    }
-
     // sắp xếp recipient theo role và ordering
     public void sortRecipient(Collection<ParticipantDTO> participants) {
         try {
@@ -276,19 +215,6 @@ public class ParticipantService {
             }
         } catch (Exception e) {
             log.error("Lỗi sắp xếp recipient", e);
-        }
-    }
-
-    private void sortParticipant(List<ParticipantDTO> participants) {
-        try{
-            participants.sort((p1, p2) -> {
-                if (Objects.equals(p1.getType(), p2.getType())) {
-                    return p1.getOrdering() - p2.getOrdering();
-                }
-                return p1.getType() - p2.getType();
-            });
-        }catch (Exception e){
-            log.error("lỗi sắp xếp lại tổ chức trong hợp đồng", e);
         }
     }
 

@@ -4,6 +4,8 @@ import com.ec.contract.model.dto.RecipientDTO;
 import com.ec.contract.model.dto.keystoreDTO.CertificateDtoRequest;
 import com.ec.contract.service.*;
 import com.ec.library.response.Response;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,11 +19,13 @@ import java.util.Collection;
 @RequestMapping("/processes")
 @AllArgsConstructor
 @Slf4j
+@Tag(name = "Process Controller", description = "Quản lý luồng xử lý hợp đồng")
 public class ProcessController {
     private final ProcessService processService;
     private final SignService signService;
 
     @PutMapping("/coordinator/{participantId}/{recipientId}")
+    @Operation(summary = "Điều phối hợp đồng")
     public Response<?> coordinator(
             Authentication authentication,
             @PathVariable("participantId") int participantId,
@@ -34,7 +38,7 @@ public class ProcessController {
                 recipientDtoCollection
         );
 
-        return Response.success(participantDtoOptional.orElse(null));
+        return Response.success(participantDtoOptional);
     }
 
     /**
@@ -43,6 +47,7 @@ public class ProcessController {
      * @param recipientId                  Mã số tham chiếu khách hàng xử lý hồ sơ
      * @return Thông báo cho người dùng cuối
      */
+    @Operation(summary = "Phê duyệt hợp đồng")
     @PutMapping("/approval/{recipientId}")
     public Response<?> approval(@PathVariable("recipientId") int recipientId) {
 
@@ -54,6 +59,7 @@ public class ProcessController {
 
     }
 
+    @Operation(summary = "Ký hợp đồng")
     @PostMapping("/certificate")
     public ResponseEntity<?> KeystoreSignFile(
             Authentication authentication,

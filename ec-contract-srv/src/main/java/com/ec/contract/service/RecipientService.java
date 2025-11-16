@@ -71,7 +71,10 @@ public class RecipientService {
                 recipient.setStatus(RecipientStatus.PROCESSING.getDbVal());
 
                 final var updated = recipientRepository.save(recipient);
-                return Optional.of(modelMapper.map(updated, RecipientDTO.class));
+
+                RecipientDTO recipientDTO = recipientMapper.toDto(updated);
+
+                return Optional.of(recipientDTO);
             }
         } catch (Exception e) {
             log.error("Error updating recipient status to PROCESSING for id {}: {}", id, e.getMessage());
@@ -87,34 +90,40 @@ public class RecipientService {
      * @return Thông tin khách hàng đã được cập nhật thành công
      */
     @Transactional
-    public Optional<RecipientDTO> approval(int recipientId , int recipientRole) {
-        var recipientOptional = recipientRepository.findById(recipientId);
+    public RecipientDTO approval(int recipientId , int recipientRole) {
+        try{
+            var recipientOptional = recipientRepository.findById(recipientId);
 
-        if (recipientOptional.isPresent()) {
+            if (recipientOptional.isPresent()) {
 
-            var recipient = recipientOptional.get();
+                var recipient = recipientOptional.get();
 
-            recipient.setProcessAt(LocalDateTime.now());
-            recipient.setStatus(RecipientStatus.APPROVAL.getDbVal());
-            Recipient updated = recipientRepository.save(recipient);
+                recipient.setProcessAt(LocalDateTime.now());
+                recipient.setStatus(RecipientStatus.APPROVAL.getDbVal());
+                Recipient updated = recipientRepository.save(recipient);
 
-            log.info("start bpmn recipient: {}", recipientId);
+                log.info("start bpmn recipient: {}", recipientId);
 
-            Participant participant = participantRepository.findById(recipient.getParticipant().getId())
-                    .orElseThrow(() -> new CustomException(ResponseCode.PARTICIPANT_NOT_FOUND));
+                Participant participant = participantRepository.findById(recipient.getParticipant().getId())
+                        .orElseThrow(() -> new CustomException(ResponseCode.PARTICIPANT_NOT_FOUND));
 
-            ContractResponseDTO contractResponseDTO = contractService.getContractById(participant.getContractId());
+                ContractResponseDTO contractResponseDTO = contractService.getContractById(participant.getContractId());
 
-            if(recipientRole == 2) bpmnService.reviewContract(contractResponseDTO, recipientId);
+                if(recipientRole == 2) bpmnService.reviewContract(contractResponseDTO, recipientId);
 
-            if(recipientRole == 3 || recipientRole == 4) bpmnService.signContract(contractResponseDTO, recipientId);
+                if(recipientRole == 3 || recipientRole == 4) bpmnService.signContract(contractResponseDTO, recipientId);
 
-            var recipientDto = modelMapper.map(updated, RecipientDTO.class);
+                return recipientMapper.toDto(updated);
 
-            return Optional.of(recipientDto);
+            }
+        } catch (CustomException ex) {
+            log.error("error approval : {}", ex.getMessage());
+            throw ex;
+        } catch (Exception e) {
+            log.error("error approval haaaauhaa: {}", e.getMessage());
+            throw new RuntimeException("Failed to fetch recipient by id", e);
         }
-
-        return Optional.empty();
+        return null;
     }
 
     @Transactional

@@ -1,6 +1,5 @@
 package com.ec.contract.model.entity;
 
-
 import com.ec.library.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

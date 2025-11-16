@@ -127,6 +127,7 @@ public class DocumentService {
 
     public Map<String, String> getPresignedUrl(Integer docId){
         try{
+            log.info("docId is : {}", docId);
             Document document = documentRepository.findById(docId)
                     .orElseThrow(() -> new CustomException(ResponseCode.DOCUMENT_NOT_FOUND));
 
@@ -136,7 +137,7 @@ public class DocumentService {
         } catch (CustomException e){
             throw e;
         } catch (Exception e){
-            log.error("Error generating presigned URL: {}", e.getMessage(), e);
+            log.error("Error generating  presigned URL: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to generate presigned URL", e);
         }
     }

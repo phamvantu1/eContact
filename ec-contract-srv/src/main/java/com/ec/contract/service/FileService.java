@@ -78,7 +78,7 @@ public class FileService {
         try {
             log.info("BẮT ĐẦU BACKUP FILE LÊN MINIO");
 
-            Document document = documentRepository.findByContractIdAndType(contractId, DocumentType.FINALLY.getDbVal());
+            Document document = documentRepository.findByContractIdAndType(contractId, DocumentType.PRIMARY.getDbVal());
 
             if (!StringUtils.hasText(pathFileReplace)) {
                 log.info("Dừng backup file dữ liệu pathFileReplace , bucketMinio , pathMinio trống");

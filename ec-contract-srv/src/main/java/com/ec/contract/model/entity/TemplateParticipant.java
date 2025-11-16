@@ -2,7 +2,6 @@ package com.ec.contract.model.entity;
 
 import com.ec.library.entity.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,11 +9,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "participants")
+@Table(name = "template_participants")
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Participant extends BaseEntity {
+public class TemplateParticipant extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -35,15 +35,16 @@ public class Participant extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "contract_id", insertable = false, updatable = false)
     @JsonBackReference
-    private Contract contract;
+    private TemplateContract contract;
 
     @OneToMany(mappedBy = "participant", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    @Builder.Default
     @OrderBy("role asc, ordering asc, id asc")
-    private Set<Recipient> recipients = new HashSet<>();
+    private Set<TemplateRecipient> recipients = new HashSet<>();
 
-    public void addRecipient(Recipient recipient) {
+    public void addRecipient(TemplateRecipient recipient) {
         if (recipient != null) {
             if (recipients == null) {
                 recipients = new HashSet<>();

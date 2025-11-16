@@ -27,5 +27,15 @@ public class FieldController {
         );
     }
 
+    @GetMapping("/{fieldId}")
+    @Operation(summary = "Lấy thông tin ô field")
+    public Response<?> getFieldById(@PathVariable("fieldId") Integer fieldId){
+        return Response.success(fieldService.getFieldById(fieldId));
+    }
 
+    @GetMapping("/by-contract/{contractId}")
+    @Operation(summary = "Lấy thông tin ô field theo id hợp đồng ")
+    public Response<?> getByContract(@PathVariable("contractId") Integer contractId){
+        return Response.success(fieldService.getByContract(contractId));
+    }
 }

@@ -84,5 +84,4 @@ public class ContractController {
         return Response.success(contractService.getBpmnFlowByContractId(contractId));
     }
 
-
 }

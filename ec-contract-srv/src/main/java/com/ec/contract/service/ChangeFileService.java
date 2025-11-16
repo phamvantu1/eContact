@@ -8,6 +8,7 @@ import com.ec.contract.model.dto.response.ContractResponseDTO;
 import com.ec.contract.model.entity.Field;
 import com.ec.contract.repository.*;
 import com.ec.contract.util.CurrencyUtil;
+import com.itextpdf.io.font.constants.StandardFonts;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -173,7 +174,7 @@ public class ChangeFileService {
         } catch (Exception e) {
             log.error("Lỗi tại hàm byPassContractNo bắt đầu backup File ban đầu");
             fileService.backUpFileMinioIfErrorAction(pathFileBackUp, contractId);
-            log.error("can't by pass add text: ", e);
+            log.error("can't by pass add text iiuajhsdg: ", e);
             throw new RuntimeException(e.getMessage());
         } finally {
             if (StringUtils.hasText(tempFilePath)) {
@@ -233,8 +234,11 @@ public class ChangeFileService {
             }
 
             fontName = (StringUtils.hasText(fontName) ? fontName : "Times New Roman");
-            var fontProgram = FontProgramFactory.createFont(String.format("./resources/fonts/%s.ttf", fontName));
-            var font = PdfFontFactory.createFont(fontProgram, PdfEncodings.IDENTITY_H);
+//            var fontProgram = FontProgramFactory.createFont(String.format("./resources/fonts/%s.ttf", fontName));
+//            var font = PdfFontFactory.createFont(fontProgram, PdfEncodings.IDENTITY_H);
+
+            var font = PdfFontFactory.createFont(StandardFonts.HELVETICA);
+
 
             final var textList = StringUtil.autoSplit(text, width, font, fontSize);
 
@@ -347,7 +351,7 @@ public class ChangeFileService {
         } catch (Exception e) {
             log.error("Lỗi tại hàm byPassContractUid bắt đầu backup File ban đầu");
             fileService.backUpFileMinioIfErrorAction(pathFileBackUp, contractId);
-            log.error("can't by pass add text: ", e);
+            log.error("can't by pass add text thth: ", e);
             throw new RuntimeException(e.getMessage());
         } finally {
             if (StringUtils.hasText(tempFilePath)) {

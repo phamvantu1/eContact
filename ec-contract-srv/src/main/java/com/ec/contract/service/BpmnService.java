@@ -428,6 +428,8 @@ public class BpmnService {
      */
     private void checkFinish(ContractResponseDTO contractDto) {
 
+        log.info("start check finish-===============");
+
         boolean finish = true;
 
         try {
@@ -580,7 +582,11 @@ public class BpmnService {
      */
     public ParticipantDTO getCurrentParticipant(ContractResponseDTO contractDto, int recipientId) {
 
+        log.info("participant of contract {}", contractDto.getParticipants());
+
         for (ParticipantDTO participant : contractDto.getParticipants()) {
+
+            log.info("participant of contract {}", contractDto.getParticipants());
 
             Set<RecipientDTO> recipients = participant.getRecipients();
             for (RecipientDTO recipientDto : recipients) {
@@ -633,6 +639,7 @@ public class BpmnService {
             contractService.sortParallel(contractDto, recipients);
 
             int prevOrder = -1;
+
             RecipientDTO nextRecipientDto = null;
 
             for (RecipientDTO recipientDto : recipients) {
@@ -682,7 +689,6 @@ public class BpmnService {
         } finally {
             // dong y
             checkFinish(contractDto);
-
         }
 
     }

@@ -83,19 +83,20 @@ public class ContractService {
 
             Customer customer = customerService.getCustomerByEmail(email);
 
-            Contract contract = Contract.builder()
-                    .name(requestDTO.getName())
-                    .contractNo(requestDTO.getContractNo())
-                    .signTime(requestDTO.getSignTime())
-                    .note(requestDTO.getNote())
-                    .typeId(requestDTO.getTypeId())
-                    .isTemplate(requestDTO.getIsTemplate())
-                    .templateContractId(requestDTO.getTemplateContractId())
-                    .contractExpireTime(requestDTO.getContractExpireTime())
-                    .customerId(customer.getId())
-                    .organizationId(customer.getOrganizationId())
-                    .status(ContractStatus.DRAFT.getDbVal()) // tao mac dinh la draft
-                    .build();
+            Contract contract = new Contract(); // tạo instance mới
+            contract.setName(requestDTO.getName());
+            contract.setContractNo(requestDTO.getContractNo());
+            contract.setSignTime(requestDTO.getSignTime());
+            contract.setNote(requestDTO.getNote());
+            contract.setTypeId(requestDTO.getTypeId());
+            contract.setIsTemplate(requestDTO.getIsTemplate());
+            contract.setTemplateContractId(requestDTO.getTemplateContractId());
+            contract.setContractExpireTime(requestDTO.getContractExpireTime());
+            contract.setCustomerId(customer.getId());
+            contract.setOrganizationId(customer.getOrganizationId());
+            contract.setStatus(ContractStatus.DRAFT.getDbVal()); // mặc định draft
+
+            contract.setParticipants(new HashSet<>());
 
             if (!requestDTO.getContractRefs().isEmpty()) {
                 Set<ContractRef> contractRefs = new HashSet<>();
@@ -190,7 +191,7 @@ public class ContractService {
             );
 
             if (contract.isPresent()) {
-                log.info("start ---aaaahbagba");
+                log.info("start ---change status -----");
                 final var contractStatusOptional = Arrays.stream(ContractStatus.values())
                         .filter(contractStatus -> contractStatus.getDbVal().equals(status))
                         .findFirst();
@@ -219,7 +220,7 @@ public class ContractService {
         } catch (CustomException ex) {
             throw ex;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to change contract status", e);
+            throw new RuntimeException("Failed to change contract status hhhhhausghf", e);
         }
     }
 
@@ -244,60 +245,32 @@ public class ContractService {
         }
     }
 
+    @Transactional
     public Optional<ContractResponseDTO> changeStatus(Integer contractId, Integer status, ContractChangeStatusRequest request) {
 
-        try{
-            log.info("[changeStatus] id: {}, status: {}", contractId, status);
+        try {
+            log.info("[changeStatus] contractId: {}, status: {}", contractId, status);
 
-            final var contractStatusOptional =
-                    Arrays.stream(ContractStatus.values()).filter(cs -> Objects.equals(cs.getDbVal(), status)).findFirst();
+            Contract contract = contractRepository.findById(contractId)
+                    .orElseThrow(() -> new CustomException(ResponseCode.CONTRACT_NOT_FOUND));
 
-            if (contractStatusOptional.isPresent()) {
-                final var contractOptional = contractRepository.findById(contractId);
+            contract.setStatus(status);
 
-                if (contractOptional.isPresent()) {
-
-                    var contract = contractOptional.get();
-
-                    contract.setStatus(status);
-
-                    contract = contractRepository.save(contract);
-
-                    if (request != null && StringUtils.hasText(request.getReason())) {
-                        contract.setReasonReject(request.getReason());
-                        contract.setCancelDate(LocalDateTime.now());
-                    }
-
-                    List<Participant> listParticipants = participantRepository.findByContractIdOrderByOrderingAsc(contractId)
-                            .stream().toList();
-
-                    for (Participant participant : listParticipants) {
-                        Set<Recipient> recipientSet = participant.getRecipients();
-
-                        for (Recipient recipient : recipientSet) {
-                            Collection<Field> fieldCollection = fieldRepository.findAllByRecipientId(recipient.getId());
-                            recipient.setFields(Set.copyOf(fieldCollection));
-                        }
-
-                        participant.setRecipients(recipientSet);
-                    }
-
-                    contract.setParticipants(Set.copyOf(listParticipants));
-
-                    log.info("[changeStatus] Updated contract status to {}", status);
-
-                    var result = contractMapper.toDto(contract);
-
-                    return Optional.of(result);
-                }
+            if (request != null && StringUtils.hasText(request.getReason())) {
+                contract.setReasonReject(request.getReason());
+                contract.setCancelDate(LocalDateTime.now());
             }
 
+            contract = contractRepository.save(contract);
 
-        }catch (Exception e){
-            log.error("Failed to change contract status: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to change contract status", e);
+            var result = contractMapper.toDto(contract);
+
+            return Optional.of(result);
+
+        } catch (Exception e) {
+            log.error("Failed to change contract status saSSSSSS: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to change contract status agaaaaaa", e);
         }
-        return Optional.empty();
     }
 
     public Page<ContractResponseDTO> getMyContracts(Authentication authentication,
