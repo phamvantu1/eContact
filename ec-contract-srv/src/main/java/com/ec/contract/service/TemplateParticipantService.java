@@ -3,10 +3,7 @@ package com.ec.contract.service;
 import com.ec.contract.mapper.TemplateParticipantMapper;
 import com.ec.contract.model.dto.ParticipantDTO;
 import com.ec.contract.model.dto.RecipientDTO;
-import com.ec.contract.model.entity.TemplateContract;
-import com.ec.contract.model.entity.TemplateField;
-import com.ec.contract.model.entity.TemplateParticipant;
-import com.ec.contract.model.entity.TemplateRecipient;
+import com.ec.contract.model.entity.*;
 import com.ec.contract.repository.TemplateContractRepository;
 import com.ec.contract.repository.TemplateFieldRepository;
 import com.ec.contract.repository.TemplateParticipantRepository;
@@ -215,6 +212,63 @@ public class TemplateParticipantService {
             }
         } catch (Exception e) {
             log.error("Lỗi sắp xếp recipient", e);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public ParticipantDTO getParticipantById(Integer participantId) {
+        try{
+            TemplateParticipant participant = templateParticipantRepository.findById(participantId)
+                    .orElseThrow(() -> new CustomException(ResponseCode.PARTICIPANT_NOT_FOUND));
+
+            ParticipantDTO participantDTO = templateParticipantMapper.toDto(participant);
+
+            sortRecipient(List.of(participantDTO));
+
+            return participantDTO;
+        }catch (CustomException e) {
+            throw e;
+        } catch (Exception ex) {
+            log.error("Error getting participants for contractId {}: {}", participantId, ex.getMessage());
+            throw ex;
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<ParticipantDTO> getParticipantsByContractId(Integer contractId) {
+        try{
+            Collection<TemplateParticipant> participantList = templateParticipantRepository.findByContractIdOrderByOrderingAsc(contractId);
+
+            List<ParticipantDTO> participantDTOList = templateParticipantMapper.toDtoList((List<TemplateParticipant>) participantList);
+
+            sortRecipient(participantDTOList);
+
+            return participantDTOList;
+        }catch (CustomException e) {
+            throw e;
+        } catch (Exception ex) {
+            log.error("Error getting participants for contractId {}: {}", contractId, ex.getMessage());
+            throw ex;
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public ParticipantDTO getByRecipientId(Integer recipientId) {
+        try{
+
+            TemplateRecipient recipient = templateRecipientRepository.findById(recipientId)
+                    .orElseThrow(() -> new CustomException(ResponseCode.RECIPIENT_NOT_FOUND));
+
+            TemplateParticipant participant = templateParticipantRepository.findById(recipient.getParticipant().getId())
+                    .orElseThrow(() -> new CustomException(ResponseCode.PARTICIPANT_NOT_FOUND));
+
+            return templateParticipantMapper.toDto(participant);
+
+        }catch (CustomException e) {
+            throw e;
+        } catch (Exception ex) {
+            log.error("Error getting participants for recipientId {}: {}", recipientId, ex.getMessage());
+            throw ex;
         }
     }
 

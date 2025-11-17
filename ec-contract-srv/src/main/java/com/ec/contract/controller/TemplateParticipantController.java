@@ -27,4 +27,22 @@ public class TemplateParticipantController {
 
     }
 
+    @GetMapping("/{participantId}")
+    @Operation(summary = "Lấy thông tin tổ chức tham gia hợp đồng theo ID", description = "Lấy thông tin chi tiết của một tổ chức tham gia hợp đồng dựa trên ID.")
+    public Response<?> getParticipantById(@PathVariable(name = "participantId") Integer participantId) {
+        return Response.success(templateParticipantService.getParticipantById(participantId));
+    }
+
+    @GetMapping("/by-contract/{contractId}")
+    @Operation(summary = "Lấy danh sách tổ chức tham gia hợp đồng theo ID hợp đồng mẫu", description = "Lấy danh sách các tổ chức tham gia hợp đồng dựa trên ID hợp đồng mẫu.")
+    public Response<?> getParticipantsByContractId(@PathVariable(name = "contractId") Integer contractId) {
+        return Response.success(templateParticipantService.getParticipantsByContractId(contractId));
+    }
+
+    @GetMapping("/byRecipientId/{recipientId}")
+    @Operation(summary = "Lay danh sach participant theo recipientId")
+    public Response<?> getByRecipientId(@PathVariable(name = "recipientId") Integer recipientId){
+        return Response.success(templateParticipantService.getByRecipientId(recipientId));
+    }
+
 }

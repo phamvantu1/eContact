@@ -7,10 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -28,5 +25,17 @@ public class TemplateFieldController {
         return  Response.success(
                 templateFieldService.createFields(fieldDtoList)
         );
+    }
+
+    @GetMapping("/{fieldId}")
+    @Operation(summary = "Lấy thông tin ô field")
+    public Response<?> getFieldById(@PathVariable("fieldId") Integer fieldId){
+        return Response.success(templateFieldService.getFieldById(fieldId));
+    }
+
+    @GetMapping("/by-contract/{contractId}")
+    @Operation(summary = "Lấy thông tin ô field theo id hợp đồng mẫu")
+    public Response<?> getByContract(@PathVariable("contractId") Integer contractId){
+        return Response.success(templateFieldService.getByContract(contractId));
     }
 }

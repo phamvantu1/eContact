@@ -61,4 +61,34 @@ public class TemplateFieldService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public FieldDto getFieldById(Integer fieldId){
+        try{
+            TemplateField field = templateFieldRepository.findById(fieldId)
+                    .orElseThrow(() -> new CustomException(ResponseCode.FIELD_NOT_FOUND));
+            return templateFieldMapper.toDto(field);
+        }catch (CustomException e) {
+            throw e;
+        }catch (Exception e){
+            log.error("Error get fields: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to create fields", e);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<FieldDto> getByContract(Integer contractId){
+        try{
+
+            List<TemplateField> fieldList = templateFieldRepository.findByContractId(contractId);
+
+            return templateFieldMapper.toDtoList(fieldList);
+
+        }catch (CustomException e) {
+            throw e;
+        }catch (Exception e){
+            log.error("Error get fields: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to create fields", e);
+        }
+    }
+
 }
