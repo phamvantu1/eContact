@@ -11,6 +11,10 @@ import com.ec.contract.repository.ContractRepository;
 import com.ec.contract.repository.DocumentRepository;
 import com.ec.library.exception.CustomException;
 import com.ec.library.exception.ResponseCode;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfReader;
+import com.itextpdf.signatures.PdfPKCS7;
+import com.itextpdf.signatures.SignatureUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -25,6 +29,8 @@ import org.springframework.mock.web.MockMultipartFile;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -200,6 +206,55 @@ public class DocumentService {
               log.error("Error replacing file in MinIO: {}", e.getMessage(), e);
               throw new RuntimeException("Failed to replace file in MinIO", e);
        }
+    }
+
+    public Map<String, Object> verifyPdfSignature(MultipartFile file) {
+        Map<String, Object> result = new HashMap<>();
+
+        try (InputStream is = file.getInputStream()) {
+
+            PdfDocument pdfDoc = new PdfDocument(new PdfReader(is));
+            SignatureUtil signUtil = new SignatureUtil(pdfDoc);
+
+            List<String> signatureNames = signUtil.getSignatureNames();
+
+            if (signatureNames.isEmpty()) {
+                result.put("status", false);
+                result.put("message", "File không có chữ ký số");
+                return result;
+            }
+
+            String sigName = signatureNames.get(0); // lấy chữ ký đầu tiên
+
+            PdfPKCS7 pkcs7 = signUtil.readSignatureData(sigName);
+
+            //Tính toàn vẹn của file (Integrity)
+            boolean isIntact = pkcs7.verifySignatureIntegrityAndAuthenticity();
+            X509Certificate cert = (X509Certificate) pkcs7.getSigningCertificate();
+
+            result.put("signatureName", sigName);
+            result.put("isDocumentIntact", isIntact);
+            result.put("signDate", pkcs7.getSignDate().getTime());
+            result.put("signer", cert.getSubjectDN().toString());
+            result.put("issuer", cert.getIssuerDN().toString());
+            result.put("notBefore", cert.getNotBefore());
+            result.put("notAfter", cert.getNotAfter());
+
+            try {
+                cert.checkValidity();
+                result.put("certificateValid", true);
+            } catch (Exception e) {
+                result.put("certificateValid", false);
+            }
+
+            result.put("status", isIntact);
+
+        } catch (Exception e) {
+            result.put("status", false);
+            result.put("error", e.getMessage());
+        }
+
+        return result;
     }
 
 }

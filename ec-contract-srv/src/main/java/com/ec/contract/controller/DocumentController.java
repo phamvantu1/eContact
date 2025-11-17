@@ -76,5 +76,11 @@ public class DocumentController {
         );
     }
 
+    @PostMapping("/verify-signature")
+    @Operation(summary = "Xác minh chữ ký số trong tài liệu", description = "Xác minh chữ ký số trong tài liệu PDF và trả về kết quả chi tiết về chữ ký.")
+    public Response<?> verifyPdf(@RequestParam("file") MultipartFile file) {
+        return Response.success(documentService.verifyPdfSignature(file));
+    }
+
 
 }
