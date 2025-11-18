@@ -100,7 +100,7 @@ public class ContractService {
 
             contract.setParticipants(new HashSet<>());
 
-            if (!requestDTO.getContractRefs().isEmpty()) {
+            if (requestDTO.getContractRefs() != null && !requestDTO.getContractRefs().isEmpty()) {
                 Set<ContractRef> contractRefs = new HashSet<>();
                 for (var ref : requestDTO.getContractRefs()) {
                     if (ref.getRefId() == null) {
@@ -142,26 +142,6 @@ public class ContractService {
 
             // Lấy danh sách participant theo hợp đồng
             List<Participant> listParticipants = participantRepository.findByContractIdOrderByOrderingAsc(contractId).stream().toList();
-
-//            for (Participant participant : listParticipants) {
-//                Set<Recipient> recipientSet = participant.getRecipients();
-//
-////                for (Recipient recipient : recipientSet) {
-////                    // Lấy danh sách field và dùng HashSet mutable
-////                    Collection<Field> fieldCollection = fieldRepository.findAllByRecipientId(recipient.getId());
-////                    recipient.setFields(new HashSet<>(fieldCollection));
-////                }
-//
-//                // Không cần set lại recipientSet, nhưng nếu muốn chắc chắn là mutable:
-//                participant.setRecipients(new HashSet<>(recipientSet));
-//            }
-
-//            // Dùng HashSet mutable cho participants
-//            contract.setParticipants(new HashSet<>(listParticipants));
-
-            // Lấy danh sách contract references
-            List<ContractRef> contractRefList = contractRefRepository.findByContractId(contractId);
-            contract.setContractRefs(new HashSet<>(contractRefList));
 
             // Map entity sang DTO
             var contractResponseDTO = contractMapper.toDto(contract);

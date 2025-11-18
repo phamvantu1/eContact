@@ -165,7 +165,7 @@ public class TemplateContractService {
 
             Customer customer = customerService.getCustomerByEmail(email);
 
-            Page<TemplateContract> templateContracts = templateContractRepository.getMyTemplateContracts(customer.getId(), type, name,pageable );
+            Page<TemplateContract> templateContracts = templateContractRepository.getMyTemplateContracts(customer.getId(), type, name,pageable);
 
             return templateContractMapper.toDtoList(templateContracts.getContent());
         } catch (CustomException ex) {
