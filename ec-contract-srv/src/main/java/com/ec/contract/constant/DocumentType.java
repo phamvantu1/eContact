@@ -9,7 +9,8 @@ public enum DocumentType implements IDbValue<Integer> {
     COMPRESS(5),
     BACKUP(6),
     IMG_EKYC(7),
-    HISTORY(8);
+    HISTORY(8),
+    REJECT(9);
 
     final Integer dbVal;
 

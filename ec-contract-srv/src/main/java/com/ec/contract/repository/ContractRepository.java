@@ -114,12 +114,10 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
             value = " select c.* from contracts c " +
                     " join participants p on c.id = p.contract_id " +
                     " join recipients r on p.id = r.participant_id " +
-                    " where r.id = :recipientId ",
-            nativeQuery = true
-    )
-    Optional<Contract> findByRecipientId(
-            @Param("recipientId") Integer recipientId
-    );
+                    " where r.id = :recipientId " +
+                    "limit 1 ",
+            nativeQuery = true)
+    Optional<Contract> findByRecipientId(@Param("recipientId") Integer recipientId);
 
     @Query(value = "SELECT count(distinct c.id) from contracts c " +
             " JOIN participants p ON c.id = p.contract_id " +

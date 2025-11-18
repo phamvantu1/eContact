@@ -7,18 +7,17 @@ import com.ec.contract.model.dto.ImageGenerateDto;
 import com.ec.contract.model.dto.keystoreDTO.CertificateDtoRequest;
 import com.ec.contract.model.dto.keystoreDTO.GetDataCertRequest;
 import com.ec.contract.model.dto.signatureDto.SignatureDtoRequest;
-import com.ec.contract.model.entity.Contract;
 import com.ec.contract.model.entity.Field;
 import com.ec.contract.model.entity.keystoreEntity.Certificate;
 import com.ec.contract.repository.*;
 import com.ec.contract.service.signatureContainer.MyExternalSignatureContainer;
 import com.ec.contract.util.ImageUtils;
 import com.ec.contract.util.StringUtil;
-import com.ec.library.exception.CustomException;
 import com.ec.library.exception.ResponseCode;
 import com.ec.library.response.Response;
 import com.itextpdf.io.image.ImageData;
 import com.itextpdf.io.image.ImageDataFactory;
+import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfReader;
@@ -27,7 +26,6 @@ import com.itextpdf.signatures.ExternalBlankSignatureContainer;
 import com.itextpdf.signatures.IExternalSignatureContainer;
 import com.itextpdf.signatures.PdfSignatureAppearance;
 import com.itextpdf.signatures.PdfSigner;
-import com.itextpdf.kernel.geom.Rectangle;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -60,10 +58,8 @@ public class SignService {
     private final ContractRepository contractRepository;
     private final DocumentRepository documentRepository;
     private final DocumentService documentService;
-    private final FieldService fieldService;
     private final FieldRepository fieldRepository;
     private final ModelMapper modelMapper;
-
 
     private static final String spaceGenImage = "              ";
     private static final double cell_text_ratio = 0.7;

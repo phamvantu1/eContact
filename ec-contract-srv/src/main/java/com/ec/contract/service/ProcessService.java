@@ -1,34 +1,29 @@
 package com.ec.contract.service;
 
-import com.ec.contract.constant.RecipientRole;
 import com.ec.contract.constant.RecipientStatus;
 import com.ec.contract.mapper.ContractMapper;
 import com.ec.contract.mapper.ParticipantMapper;
+import com.ec.contract.mapper.RecipientMapper;
+import com.ec.contract.model.dto.ContractChangeStatusRequest;
 import com.ec.contract.model.dto.ParticipantDTO;
 import com.ec.contract.model.dto.RecipientDTO;
 import com.ec.contract.model.dto.response.ContractResponseDTO;
 import com.ec.contract.model.entity.Contract;
-import com.ec.contract.model.entity.Field;
-import com.ec.contract.model.entity.Participant;
 import com.ec.contract.model.entity.Recipient;
 import com.ec.contract.repository.ContractRepository;
-import com.ec.contract.repository.FieldRepository;
 import com.ec.contract.repository.ParticipantRepository;
 import com.ec.contract.repository.RecipientRepository;
 import com.ec.library.exception.CustomException;
 import com.ec.library.exception.ResponseCode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collection;
 
 @Service
 @RequiredArgsConstructor
@@ -36,13 +31,13 @@ import java.util.*;
 public class ProcessService {
 
     private final ParticipantRepository participantRepository;
-    private final FieldRepository fieldRepository;
     private final RecipientRepository recipientRepository;
     private final RecipientService recipientService;
     private final ContractRepository contractRepository;
     private final BpmnService bpmnService;
     private final ContractMapper contractMapper;
     private final ParticipantMapper participantMapper;
+    private final RecipientMapper recipientMapper;
 
     @Transactional
     public ParticipantDTO updateRecipientForCoordinator(Authentication authentication,
@@ -121,6 +116,36 @@ public class ProcessService {
             }
         }
         return null;
+    }
+
+    @Transactional
+    public RecipientDTO rejectContract(int recipientId, ContractChangeStatusRequest reason){
+        try{
+
+            Recipient recipient = recipientRepository.findById(recipientId)
+                    .orElseThrow(() -> new CustomException(ResponseCode.RECIPIENT_NOT_FOUND));
+
+            recipient.setStatus(RecipientStatus.APPROVAL.getDbVal());
+            recipient.setProcessAt(LocalDateTime.now());
+            recipient.setReasonReject(reason.getReason());
+
+            var update = recipientRepository.save(recipient);
+
+            Contract contract = contractRepository.findByRecipientId(recipientId).get();
+
+            bpmnService.rejectContract(contractMapper.toDto(contract), reason);
+
+            return recipientMapper.toDto(update);
+
+        }catch (CustomException ce){
+            log.error("Error rejectContract: {}", ce.getMessage());
+            throw ce;
+        }
+        catch (Exception e) {
+            log.error("Error catch rejectContract: {}", e.getMessage());
+            // TODO: handle exception
+            throw e;
+        }
     }
 
 }

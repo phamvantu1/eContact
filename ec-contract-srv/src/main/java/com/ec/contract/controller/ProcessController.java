@@ -1,5 +1,6 @@
 package com.ec.contract.controller;
 
+import com.ec.contract.model.dto.ContractChangeStatusRequest;
 import com.ec.contract.model.dto.RecipientDTO;
 import com.ec.contract.model.dto.keystoreDTO.CertificateDtoRequest;
 import com.ec.contract.service.*;
@@ -44,7 +45,7 @@ public class ProcessController {
     /**
      * Khách hàng xác nhận đồng ý xử lý hồ sơ
      *
-     * @param recipientId                  Mã số tham chiếu khách hàng xử lý hồ sơ
+     * @param recipientId Mã số tham chiếu khách hàng xử lý hồ sơ
      * @return Thông báo cho người dùng cuối
      */
     @Operation(summary = "Phê duyệt hợp đồng")
@@ -73,6 +74,16 @@ public class ProcessController {
 //        }
 //        signService.changEndContractProcessedByRecipientId(recipientId);
         return ResponseEntity.ok(response);
+
+    }
+
+    @PutMapping("/reject/{recipientId}")
+    @Operation(summary = "Từ chối xử lý hợp đồng")
+    public Response<?> rejectContract(
+            @PathVariable("recipientId") int recipientId,
+            @RequestBody ContractChangeStatusRequest reason) {
+
+        return Response.success(processService.rejectContract(recipientId, reason));
 
     }
 

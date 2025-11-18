@@ -1,9 +1,9 @@
 package com.ec.contract.service;
 
 import com.ec.contract.constant.ContractStatus;
-import com.ec.contract.constant.ParticipantType;
 import com.ec.contract.constant.RecipientRole;
 import com.ec.contract.constant.RecipientStatus;
+import com.ec.contract.model.dto.ContractChangeStatusRequest;
 import com.ec.contract.model.dto.OrganizationDTO;
 import com.ec.contract.model.dto.ParticipantDTO;
 import com.ec.contract.model.dto.RecipientDTO;
@@ -13,10 +13,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -388,6 +391,30 @@ public class BpmnService {
 
             log.info("contract.get: {}", contractDto);
 
+        } catch (Exception e) {
+            log.error("error", e);
+
+        }
+    }
+
+    /**
+     * Tu choi HD
+     */
+    public void rejectContract(ContractResponseDTO contractDto, ContractChangeStatusRequest request) {
+
+        log.info("========start reject contract bpmn========");
+
+        try {
+
+            // Cap nhat trang thai hop dong thanh REJECT
+            ContractResponseDTO changeStatusResponse = contractService.changeStatus(contractDto.getId(), ContractStatus.REJECTED.getDbVal(), request).get();
+
+            log.info("Reject contract: " + changeStatusResponse);
+
+//            // gui thong bao den tat ca nguoi tham gia HD
+//            for (ParticipantDTO participant : contractDto.getParticipants()) {
+//
+//            }
         } catch (Exception e) {
             log.error("error", e);
 

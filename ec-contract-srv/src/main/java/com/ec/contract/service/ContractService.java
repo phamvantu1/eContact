@@ -197,6 +197,7 @@ public class ContractService {
 
             log.info("request {}", request.orElse(null));
 
+            // Thay đổi trạng thái hợp đồng
             final var contract = changeStatus(
                     contractId, status, request.orElse(null)
             );
