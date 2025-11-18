@@ -38,4 +38,11 @@ public class TemplateFieldController {
     public Response<?> getByContract(@PathVariable("contractId") Integer contractId){
         return Response.success(templateFieldService.getByContract(contractId));
     }
+
+    @PutMapping("/update/{fieldId}")
+    @Operation(summary = "Cập nhật thông tin trường dữ liệu")
+    public Response<?> updateField(@PathVariable("fieldId") Integer fieldId,
+                                   @Valid @RequestBody FieldDto fieldDto){
+        return Response.success(templateFieldService.updateField(fieldId, fieldDto));
+    }
 }

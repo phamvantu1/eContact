@@ -46,11 +46,13 @@ docker ps -a
 ----------------------------------------------------------------
 minIO :
 
-docker create --name minio -p 9000:9000 -p 9001:9001 -e "MINIO_ROOT_USER=minioadmin" -e "MINIO_ROOT_PASSWORD=minioadmin" -v /data/minio:/data quay.io/minio/minio server /data --console-address ":9001"
+mkdir C:\minio\data
 
+docker rm minio
+
+docker create --name minio -p 9000:9000 -p 9001:9001 -e "MINIO_ROOT_USER=minioadmin" -e "MINIO_ROOT_PASSWORD=minioadmin" -v C:\minio\data:/data quay.io/minio/minio server /data --console-address ":9001"
 
 docker start minio
-
 
 docker stop minio
 

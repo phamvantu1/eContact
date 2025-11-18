@@ -91,4 +91,25 @@ public class TemplateFieldService {
         }
     }
 
+    @Transactional
+    public FieldDto updateField(Integer fieldId, FieldDto fieldDto){
+        try{
+            TemplateField existingField = templateFieldRepository.findById(fieldId)
+                    .orElseThrow(() -> new CustomException(ResponseCode.FIELD_NOT_FOUND));
+
+            TemplateField updatedField = templateFieldMapper.toEntity(fieldDto);
+            updatedField.setId(existingField.getId());
+
+            TemplateField savedField = templateFieldRepository.save(updatedField);
+
+            return templateFieldMapper.toDto(savedField);
+
+        }catch (CustomException e) {
+            throw e;
+        }catch (Exception e){
+            log.error("Error updating field: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to update field", e);
+        }
+    }
+
 }
