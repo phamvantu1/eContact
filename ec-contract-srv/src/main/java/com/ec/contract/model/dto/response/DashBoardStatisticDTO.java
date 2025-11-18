@@ -1,26 +1,30 @@
 package com.ec.contract.model.dto.response;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class DashBoardStatisticDTO {
 
-    private final long totalDraff;
+    private  Integer totalDraff;
 
-    private final long totalCreated;
+    private  Integer totalCreated;
 
-    private final long totalCancel;
+    private  Integer totalCancel;
 
-    private final long totalReject;
+    private  Integer totalReject;
 
-    private final long totalSigned;
+    private  Integer totalSigned;
 
-    private final long totalLiquidation;
+    private  Integer totalLiquidation;
 
-    private final long totalProcess;
+    private  Integer totalProcessing;
 
-    private final long totalExpires;
+    private  Integer totalExpires;
 
-    private final long totalAboutExpire;
+    private  Integer totalAboutExpire;
+
+    private  Integer totalWaiting;
 
 }

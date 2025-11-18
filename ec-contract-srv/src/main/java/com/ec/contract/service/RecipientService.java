@@ -29,11 +29,7 @@ public class RecipientService {
 
     private final RecipientRepository recipientRepository;
     private final RecipientMapper recipientMapper;
-    private final FieldRepository fieldRepository;
-    private final ModelMapper modelMapper;
-
     private final ContractService contractService;
-    private final ParticipantService participantService;
     private final ParticipantRepository participantRepository;
 
 

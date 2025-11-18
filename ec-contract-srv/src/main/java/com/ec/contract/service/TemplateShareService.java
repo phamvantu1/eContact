@@ -1,17 +1,16 @@
 package com.ec.contract.service;
 
 import com.ec.contract.constant.BaseStatus;
-import com.ec.contract.constant.ContractStatus;
-import com.ec.contract.mapper.ContractMapper;
-import com.ec.contract.mapper.ShareMapper;
+import com.ec.contract.mapper.TemplateContractMapper;
+import com.ec.contract.mapper.TemplateShareMapper;
 import com.ec.contract.model.dto.ShareDto;
 import com.ec.contract.model.dto.ShareListDto;
 import com.ec.contract.model.dto.request.FilterContractDTO;
 import com.ec.contract.model.dto.response.ContractResponseDTO;
-import com.ec.contract.model.entity.Contract;
-import com.ec.contract.model.entity.Share;
-import com.ec.contract.repository.ContractRepository;
-import com.ec.contract.repository.ShareRepository;
+import com.ec.contract.model.entity.TemplateContract;
+import com.ec.contract.model.entity.TemplateShare;
+import com.ec.contract.repository.TemplateContractRepository;
+import com.ec.contract.repository.TemplateShareRepository;
 import com.ec.contract.util.PasswordUtil;
 import com.ec.library.exception.CustomException;
 import com.ec.library.exception.ResponseCode;
@@ -26,27 +25,27 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
-public class ShareService {
+@Slf4j
+public class TemplateShareService {
 
-    private final ShareRepository shareRepository;
-    private final ContractRepository contractRepository;
+    private final TemplateContractRepository templateContractRepository;
+    private final TemplateShareRepository templateShareRepository;
+    private final TemplateShareMapper templateShareMapper;
     private final CustomerService customerService;
-    private final ShareMapper shareMapper;
-    private final ContractMapper contractMapper;
+    private final TemplateContractMapper templateContractMapper;
 
     @Transactional
     public Object createShare(ShareListDto shareListDto) {
         try {
-            final var contractOptional = contractRepository.findById(shareListDto.getContractId());
-            if (contractOptional.isEmpty() || !Objects.equals(contractOptional.get().getStatus(), ContractStatus.SIGNED.getDbVal())) {
-                log.info("Contract ID {} not found or not signed", shareListDto.getContractId());
-                throw new CustomException(ResponseCode.CONTRACT_NO_SIGNED);
+
+            final var contractOptional = templateContractRepository.findById(shareListDto.getContractId());
+
+            if (contractOptional.isEmpty()) {
+                throw new CustomException(ResponseCode.CONTRACT_NOT_FOUND);
             }
 
             var contract = contractOptional.get();
@@ -64,19 +63,19 @@ public class ShareService {
                             .contractId(contract.getId())
                             .build();
 
-                    Share share;
+                    TemplateShare share;
 
                     if (shareDto.getEmail() != null) {
                         shareDto.setEmail(shareDto.getEmail().trim());
                     }
 
                     // check exists shared
-                    var shareOptional = shareRepository.findFirstByContractIdAndEmail(shareDto.getContractId(), shareDto.getEmail());
+                    var shareOptional = templateShareRepository.findFirstByContractIdAndEmail(shareDto.getContractId(), shareDto.getEmail());
                     if (shareOptional.isPresent()) {
                         share = shareOptional.get();
                     } else {
 
-                        share = shareMapper.toEntity(shareDto);
+                        share = templateShareMapper.toEntity(shareDto);
                     }
 
                     // check customer
@@ -94,7 +93,7 @@ public class ShareService {
                     share.setPassword(password);
                     share.setStatus(BaseStatus.ACTIVE.ordinal());
 
-                    final var created = shareRepository.save(share);
+                    final var created = templateShareRepository.save(share);
 
 //                if (created != null) {
 //                    OrganizationDto organizationDto = customerService.getOrganizationByCustomer(customerUser.getId()).get();
@@ -136,7 +135,7 @@ public class ShareService {
 
             Pageable pageable = PageRequest.of(filterContractDTO.getPage(), filterContractDTO.getSize());
 
-            Page<Contract> contractPage = shareRepository.getAllSharesContract(
+            Page<TemplateContract> contractPage = templateShareRepository.getAllSharesContract(
                     email,
                     filterContractDTO.getTextSearch(),
                     filterContractDTO.getFromDate(),
@@ -145,7 +144,7 @@ public class ShareService {
             );
 
             List<ContractResponseDTO> contractResponseDTOS = contractPage.getContent().stream()
-                    .map(contractMapper::toDto)
+                    .map(templateContractMapper::toDto)
                     .toList();
 
             return new PageImpl<>(contractResponseDTOS, pageable, contractPage.getTotalElements());

@@ -13,8 +13,8 @@ public enum ContractStatus implements IDbValue<Integer> {
     LIQUIDATED(40),
     REJECTED(31),
     CANCEL(32),
-    ABOUT_EXPRIRE(1),
-    EXPRIRE(2),
+    ABOUT_EXPIRE(1),
+    EXPIRE(2),
     SCAN(35);
     final Integer dbVal;
 
@@ -42,9 +42,9 @@ public enum ContractStatus implements IDbValue<Integer> {
                 return "Từ chối";
             case CANCEL:
                 return "Hủy bỏ";
-            case ABOUT_EXPRIRE:
+            case ABOUT_EXPIRE:
                 return "sắp hết hạn";
-            case EXPRIRE:
+            case EXPIRE:
                 return "Quá hạn";
             case SCAN:
                 return "Lưu trữ";
