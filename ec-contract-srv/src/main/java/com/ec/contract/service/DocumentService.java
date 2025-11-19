@@ -19,18 +19,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.interactive.digitalsignature.PDSignature;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.mock.web.MockMultipartFile;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.Security;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +57,7 @@ public class DocumentService {
         String uniqueName = System.currentTimeMillis() + "_" + originalName;
 
         // 2️⃣ Upload lên MinIO
-        minioService.uploadFile(file,uniqueName);
+        minioService.uploadFile(file, uniqueName);
 
         return DocumentResponseDTO.builder()
                 .fileName(originalName)
@@ -62,8 +65,8 @@ public class DocumentService {
                 .build();
     }
 
-    public DocumentResponseDTO createDocument(DocumentUploadDTO documentUploadDTO){
-        try{
+    public DocumentResponseDTO createDocument(DocumentUploadDTO documentUploadDTO) {
+        try {
             Contract contract = contractRepository.findById(documentUploadDTO.getContractId())
                     .orElseThrow(() -> new CustomException(ResponseCode.CONTRACT_NOT_FOUND));
 
@@ -80,9 +83,9 @@ public class DocumentService {
             Document savedDocument = documentRepository.save(document);
 
             return documentMapper.toDto(savedDocument);
-        } catch (CustomException e){
+        } catch (CustomException e) {
             throw e;
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error("Error creating document record: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to create document record", e);
         }
@@ -131,8 +134,8 @@ public class DocumentService {
         }
     }
 
-    public Map<String, String> getPresignedUrl(Integer docId){
-        try{
+    public Map<String, String> getPresignedUrl(Integer docId) {
+        try {
             log.info("docId is : {}", docId);
             Document document = documentRepository.findById(docId)
                     .orElseThrow(() -> new CustomException(ResponseCode.DOCUMENT_NOT_FOUND));
@@ -140,72 +143,72 @@ public class DocumentService {
             String url = minioService.getPresignedUrl(document.getBucketName(), document.getPath());
 
             return Map.of("message", url);
-        } catch (CustomException e){
+        } catch (CustomException e) {
             throw e;
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error("Error generating  presigned URL: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to generate presigned URL", e);
         }
     }
 
-    public List<DocumentResponseDTO> getDocumentByContract(Integer contractId){
-       try{
-           List<Document> documents = documentRepository.findByContractIdAndStatus(contractId,BaseStatus.ACTIVE.ordinal());
+    public List<DocumentResponseDTO> getDocumentByContract(Integer contractId) {
+        try {
+            List<Document> documents = documentRepository.findByContractIdAndStatus(contractId, BaseStatus.ACTIVE.ordinal());
 
-           return documentMapper.toDtoList(documents);
-       } catch (CustomException e){
-           throw e;
-       } catch (Exception e){
-              log.error("Error fetching documents by contract ID {}: {}", contractId, e.getMessage(), e);
-              throw new RuntimeException("Failed to fetch documents by contract ID", e);
-       }
+            return documentMapper.toDtoList(documents);
+        } catch (CustomException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error fetching documents by contract ID {}: {}", contractId, e.getMessage(), e);
+            throw new RuntimeException("Failed to fetch documents by contract ID", e);
+        }
     }
 
     public String replace(String newFilePath, Document document) throws Exception {
-       try{
-           log.info(String.format("start replace file <- %s",  newFilePath));
-           log.info("Request replace file trên minio , path file cũ : {} , ", newFilePath);
-           final var headers = new HttpHeaders();
-           headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        try {
+            log.info(String.format("start replace file <- %s", newFilePath));
+            log.info("Request replace file trên minio , path file cũ : {} , ", newFilePath);
+            final var headers = new HttpHeaders();
+            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-           File file = new File(newFilePath);
-           FileInputStream input = new FileInputStream(file);
+            File file = new File(newFilePath);
+            FileInputStream input = new FileInputStream(file);
 
-           MultipartFile multipartFile = new MockMultipartFile(
-                   "file",                  // tên field form
-                   file.getName(),          // tên file gốc
-                   "application/pdf",       // ✅ MIME type cho PDF
-                   input                    // dữ liệu file
-           );
+            MultipartFile multipartFile = new MockMultipartFile(
+                    "file",                  // tên field form
+                    file.getName(),          // tên file gốc
+                    "application/pdf",       // ✅ MIME type cho PDF
+                    input                    // dữ liệu file
+            );
 
-           // 2️⃣ Gọi hàm uploadDocument() (bạn đã có sẵn)
-           DocumentResponseDTO uploadResponse = uploadDocument(multipartFile);
+            // 2️⃣ Gọi hàm uploadDocument() (bạn đã có sẵn)
+            DocumentResponseDTO uploadResponse = uploadDocument(multipartFile);
 
-           log.info("Response trả về request replace file trên Minio : {}", uploadResponse);
+            log.info("Response trả về request replace file trên Minio : {}", uploadResponse);
 
-           if(document != null){
-               document.setType(DocumentType.HISTORY.getDbVal());
+            if (document != null) {
+                document.setType(DocumentType.HISTORY.getDbVal());
 
-               documentRepository.save(document);
+                documentRepository.save(document);
 
-               Document newDocument = Document.builder()
-                       .name(document.getName())
-                       .path(uploadResponse.getPath())        // chính là objectName trong MinIO
-                       .fileName(uploadResponse.getFileName())
-                       .bucketName(bucketName)
-                       .contractId(document.getContractId())
-                       .type(DocumentType.FINALLY.getDbVal())
-                       .status(BaseStatus.ACTIVE.ordinal())
-                       .build();
+                Document newDocument = Document.builder()
+                        .name(document.getName())
+                        .path(uploadResponse.getPath())        // chính là objectName trong MinIO
+                        .fileName(uploadResponse.getFileName())
+                        .bucketName(bucketName)
+                        .contractId(document.getContractId())
+                        .type(DocumentType.FINALLY.getDbVal())
+                        .status(BaseStatus.ACTIVE.ordinal())
+                        .build();
 
-               documentRepository.save(newDocument);
-           }
+                documentRepository.save(newDocument);
+            }
 
-           return "success";
-       }catch (Exception e){
-              log.error("Error replacing file in MinIO: {}", e.getMessage(), e);
-              throw new RuntimeException("Failed to replace file in MinIO", e);
-       }
+            return "success";
+        } catch (Exception e) {
+            log.error("Error replacing file in MinIO: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to replace file in MinIO", e);
+        }
     }
 
     public Map<String, Object> verifyPdfSignature(MultipartFile file) {
@@ -213,41 +216,51 @@ public class DocumentService {
 
         try (InputStream is = file.getInputStream()) {
 
+            Security.addProvider(new BouncyCastleProvider());
+
             PdfDocument pdfDoc = new PdfDocument(new PdfReader(is));
             SignatureUtil signUtil = new SignatureUtil(pdfDoc);
 
-            List<String> signatureNames = signUtil.getSignatureNames();
+            List<String> signatures = signUtil.getSignatureNames();
 
-            if (signatureNames.isEmpty()) {
+            if (signatures.isEmpty()) {
                 result.put("status", false);
-                result.put("message", "File không có chữ ký số");
+                result.put("message", "PDF không có chữ ký số");
                 return result;
             }
 
-            String sigName = signatureNames.get(0); // lấy chữ ký đầu tiên
+            List<Map<String, Object>> signInfos = new ArrayList<>();
 
-            PdfPKCS7 pkcs7 = signUtil.readSignatureData(sigName);
+            for (String name : signatures) {
 
-            //Tính toàn vẹn của file (Integrity)
-            boolean isIntact = pkcs7.verifySignatureIntegrityAndAuthenticity();
-            X509Certificate cert = (X509Certificate) pkcs7.getSigningCertificate();
+                PdfPKCS7 pkcs7 = signUtil.readSignatureData(name);
+                X509Certificate cert = (X509Certificate) pkcs7.getSigningCertificate();
 
-            result.put("signatureName", sigName);
-            result.put("isDocumentIntact", isIntact);
-            result.put("signDate", pkcs7.getSignDate().getTime());
-            result.put("signer", cert.getSubjectDN().toString());
-            result.put("issuer", cert.getIssuerDN().toString());
-            result.put("notBefore", cert.getNotBefore());
-            result.put("notAfter", cert.getNotAfter());
+                Map<String, Object> info = new HashMap<>();
+                info.put("signatureName", name);
+                info.put("signDate", pkcs7.getSignDate().getTime());
+                info.put("signer", cert.getSubjectDN().toString());
+                info.put("issuer", cert.getIssuerDN().toString());
+                info.put("notBefore", cert.getNotBefore());
+                info.put("notAfter", cert.getNotAfter());
 
-            try {
-                cert.checkValidity();
-                result.put("certificateValid", true);
-            } catch (Exception e) {
-                result.put("certificateValid", false);
+                // Kiểm tra chứng thư còn hạn
+                try {
+                    cert.checkValidity();
+                    info.put("certificateValid", true);
+                } catch (Exception e) {
+                    info.put("certificateValid", false);
+                }
+
+                // Kiểm tra tính toàn vẹn tài liệu
+                boolean isIntact = pkcs7.verifySignatureIntegrityAndAuthenticity();
+                info.put("isDocumentIntact", isIntact);
+
+                signInfos.add(info);
             }
 
-            result.put("status", isIntact);
+            result.put("status", true);
+            result.put("signatures", signInfos);
 
         } catch (Exception e) {
             result.put("status", false);
@@ -256,5 +269,6 @@ public class DocumentService {
 
         return result;
     }
+
 
 }
