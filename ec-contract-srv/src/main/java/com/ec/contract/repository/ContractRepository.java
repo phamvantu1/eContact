@@ -243,6 +243,7 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
     Integer countTotalCancelledContractsByOrganization(@Param("organizationId") Integer organizationId,
                                                        @Param("fromDate") String fromDate,
                                                        @Param("toDate") String toDate);
+
     @Query(value = " SELECT count(distinct c.id) from contracts c " +
             "where ( organizationId is null or c.organization_id = :organizationId )" +
             "and c.status = 2 " +
@@ -250,7 +251,61 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
             "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) "
             , nativeQuery = true)
     Integer countTotalExpiredContractsByOrganization(@Param("organizationId") Integer organizationId,
-                                                      @Param("fromDate") String fromDate,
-                                                      @Param("toDate") String toDate);
+                                                     @Param("fromDate") String fromDate,
+                                                     @Param("toDate") String toDate);
+
+    @Query(value = "SELECT c.* from contracts c " +
+            "where c.organization_id = :organizationId " +
+            "and (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
+            "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) " +
+            "AND (:completedFromDate IS NULL OR (c.updated_at >= CAST(:completedFromDate AS timestamp) and c.status = 30) ) " +
+            "AND (:completedToDate IS NULL OR (c.updated_at <= CAST(:completedToDate AS timestamp) and c.status = 30)) " +
+            "AND (:status IS NULL OR c.status = :status ) " +
+            "and (c.contract_no ILIKE CONCAT('%', :textSearch, '%') OR c.name ILIKE CONCAT('%', :textSearch, '%')) " +
+            "ORDER BY c.created_at DESC",
+            countQuery = "SELECT count(*) from contracts c " +
+                    "where c.organization_id = :organizationId " +
+                    "and (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
+                    "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) " +
+                    "AND (:completedFromDate IS NULL OR (c.updated_at >= CAST(:completedFromDate AS timestamp) and c.status = 30) ) " +
+                    "AND (:completedToDate IS NULL OR (c.updated_at <= CAST(:completedToDate AS timestamp) and c.status = 30)) " +
+                    "AND (:status IS NULL OR c.status = :status ) " +
+                    "and (c.contract_no ILIKE CONCAT('%', :textSearch, '%') OR c.name ILIKE CONCAT('%', :textSearch, '%')) "
+            , nativeQuery = true)
+    Page<Contract> reportDetail(@Param("organizationId") int organizationId,
+                                @Param("fromDate") String fromDate,
+                                @Param("toDate") String toDate,
+                                @Param("completedFromDate") String completedFromDate,
+                                @Param("completedToDate") String completedToDate,
+                                @Param("status") Integer status,
+                                @Param("textSearch") String textSearch,
+                                Pageable pageable);
+
+    @Query(value = "SELECT c.* from contracts c " +
+            "where c.organization_id = :organizationId " +
+            "and (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
+            "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) " +
+            "AND (:completedFromDate IS NULL OR (c.updated_at >= CAST(:completedFromDate AS timestamp) and c.status = 30) ) " +
+            "AND (:completedToDate IS NULL OR (c.updated_at <= CAST(:completedToDate AS timestamp) and c.status = 30)) " +
+            "AND (:status IS NULL OR c.status = :status ) " +
+            "and (c.contract_no ILIKE CONCAT('%', :textSearch, '%') OR c.name ILIKE CONCAT('%', :textSearch, '%')) " +
+            "ORDER BY c.created_at DESC",
+            countQuery = "SELECT count(*) from contracts c " +
+                    "where c.organization_id = :organizationId " +
+                    "and (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
+                    "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) " +
+                    "AND (:completedFromDate IS NULL OR (c.updated_at >= CAST(:completedFromDate AS timestamp) and c.status = 30) ) " +
+                    "AND (:completedToDate IS NULL OR (c.updated_at <= CAST(:completedToDate AS timestamp) and c.status = 30)) " +
+                    "AND (:status IS NULL OR c.status = :status ) " +
+                    "and (c.contract_no ILIKE CONCAT('%', :textSearch, '%') OR c.name ILIKE CONCAT('%', :textSearch, '%')) "
+            , nativeQuery = true)
+    Page<Contract> reportByStatus(@Param("organizationId") int organizationId,
+                                  @Param("fromDate") String fromDate,
+                                  @Param("toDate") String toDate,
+                                  @Param("completedFromDate") String completedFromDate,
+                                  @Param("completedToDate") String completedToDate,
+                                  @Param("status") Integer status,
+                                  @Param("textSearch") String textSearch,
+                                  Pageable pageable);
 
 }
