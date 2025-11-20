@@ -308,4 +308,35 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
                                   @Param("textSearch") String textSearch,
                                   Pageable pageable);
 
+    @Query(value = "SELECT c.* from contracts c " +
+            "JOIN participiants p ON c.id = p.contract_id " +
+            "JOIN recipients r ON r.participant_id = p.id " +
+            "where r.email IN (:emails) " +
+            "and (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
+            "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) " +
+            "AND (:completedFromDate IS NULL OR (c.updated_at >= CAST(:completedFromDate AS timestamp) and c.status = 30) ) " +
+            "AND (:completedToDate IS NULL OR (c.updated_at <= CAST(:completedToDate AS timestamp) and c.status = 30)) " +
+            "AND (:status IS NULL OR c.status = :status ) " +
+            "and (c.contract_no ILIKE CONCAT('%', :textSearch, '%') OR c.name ILIKE CONCAT('%', :textSearch, '%')) " +
+            "ORDER BY c.created_at DESC",
+    countQuery = "SELECT count(*) from contracts c " +
+            "JOIN participiants p ON c.id = p.contract_id " +
+            "JOIN recipients r ON r.participant_id = p.id " +
+            "where r.email IN (:emails) " +
+            "and (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
+            "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) " +
+            "AND (:completedFromDate IS NULL OR (c.updated_at >= CAST(:completedFromDate AS timestamp) and c.status = 30) ) " +
+            "AND (:completedToDate IS NULL OR (c.updated_at <= CAST(:completedToDate AS timestamp) and c.status = 30)) " +
+            "AND (:status IS NULL OR c.status = :status ) " +
+            "and (c.contract_no ILIKE CONCAT('%', :textSearch, '%') OR c.name ILIKE CONCAT('%', :textSearch, '%')) "
+    , nativeQuery = true)
+    Page<Contract> reportMyProcess(@Param("emails") List<String> emails,
+                                  @Param("fromDate") String fromDate,
+                                  @Param("toDate") String toDate,
+                                  @Param("completedFromDate") String completedFromDate,
+                                  @Param("completedToDate") String completedToDate,
+                                  @Param("status") Integer status,
+                                  @Param("textSearch") String textSearch,
+                                  Pageable pageable);
+
 }

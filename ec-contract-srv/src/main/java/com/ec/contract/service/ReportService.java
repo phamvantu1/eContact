@@ -119,4 +119,32 @@ public class ReportService {
             throw e;
         }
     }
+
+    @Transactional(readOnly = true)
+    public Page<ContractResponseDTO> reportMyProcess(int organizationId, String fromDate, String toDate,
+                                                    String completedFromDate, String completedToDate,
+                                                    Integer status, String textSearch,
+                                                    Integer page, Integer size) {
+        try {
+            List<Customer> customerList = customerService.getCustomerByOrganizationId(organizationId);
+
+            List<String> emails = customerList.stream()
+                    .map(Customer::getEmail)
+                    .toList();
+
+            Pageable pageable = PageRequest.of(page, size);
+
+            Page<Contract> contractPage = contractRepository.reportMyProcess(emails, fromDate, toDate,
+                    completedFromDate, completedToDate,
+                    status, textSearch, pageable);
+
+            List<ContractResponseDTO> result = contractMapper.toDtoList(contractPage.getContent());
+
+            return new PageImpl<>(result, pageable, contractPage.getTotalElements());
+
+        } catch (Exception e) {
+            log.error("Error in reportByStatus: ", e);
+            throw e;
+        }
+    }
 }
