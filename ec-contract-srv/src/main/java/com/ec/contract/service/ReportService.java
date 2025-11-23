@@ -82,7 +82,7 @@ public class ReportService {
                         .cancelDate(contract.getStatus() == 32 ? contract.getCancelDate() : null)
                         .updatedAt(contract.getUpdatedAt())
                         .customer(customer != null ? customer.getName() : null)
-                        .participants(participantMapper.toDtoList((List<Participant>) contract.getParticipants()))
+                        .participants(participantMapper.toDtoList(new ArrayList<>(contract.getParticipants())))
                         .organizationCreatedName(organizationDTO != null ? organizationDTO.getName() : null)
                         .build();
 

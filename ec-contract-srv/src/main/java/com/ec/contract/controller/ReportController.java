@@ -22,8 +22,8 @@ public class ReportController {
                                     @RequestParam(name = "toDate") String toDate,
                                     @RequestParam(name = "completed_from_date", required = false) String completedFromDate,
                                     @RequestParam(name = "completed_to_date", required = false) String completedToDate,
-                                    @RequestParam(name = "status", required = false, defaultValue = "-1") Integer status,
-                                    @RequestParam(name = "textSearch", required = false, defaultValue = "") String textSearch,
+                                    @RequestParam(name = "status", required = false) Integer status,
+                                    @RequestParam(name = "textSearch", required = false) String textSearch,
                                     @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
                                     @RequestParam(name = "size", required = false, defaultValue = "10") Integer size) {
 
@@ -37,8 +37,8 @@ public class ReportController {
                                       @RequestParam(name = "toDate") String toDate,
                                       @RequestParam(name = "completed_from_date", required = false) String completedFromDate,
                                       @RequestParam(name = "completed_to_date", required = false) String completedToDate,
-                                      @RequestParam(name = "status", required = false, defaultValue = "-1") Integer status,
-                                      @RequestParam(name = "textSearch", required = false, defaultValue = "") String textSearch,
+                                      @RequestParam(name = "status", required = false) Integer status,
+                                      @RequestParam(name = "textSearch", required = false) String textSearch,
                                       @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
                                       @RequestParam(name = "size", required = false, defaultValue = "10") Integer size) {
 
@@ -52,8 +52,8 @@ public class ReportController {
                                        @RequestParam(name = "toDate") String toDate,
                                        @RequestParam(name = "completed_from_date", required = false) String completedFromDate,
                                        @RequestParam(name = "completed_to_date", required = false) String completedToDate,
-                                       @RequestParam(name = "status", required = false, defaultValue = "-1") Integer status,
-                                       @RequestParam(name = "textSearch", required = false, defaultValue = "") String textSearch,
+                                       @RequestParam(name = "status", required = false) Integer status,
+                                       @RequestParam(name = "textSearch", required = false) String textSearch,
                                        @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
                                        @RequestParam(name = "size", required = false, defaultValue = "10") Integer size) {
 

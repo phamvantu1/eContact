@@ -93,8 +93,8 @@ public class CertController {
     @GetMapping("/find-cert")
     @Operation(summary = "Tìm kiếm chứng thư số", description = "Tìm kiếm chứng thư số với các tiêu chí lọc và phân trang")
     public Response<?> findAllCert(Authentication authentication,
-                                   @RequestParam(name = "subject", defaultValue = "", required = false) String subject,
-                                   @RequestParam(name = "serial_number", defaultValue = "", required = false) String serial_number,
+                                   @RequestParam(name = "subject", required = false) String subject,
+                                   @RequestParam(name = "serial_number", required = false) String serial_number,
                                    @RequestParam(name = "status", defaultValue = "1", required = false) Integer status,
                                    @RequestParam(name = "size", defaultValue = "10") int size,
                                    @RequestParam(name = "page", defaultValue = "0") int page) {

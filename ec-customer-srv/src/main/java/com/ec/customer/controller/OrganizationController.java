@@ -39,7 +39,7 @@ public class OrganizationController {
 
     @Operation(summary = "Lấy danh sách tất cả tổ chức ",description = "Lấy danh sách tổ chức có phân trang và tìm kiếm")
     @GetMapping("/get-all")
-    public Response<?> getAllOrganization(@RequestParam(name = "textSearch", required = false, defaultValue = "") String textSearch,
+    public Response<?> getAllOrganization(@RequestParam(name = "textSearch", required = false) String textSearch,
                                           @RequestParam(name = "page" , required = false, defaultValue = "0") int page,
                                           @RequestParam(name = "size", required = false, defaultValue = "10") int size){
         return Response.success(organizationService.getAllOrganizations(page, size, textSearch));

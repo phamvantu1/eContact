@@ -38,7 +38,7 @@ public class RoleController {
 
     @Operation(summary = "Danh sách vai trò", description = "Danh sach vai trò có phân trang và tìm kiếm")
     @GetMapping("/get-all")
-    public Response<?> getAllRoles(@RequestParam(name = "textSearch", required = false, defaultValue = "") String textSearch,
+    public Response<?> getAllRoles(@RequestParam(name = "textSearch", required = false) String textSearch,
                                    @RequestParam(name = "page" , required = false, defaultValue = "0") int page,
                                    @RequestParam(name = "size", required = false, defaultValue = "10") int size ){
         return Response.success(roleService.getAllRoles(page, size, textSearch));

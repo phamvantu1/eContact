@@ -205,7 +205,7 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
             "AND (:completedFromDate IS NULL OR (c.updated_at >= CAST(:completedFromDate AS timestamp) and c.status = 30) ) " +
             "AND (:completedToDate IS NULL OR (c.updated_at <= CAST(:completedToDate AS timestamp) and c.status = 30)) " +
             "AND (:status IS NULL OR c.status = :status ) " +
-            "and (c.contract_no ILIKE CONCAT('%', :textSearch, '%') OR c.name ILIKE CONCAT('%', :textSearch, '%')) " +
+            "and (:textSearch IS NULL OR c.contract_no ILIKE CONCAT('%', :textSearch, '%') OR c.name ILIKE CONCAT('%', :textSearch, '%')) " +
             "ORDER BY c.created_at DESC",
             countQuery = "SELECT count(*) from contracts c " +
                     "where c.organization_id = :organizationId " +
@@ -214,7 +214,7 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
                     "AND (:completedFromDate IS NULL OR (c.updated_at >= CAST(:completedFromDate AS timestamp) and c.status = 30) ) " +
                     "AND (:completedToDate IS NULL OR (c.updated_at <= CAST(:completedToDate AS timestamp) and c.status = 30)) " +
                     "AND (:status IS NULL OR c.status = :status ) " +
-                    "and (c.contract_no ILIKE CONCAT('%', :textSearch, '%') OR c.name ILIKE CONCAT('%', :textSearch, '%')) "
+                    "and (:textSearch IS NULL OR c.contract_no ILIKE CONCAT('%', :textSearch, '%') OR c.name ILIKE CONCAT('%', :textSearch, '%')) "
             , nativeQuery = true)
     Page<Contract> reportDetail(@Param("organizationId") int organizationId,
                                 @Param("fromDate") String fromDate,
@@ -252,8 +252,8 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
                                   @Param("textSearch") String textSearch,
                                   Pageable pageable);
 
-    @Query(value = "SELECT c.* from contracts c " +
-            "JOIN participiants p ON c.id = p.contract_id " +
+    @Query(value = "SELECT distinct c.* from contracts c " +
+            "JOIN participants p ON c.id = p.contract_id " +
             "JOIN recipients r ON r.participant_id = p.id " +
             "where r.email IN (:emails) " +
             "and (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
@@ -264,7 +264,7 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
             "and (c.contract_no ILIKE CONCAT('%', :textSearch, '%') OR c.name ILIKE CONCAT('%', :textSearch, '%')) " +
             "ORDER BY c.created_at DESC",
             countQuery = "SELECT count(*) from contracts c " +
-                    "JOIN participiants p ON c.id = p.contract_id " +
+                    "JOIN participants p ON c.id = p.contract_id " +
                     "JOIN recipients r ON r.participant_id = p.id " +
                     "where r.email IN (:emails) " +
                     "and (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
@@ -300,7 +300,7 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
             "and ( c.status = :status or (:status = 1 and c.contract_expire_time <= now() + interval '5 days' and c.contract_expire_time >= now() ) ) " +
             "and (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
             "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) "
-    , nativeQuery = true)
+            , nativeQuery = true)
     Integer countContractByType(@Param("organizationId") int organizationId,
                                 @Param("fromDate") String fromDate,
                                 @Param("toDate") String toDate,
