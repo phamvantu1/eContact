@@ -18,7 +18,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 
 
-@RestController("/certs")
+@RestController
+@RequestMapping("/certs")
 @Slf4j
 @RequiredArgsConstructor
 @Tag(name = "Cert Controller API", description = "Quản lý chứng thư số")
