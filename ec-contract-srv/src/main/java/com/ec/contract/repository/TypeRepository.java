@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface TypeRepository extends JpaRepository<Type, Integer> {
 
 
@@ -23,4 +25,11 @@ public interface TypeRepository extends JpaRepository<Type, Integer> {
     Page<Type> findByNameContainingAndStatus(@Param("name") String name,
                                              @Param("organizationId") Integer organizationId,
                                              Pageable pageable);
+
+
+    @Query(value = "SELECT * FROM types t " +
+            "where t.organization_id = :organizationId " +
+            "and t.status = :status ",
+            nativeQuery = true)
+    List<Type> findByOrganizationIdAndStatus(Integer organizationId, Integer status);
 }
