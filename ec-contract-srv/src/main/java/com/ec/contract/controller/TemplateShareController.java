@@ -1,7 +1,6 @@
 package com.ec.contract.controller;
 
 import com.ec.contract.model.dto.ShareListDto;
-import com.ec.contract.model.dto.request.FilterContractDTO;
 import com.ec.contract.service.TemplateShareService;
 import com.ec.library.response.Response;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,14 +19,18 @@ public class TemplateShareController {
 
     @PostMapping("")
     @Operation(summary = "Tạo chia sẻ hợp đồng mẫu ", description = "Tạo mới chia sẻ hợp đồng mẫu cho người dùng khác")
-    public Response<?> createShare(@RequestBody ShareListDto shareListDto){
+    public Response<?> createShare(@RequestBody ShareListDto shareListDto) {
         return Response.success(templateShareService.createShare(shareListDto));
     }
 
     @GetMapping("")
     @Operation(summary = "Lấy thông tin danh sách chia sẻ hợp đồng mẫu ", description = "Lấy danh sách chia sẻ hợp đồng mẫu")
-    public Response<?> getAllShares(@RequestBody FilterContractDTO filterContractDTO,
-                                    Authentication authentication){
-        return Response.success(templateShareService.getAllSharesContract(filterContractDTO, authentication));
+    public Response<?> getAllShares(@RequestParam(name = "textSearch", required = false) String textSearch,
+                                    @RequestParam(name = "fromDate", required = false) String fromDate,
+                                    @RequestParam(name = "toDate", required = false) String toDate,
+                                    @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
+                                    @RequestParam(name = "size", required = false, defaultValue = "10") Integer size,
+                                    Authentication authentication) {
+        return Response.success(templateShareService.getAllSharesContract(textSearch, fromDate, toDate, page, size, authentication));
     }
 }

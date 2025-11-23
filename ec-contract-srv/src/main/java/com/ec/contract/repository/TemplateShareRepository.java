@@ -17,7 +17,10 @@ public interface TemplateShareRepository extends JpaRepository<TemplateShare, In
     @Query(value = "SELECT distinct c.* from template_contracts c  " +
             "join template_shares s on c.id = s.contract_id " +
             "where s.email = :email " +
-            "and (:textSearch is null or (c.contract_no like %:textSearch% or c.name like %:textSearch%)) " +
+            "AND (:textSearch IS NULL OR (" +
+            "     c.contract_no LIKE CONCAT('%', :textSearch, '%') " +
+            "     OR c.name LIKE CONCAT('%', :textSearch, '%')" +
+            ")) " +
             "AND (:fromDate IS NULL  OR c.created_at >= CAST(:fromDate AS timestamp)) " +
             "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp))" +
             "order by c.created_at desc"

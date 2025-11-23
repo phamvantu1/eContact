@@ -1,7 +1,6 @@
 package com.ec.contract.controller;
 
 import com.ec.contract.model.dto.ShareListDto;
-import com.ec.contract.model.dto.request.FilterContractDTO;
 import com.ec.contract.service.ShareService;
 import com.ec.library.response.Response;
 import io.swagger.v3.oas.annotations.Operation;

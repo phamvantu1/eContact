@@ -5,7 +5,6 @@ import com.ec.contract.mapper.TemplateContractMapper;
 import com.ec.contract.mapper.TemplateShareMapper;
 import com.ec.contract.model.dto.ShareDto;
 import com.ec.contract.model.dto.ShareListDto;
-import com.ec.contract.model.dto.request.FilterContractDTO;
 import com.ec.contract.model.dto.response.ContractResponseDTO;
 import com.ec.contract.model.entity.TemplateContract;
 import com.ec.contract.model.entity.TemplateShare;
@@ -128,18 +127,22 @@ public class TemplateShareService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ContractResponseDTO> getAllSharesContract(FilterContractDTO filterContractDTO,
+    public Page<ContractResponseDTO> getAllSharesContract(String textSearch,
+                                                          String fromDate,
+                                                          String toDate,
+                                                          Integer page,
+                                                          Integer size,
                                                           Authentication authentication) {
         try {
             String email = authentication.getName();
 
-            Pageable pageable = PageRequest.of(filterContractDTO.getPage(), filterContractDTO.getSize());
+            Pageable pageable = PageRequest.of(page, size);
 
             Page<TemplateContract> contractPage = templateShareRepository.getAllSharesContract(
                     email,
-                    filterContractDTO.getTextSearch(),
-                    filterContractDTO.getFromDate(),
-                    filterContractDTO.getToDate(),
+                    textSearch,
+                    fromDate,
+                    toDate,
                     pageable
             );
 
