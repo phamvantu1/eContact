@@ -5,10 +5,7 @@ import com.ec.library.response.Response;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Date;
 
 @RestController
 @RequestMapping("/reports")
@@ -21,14 +18,14 @@ public class ReportController {
     @GetMapping("/detail/{organizationId}")
     @Operation(summary = "Lấy chi tiết báo cáo", description = "Lấy chi tiết báo cáo.")
     public Response<?> reportDetail(@PathVariable("organizationId") int organizationId,
-                                    @RequestParam(name = "fromDate")  String fromDate,
+                                    @RequestParam(name = "fromDate") String fromDate,
                                     @RequestParam(name = "toDate") String toDate,
                                     @RequestParam(name = "completed_from_date", required = false) String completedFromDate,
                                     @RequestParam(name = "completed_to_date", required = false) String completedToDate,
                                     @RequestParam(name = "status", required = false, defaultValue = "-1") Integer status,
                                     @RequestParam(name = "textSearch", required = false, defaultValue = "") String textSearch,
                                     @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
-                                    @RequestParam(name = "size", required = false, defaultValue = "10") Integer size){
+                                    @RequestParam(name = "size", required = false, defaultValue = "10") Integer size) {
 
         return Response.success(reportService.reportDetail(organizationId, fromDate, toDate, completedFromDate, completedToDate, status, textSearch, page, size));
     }
@@ -36,14 +33,14 @@ public class ReportController {
     @GetMapping("/by-status/{organizationId}")
     @Operation(summary = "Lấy báo cáo theo trạng thái", description = "Lấy báo cáo theo trạng thái.")
     public Response<?> reportByStatus(@PathVariable("organizationId") int organizationId,
-                                    @RequestParam(name = "fromDate")  String fromDate,
-                                    @RequestParam(name = "toDate") String toDate,
-                                    @RequestParam(name = "completed_from_date", required = false) String completedFromDate,
-                                    @RequestParam(name = "completed_to_date", required = false) String completedToDate,
-                                    @RequestParam(name = "status", required = false, defaultValue = "-1") Integer status,
-                                    @RequestParam(name = "textSearch", required = false, defaultValue = "") String textSearch,
-                                    @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
-                                    @RequestParam(name = "size", required = false, defaultValue = "10") Integer size){
+                                      @RequestParam(name = "fromDate") String fromDate,
+                                      @RequestParam(name = "toDate") String toDate,
+                                      @RequestParam(name = "completed_from_date", required = false) String completedFromDate,
+                                      @RequestParam(name = "completed_to_date", required = false) String completedToDate,
+                                      @RequestParam(name = "status", required = false, defaultValue = "-1") Integer status,
+                                      @RequestParam(name = "textSearch", required = false, defaultValue = "") String textSearch,
+                                      @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
+                                      @RequestParam(name = "size", required = false, defaultValue = "10") Integer size) {
 
         return Response.success(reportService.reportByStatus(organizationId, fromDate, toDate, completedFromDate, completedToDate, status, textSearch, page, size));
     }
@@ -51,16 +48,32 @@ public class ReportController {
     @GetMapping("/my-process/{organizationId}")
     @Operation(summary = "Lấy báo cáo hợp đồng nhận ", description = "Lấy báo cáo hợp đồng nhận .")
     public Response<?> reportMyProcess(@PathVariable("organizationId") int organizationId,
-                                      @RequestParam(name = "fromDate")  String fromDate,
-                                      @RequestParam(name = "toDate") String toDate,
-                                      @RequestParam(name = "completed_from_date", required = false) String completedFromDate,
-                                      @RequestParam(name = "completed_to_date", required = false) String completedToDate,
-                                      @RequestParam(name = "status", required = false, defaultValue = "-1") Integer status,
-                                      @RequestParam(name = "textSearch", required = false, defaultValue = "") String textSearch,
-                                      @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
-                                      @RequestParam(name = "size", required = false, defaultValue = "10") Integer size){
+                                       @RequestParam(name = "fromDate") String fromDate,
+                                       @RequestParam(name = "toDate") String toDate,
+                                       @RequestParam(name = "completed_from_date", required = false) String completedFromDate,
+                                       @RequestParam(name = "completed_to_date", required = false) String completedToDate,
+                                       @RequestParam(name = "status", required = false, defaultValue = "-1") Integer status,
+                                       @RequestParam(name = "textSearch", required = false, defaultValue = "") String textSearch,
+                                       @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
+                                       @RequestParam(name = "size", required = false, defaultValue = "10") Integer size) {
 
         return Response.success(reportService.reportMyProcess(organizationId, fromDate, toDate, completedFromDate, completedToDate, status, textSearch, page, size));
+    }
+
+    @GetMapping("/number-by-status/{organizationId}")
+    @Operation(summary = "Lấy số lượng hợp đồng theo trạng thái", description = "Lấy số lượng hợp đồng theo trạng thái.")
+    public Response<?> reportNumberByStatus(@PathVariable("organizationId") int organizationId,
+                                            @RequestParam(name = "fromDate") String fromDate,
+                                            @RequestParam(name = "toDate") String toDate) {
+        return Response.success(reportService.reportNumberByStatus(organizationId, fromDate, toDate));
+    }
+
+    @GetMapping("/number-by-type/{organizationId}")
+    @Operation(summary = "Lấy số lượng hợp đồng theo loại tài liệu", description = "Lấy số lượng hợp đồng theo loại tài liệu.")
+    public Response<?> reportNumberByType(@PathVariable("organizationId") int organizationId,
+                                          @RequestParam(name = "fromDate") String fromDate,
+                                          @RequestParam(name = "toDate") String toDate) {
+        return Response.success(reportService.reportNumberByType(organizationId, fromDate, toDate));
     }
 
 }

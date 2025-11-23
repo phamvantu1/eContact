@@ -1,11 +1,11 @@
 package com.ec.contract.service;
 
+import com.ec.contract.constant.BaseStatus;
+import com.ec.contract.constant.ContractStatus;
 import com.ec.contract.mapper.ContractMapper;
 import com.ec.contract.mapper.ParticipantMapper;
 import com.ec.contract.model.dto.OrganizationDTO;
-import com.ec.contract.model.dto.response.ContractRefResponseDTO;
-import com.ec.contract.model.dto.response.ContractResponseDTO;
-import com.ec.contract.model.dto.response.ReportDetailDTO;
+import com.ec.contract.model.dto.response.*;
 import com.ec.contract.model.entity.*;
 import com.ec.contract.repository.ContractRefRepository;
 import com.ec.contract.repository.ContractRepository;
@@ -144,6 +144,70 @@ public class ReportService {
 
         } catch (Exception e) {
             log.error("Error in reportByStatus: ", e);
+            throw e;
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public DashBoardStatisticDTO reportNumberByStatus(int organizationId, String fromDate, String toDate) {
+        try {
+            int cancelledCount = contractRepository.countContractByStatus(organizationId, fromDate, toDate, ContractStatus.CANCEL.getDbVal());
+            int rejectedCount = contractRepository.countContractByStatus(organizationId, fromDate, toDate, ContractStatus.REJECTED.getDbVal());
+            int expiredCount = contractRepository.countContractByStatus(organizationId, fromDate, toDate, ContractStatus.EXPIRE.getDbVal());
+            int aboutExpireCount = contractRepository.countContractByStatus(organizationId, fromDate, toDate, ContractStatus.ABOUT_EXPIRE.getDbVal());
+            int completedCount = contractRepository.countContractByStatus(organizationId, fromDate, toDate, ContractStatus.SIGNED.getDbVal());
+            int processCount = contractRepository.countContractByStatus(organizationId, fromDate, toDate, ContractStatus.PROCESSING.getDbVal());
+            return DashBoardStatisticDTO.builder()
+                    .totalCancel(cancelledCount)
+                    .totalReject(rejectedCount)
+                    .totalExpires(expiredCount)
+                    .totalAboutExpire(aboutExpireCount)
+                    .totalSigned(completedCount)
+                    .totalProcessing(processCount)
+                    .build();
+        } catch (Exception e) {
+            log.error("Error in reportNumberByStatus: ", e);
+            throw e;
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReportByTypeDTO> reportNumberByType(int organizationId, String fromDate, String toDate) {
+        try {
+
+            List<Type> types = typeRepository.findByOrganizationIdAndStatus(organizationId, BaseStatus.ACTIVE.ordinal());
+
+            List<ReportByTypeDTO> result = new ArrayList<>();
+            for (Type type : types) {
+
+                int countFinished = contractRepository.countContractByType(organizationId, fromDate, toDate, type.getId(), ContractStatus.SIGNED.getDbVal());
+                int processingCount = contractRepository.countContractByType(organizationId, fromDate, toDate, type.getId(), ContractStatus.PROCESSING.getDbVal());
+                int rejectedCount = contractRepository.countContractByType(organizationId, fromDate, toDate, type.getId(), ContractStatus.REJECTED.getDbVal());
+                int cancelledCount = contractRepository.countContractByType(organizationId, fromDate, toDate, type.getId(), ContractStatus.CANCEL.getDbVal());
+                int aboutExpireCount = contractRepository.countContractByType(organizationId, fromDate, toDate, type.getId(), ContractStatus.ABOUT_EXPIRE.getDbVal());
+                int expiredCount = contractRepository.countContractByType(organizationId, fromDate, toDate, type.getId(), ContractStatus.EXPIRE.getDbVal());
+                int totalCount = countFinished + processingCount + rejectedCount + cancelledCount + aboutExpireCount + expiredCount;
+
+                DashBoardStatisticDTO statistic = DashBoardStatisticDTO.builder()
+                        .totalSigned(countFinished)
+                        .totalProcessing(processingCount)
+                        .totalReject(rejectedCount)
+                        .totalCancel(cancelledCount)
+                        .totalAboutExpire(aboutExpireCount)
+                        .totalExpires(expiredCount)
+                        .total(totalCount)
+                        .build();
+
+                ReportByTypeDTO dto = ReportByTypeDTO.builder()
+                        .typeName(type.getName())
+                        .statistic(statistic)
+                        .build();
+
+                result.add(dto);
+            }
+            return result;
+        } catch (Exception e) {
+            log.error("Error in reportNumberByType: ", e);
             throw e;
         }
     }

@@ -123,86 +123,30 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
             " JOIN participants p ON c.id = p.contract_id " +
             " JOIN recipients r ON r.participant_id = p.id " +
             " where r.email = :email " +
-            " and c.status = 30 "
+            " and ( (:status = 30 and c.status = 30)  " +
+            " or (:status = 20 and c.status = 20 and r.status = 1) " +
+            " or (:status = 50 and r.status not in (1, 2) )" + // fix cung 50 la waiting
+            " or (:status = 1 and c.status = 20  and c.contract_expire_time <= now() + interval '5 days' and c.contract_expire_time >= now() )" +
+            " )  "
             , nativeQuery = true)
-    Integer countTotalSignedContracts(@Param("email") String email);
-
-    @Query(value = "SELECT count(distinct c.id) from contracts c " +
-            " JOIN participants p ON c.id = p.contract_id " +
-            " JOIN recipients r ON r.participant_id = p.id " +
-            " where r.email = :email " +
-            " and r.status = 1 " +
-            " and c.status = 20 "
-            , nativeQuery = true)
-    Integer countTotalProcessingContracts(@Param("email") String email);
-
-    @Query(value = "SELECT count(distinct c.id) from contracts c " +
-            " JOIN participants p ON c.id = p.contract_id " +
-            " JOIN recipients r ON r.participant_id = p.id " +
-            " where r.email = :email " +
-            " and r.status not in (1, 2) " + // chua den luot xu ly, hoac xu ly roi - doi nguoi khac xu ly
-            " and c.status = 20 "
-            , nativeQuery = true)
-    Integer countWaitingContracts(@Param("email") String email);
-
-    @Query(value = "SELECT count(distinct c.id) from contracts c " +
-            " JOIN participants p ON c.id = p.contract_id " +
-            " JOIN recipients r ON r.participant_id = p.id " +
-            " where r.email = :email " +
-            " and c.status = 20 " +
-            " and (c.contract_expire_time <= now() + interval '5 days' and c.contract_expire_time >= now() ) "
-            , nativeQuery = true)
-    Integer countAboutToExpireContracts(@Param("email") String email);
+    Integer countMyProcessContract(@Param("email") String email,
+                                   @Param("status") Integer status);
 
     @Query(value = "SELECT count(distinct c.id) from contracts c " +
             "where c.created_by = :customerId " +
-            "and c.status = 30 " +
+            "and ( (:status = 30 and c.status = 30 )" +
+            " or (:status = 20 and c.status = 20) " +
+            " or (:status = 31 and c.status = 31) " +
+            " or (:status = 32 and c.status = 32) " +
+            " or (:status = 2 and c.status = 2) " +
+            " )  " +
             "and (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
             "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) "
             , nativeQuery = true)
-    Integer countTotalSignedMyContracts(@Param("customerId") Integer customerId,
-                                        @Param("fromDate") String fromDate,
-                                        @Param("toDate") String toDate);
-
-    @Query(value = "SELECT count(distinct c.id) from contracts c " +
-            "where c.created_by = :customerId " +
-            "and c.status = 20 " +
-            "and (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
-            "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) "
-            , nativeQuery = true)
-    Integer countTotalProcessingMyContracts(@Param("customerId") Integer customerId,
-                                            @Param("fromDate") String fromDate,
-                                            @Param("toDate") String toDate);
-
-    @Query(value = "SELECT count(distinct c.id) from contracts c " +
-            "where c.created_by = :customerId " +
-            "and c.status = 31 " +
-            "and (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
-            "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) "
-            , nativeQuery = true)
-    Integer countTotalRejectedMyContracts(@Param("customerId") Integer customerId,
-                                          @Param("fromDate") String fromDate,
-                                          @Param("toDate") String toDate);
-
-    @Query(value = "SELECT count(distinct c.id) from contracts c " +
-            "where c.created_by = :customerId " +
-            "and c.status = 32 " +
-            "and (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
-            "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) "
-            , nativeQuery = true)
-    Integer countTotalCancelMyContracts(@Param("customerId") Integer customerId,
-                                        @Param("fromDate") String fromDate,
-                                        @Param("toDate") String toDate);
-
-    @Query(value = "SELECT count(distinct c.id) from contracts c " +
-            "where c.created_by = :customerId " +
-            "and c.status = 2 " +
-            "and (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
-            "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) "
-            , nativeQuery = true)
-    Integer countTotalExpiredMyContracts(@Param("customerId") Integer customerId,
-                                         @Param("fromDate") String fromDate,
-                                         @Param("toDate") String toDate);
+    Integer countMyContractByStatus(@Param("customerId") Integer customerId,
+                                    @Param("fromDate") String fromDate,
+                                    @Param("toDate") String toDate,
+                                    @Param("status") Integer status);
 
     @Query(value = "SELECT count(distinct c.id) from contracts c " +
             "where ( organizationId is null or c.organization_id = :organizationId )" +
@@ -319,24 +263,48 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
             "AND (:status IS NULL OR c.status = :status ) " +
             "and (c.contract_no ILIKE CONCAT('%', :textSearch, '%') OR c.name ILIKE CONCAT('%', :textSearch, '%')) " +
             "ORDER BY c.created_at DESC",
-    countQuery = "SELECT count(*) from contracts c " +
-            "JOIN participiants p ON c.id = p.contract_id " +
-            "JOIN recipients r ON r.participant_id = p.id " +
-            "where r.email IN (:emails) " +
-            "and (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
-            "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) " +
-            "AND (:completedFromDate IS NULL OR (c.updated_at >= CAST(:completedFromDate AS timestamp) and c.status = 30) ) " +
-            "AND (:completedToDate IS NULL OR (c.updated_at <= CAST(:completedToDate AS timestamp) and c.status = 30)) " +
-            "AND (:status IS NULL OR c.status = :status ) " +
-            "and (c.contract_no ILIKE CONCAT('%', :textSearch, '%') OR c.name ILIKE CONCAT('%', :textSearch, '%')) "
-    , nativeQuery = true)
+            countQuery = "SELECT count(*) from contracts c " +
+                    "JOIN participiants p ON c.id = p.contract_id " +
+                    "JOIN recipients r ON r.participant_id = p.id " +
+                    "where r.email IN (:emails) " +
+                    "and (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
+                    "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) " +
+                    "AND (:completedFromDate IS NULL OR (c.updated_at >= CAST(:completedFromDate AS timestamp) and c.status = 30) ) " +
+                    "AND (:completedToDate IS NULL OR (c.updated_at <= CAST(:completedToDate AS timestamp) and c.status = 30)) " +
+                    "AND (:status IS NULL OR c.status = :status ) " +
+                    "and (c.contract_no ILIKE CONCAT('%', :textSearch, '%') OR c.name ILIKE CONCAT('%', :textSearch, '%')) "
+            , nativeQuery = true)
     Page<Contract> reportMyProcess(@Param("emails") List<String> emails,
+                                   @Param("fromDate") String fromDate,
+                                   @Param("toDate") String toDate,
+                                   @Param("completedFromDate") String completedFromDate,
+                                   @Param("completedToDate") String completedToDate,
+                                   @Param("status") Integer status,
+                                   @Param("textSearch") String textSearch,
+                                   Pageable pageable);
+
+    @Query(value = "SELECT count(distinct c.id) from contracts c " +
+            "where c.organization_id = :organizationId " +
+            "and (c.status = :status or (:status = 1 and c.contract_expire_time <= now() + interval '5 days' and c.contract_expire_time >= now() ) ) " +
+            "and (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
+            "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) "
+            , nativeQuery = true)
+    Integer countContractByStatus(@Param("organizationId") int organizationId,
                                   @Param("fromDate") String fromDate,
                                   @Param("toDate") String toDate,
-                                  @Param("completedFromDate") String completedFromDate,
-                                  @Param("completedToDate") String completedToDate,
-                                  @Param("status") Integer status,
-                                  @Param("textSearch") String textSearch,
-                                  Pageable pageable);
+                                  @Param("status") Integer status);
+
+    @Query(value = "SELECT count(distinct c.id) from contracts c " +
+            "where c.organization_id = :organizationId " +
+            "and (:typeId IS NULL OR c.type_id = :typeId ) " +
+            "and ( c.status = :status or (:status = 1 and c.contract_expire_time <= now() + interval '5 days' and c.contract_expire_time >= now() ) ) " +
+            "and (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
+            "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) "
+    , nativeQuery = true)
+    Integer countContractByType(@Param("organizationId") int organizationId,
+                                @Param("fromDate") String fromDate,
+                                @Param("toDate") String toDate,
+                                @Param("typeId") Integer typeId,
+                                @Param("status") Integer status);
 
 }
