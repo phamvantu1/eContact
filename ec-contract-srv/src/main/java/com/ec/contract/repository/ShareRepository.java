@@ -15,14 +15,18 @@ public interface ShareRepository extends JpaRepository<Share, Integer> {
     Optional<Share> findFirstByContractIdAndEmail(Integer contractId, String email);
 
 
-    @Query(value = "SELECT distinct c.* from contracts c  " +
-            "join shares s on c.id = s.contract_id " +
-            "where s.email = :email " +
-            "and (:textSearch is null or (c.contract_no like %:textSearch% or c.name like %:textSearch%)) " +
-            "AND (:fromDate IS NULL  OR c.created_at >= CAST(:fromDate AS timestamp)) " +
-            "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp))" +
-            "order by c.created_at desc"
-            , nativeQuery = true)
+    @Query(value =
+            "SELECT DISTINCT c.* FROM contracts c " +
+                    "JOIN shares s ON c.id = s.contract_id " +
+                    "WHERE s.email = :email " +
+                    "AND (:textSearch IS NULL OR (" +
+                    "     c.contract_no LIKE CONCAT('%', :textSearch, '%') " +
+                    "     OR c.name LIKE CONCAT('%', :textSearch, '%')" +
+                    ")) " +
+                    "AND (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
+                    "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) " +
+                    "ORDER BY c.created_at DESC",
+            nativeQuery = true)
     Page<Contract> getAllSharesContract(@Param("email") String email,
                                         @Param("textSearch") String textSearch,
                                         @Param("fromDate") String fromDate,

@@ -22,15 +22,19 @@ public class ShareController {
 
     @PostMapping("")
     @Operation(summary = "Tạo chia sẻ hợp đồng", description = "Tạo mới chia sẻ hợp đồng cho người dùng khác")
-    public Response<?> createShare(@RequestBody ShareListDto shareListDto){
+    public Response<?> createShare(@RequestBody ShareListDto shareListDto) {
         return Response.success(shareService.createShare(shareListDto));
     }
 
     @GetMapping("")
     @Operation(summary = "Lấy thông tin danh sách chia sẻ hợp đồng", description = "Lấy danh sách chia sẻ hợp đồng")
-    public Response<?> getAllShares(@RequestBody FilterContractDTO filterContractDTO,
-                                    Authentication authentication){
-        return Response.success(shareService.getAllSharesContract(filterContractDTO, authentication));
+    public Response<?> getAllShares(@RequestParam(name = "textSearch", required = false) String textSearch,
+                                    @RequestParam(name = "fromDate", required = false) String fromDate,
+                                    @RequestParam(name = "toDate", required = false) String toDate,
+                                    @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
+                                    @RequestParam(name = "size", required = false, defaultValue = "10") Integer size,
+                                    Authentication authentication) {
+        return Response.success(shareService.getAllSharesContract(textSearch, fromDate, toDate, page, size, authentication));
     }
 
 
