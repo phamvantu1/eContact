@@ -53,3 +53,28 @@ PDF hỗ trợ Incremental Update (cập nhật theo kiểu bổ sung):
 Mỗi lần ký số = thêm một lớp dữ liệu mới vào file PDF
 
 Không sửa dữ liệu cũ → Các chữ ký cũ vẫn tham chiếu được nội dung chính xác như lúc chúng ký
+
+
+
+
+
+🧠 5. Chữ ký số bảo đảm điều gì?
+✔ Toàn vẹn dữ liệu (Integrity)
+
+File mà sửa → chữ ký sai ngay.
+
+✔ Xác thực người ký (Authentication)
+
+Certificate cho biết:
+
+ai ký
+
+chứng thư do ai cấp
+
+có còn hạn không
+
+✔ Không thể chối bỏ (Non-repudiation)
+
+Vì:
+
+chỉ người giữ private key mới tạo được chữ ký đó.
