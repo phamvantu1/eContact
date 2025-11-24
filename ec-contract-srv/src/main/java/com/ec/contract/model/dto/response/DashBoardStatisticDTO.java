@@ -7,24 +7,26 @@ import lombok.Data;
 @Builder
 public class DashBoardStatisticDTO {
 
-    private  Integer totalDraff;
+    private Integer totalDraff;
 
-    private  Integer totalCreated;
+    private Integer totalCreated;
 
-    private  Integer totalCancel;
+    private Integer totalCancel;
 
-    private  Integer totalReject;
+    private Integer totalReject;
 
-    private  Integer totalSigned;
+    private Integer totalSigned;
 
-    private  Integer totalLiquidation;
+    private Integer totalLiquidation;
 
-    private  Integer totalProcessing;
+    private Integer totalProcessing;
 
-    private  Integer totalExpires;
+    private Integer totalExpires;
 
-    private  Integer totalAboutExpire;
+    private Integer totalAboutExpire;
 
-    private  Integer totalWaiting;
+    private Integer totalWaiting;
+
+    private Integer total;
 
 }
