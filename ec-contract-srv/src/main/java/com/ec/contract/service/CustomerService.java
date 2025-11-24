@@ -27,7 +27,7 @@ public class CustomerService {
     public Customer getCustomerByEmail(String email) {
         try {
             String url = ServiceEndpoints.CUSTOMER_API + "/internal/get-by-email?email=" + email;
-            log.info("Gọi Customer API getCustomerByEmail tại URL: {}", url);
+            log.info("Gọi Customer API ----  getCustomerByEmail tại URL: {}", url);
 
             ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                     url,

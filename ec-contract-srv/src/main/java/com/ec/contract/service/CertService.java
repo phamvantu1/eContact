@@ -101,6 +101,8 @@ public class CertService {
             if (emails != null) {
                 Arrays.asList(emails).forEach(email -> {
 
+                    log.info("tests this --- email : {}", email);
+
                     Customer newCustomer = customerService.getCustomerByEmail(email);
 
                     if (!newCustomer.getOrganizationId().equals(organizationDTO.getId())) {
