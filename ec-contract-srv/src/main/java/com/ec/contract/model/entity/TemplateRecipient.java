@@ -68,7 +68,7 @@ public class TemplateRecipient extends BaseEntity {
     @JoinColumn(name = "participant_id")
     private TemplateParticipant participant;
 
-    @OneToMany(mappedBy = "recipient", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "recipient", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @JsonIgnore
     @JsonManagedReference

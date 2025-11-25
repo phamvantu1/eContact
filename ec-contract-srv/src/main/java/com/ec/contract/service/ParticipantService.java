@@ -35,7 +35,6 @@ public class ParticipantService {
     private final RecipientRepository recipientRepository;
     private final ParticipantMapper participantMapper;
     private final FieldRepository fieldRepository;
-    private final ModelMapper modelMapper;
 
     @Transactional
     public List<ParticipantDTO> createParticipant(List<ParticipantDTO> participantDTOList,
@@ -153,16 +152,16 @@ public class ParticipantService {
 
             final var participantList = participantRepository.saveAll(participantCollection);
 
-            for(Participant participant: participantList) {
-                Set<Recipient> recipientSet = participant.getRecipients();
-
-                for(Recipient recipient : recipientSet) {
-                    Collection<Field> fieldCollection = fieldRepository.findAllByRecipientId(recipient.getId());
-                    for(Field field : fieldCollection) {
-                        recipient.addField(field);
-                    }
-                }
-            }
+//            for(Participant participant: participantList) {
+//                Set<Recipient> recipientSet = participant.getRecipients();
+//
+//                for(Recipient recipient : recipientSet) {
+//                    Collection<Field> fieldCollection = fieldRepository.findAllByRecipientId(recipient.getId());
+//                    for(Field field : fieldCollection) {
+//                        recipient.addField(field);
+//                    }
+//                }
+//            }
 
             var result = participantMapper.toDtoList(participantList);
 

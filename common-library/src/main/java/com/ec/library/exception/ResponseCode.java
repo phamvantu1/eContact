@@ -68,7 +68,7 @@ public enum ResponseCode {
 
 
     // participant
-    PARTICIPANT_NOT_FOUND("ERR_404", "Không tìm thấy thành phần tham gia", HttpStatus.NOT_FOUND),
+    PARTICIPANT_NOT_FOUND("ERR_404", "Không tìm thấy tổ chức tham gia", HttpStatus.NOT_FOUND),
 
 
 
