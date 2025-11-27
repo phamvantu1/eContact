@@ -18,10 +18,7 @@ import com.ec.library.response.Response;
 import com.itextpdf.io.image.ImageData;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.geom.Rectangle;
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfName;
-import com.itextpdf.kernel.pdf.PdfReader;
-import com.itextpdf.kernel.pdf.StampingProperties;
+import com.itextpdf.kernel.pdf.*;
 import com.itextpdf.signatures.ExternalBlankSignatureContainer;
 import com.itextpdf.signatures.IExternalSignatureContainer;
 import com.itextpdf.signatures.PdfSignatureAppearance;
@@ -189,7 +186,7 @@ public class SignService {
 
     // kí file cert mềm
     private String replaceFileAfterSignKeystore(Field field, int contractId, String presignedUrl, String fileName, CertificateDtoRequest certificateDtoRequest) {
-        log.info("\n \n ----- BAT DAU THUC HIEN KY CHUNG THU SO ----- \n \n - field DATA: " + field + "\n \n");
+        log.info("\n \n ----- BAT DAU THUC HIEN KY CHUNG THU SO ----- \n \n - field DATA: "  + " ---- boxX : "+ field.getBoxX() + " ---- boxY : " + field.getBoxY()+ "\n \n");
         final var tempFolder = "./tmp/" + UUID.randomUUID();
 
         InputStream is = null;
@@ -255,6 +252,9 @@ public class SignService {
             changDbFieldName(fieldName, contractId);
 
             float x = (float) field.getBoxX().floatValue();
+
+            log.info("------boxX this box X after convert : " + field.getBoxX());
+            log.info("this box Y after convert : " + field.getBoxY());
 
             InputStream inputStream = this.emptySignature(new ByteArrayInputStream(bytes), fieldName, chain,field.getBoxX().floatValue()
                     , field.getBoxY().floatValue(), field.getBoxW().floatValue(), field.getBoxH().floatValue(), Integer.valueOf(field.getPage()), certificateDtoRequest.getImageBase64());
@@ -344,46 +344,60 @@ public class SignService {
         }
     }
 
-    public InputStream emptySignature(InputStream inputStream, String fieldName, java.security.cert.Certificate[] chain, float toX,
-                                      float toY, float toW, float toH, Integer pageNumber, String imageBase64) {
+    public InputStream emptySignature(InputStream inputStream,
+                                      String fieldName,
+                                      java.security.cert.Certificate[] chain,
+                                      float toX,
+                                      float toY,
+                                      float toW,
+                                      float toH,
+                                      Integer pageNumber,
+                                      String imageBase64) {
         try {
+            log.info("----- toa do ky so before conversion x: {} , y: {} , w: {} , h: {} , pageNumber: {}",
+                    toX, toY, toW, toH, pageNumber);
 
             byte[] image = Base64.getDecoder().decode(imageBase64);
 
             PdfReader reader = new PdfReader(inputStream);
-            StampingProperties stampingProperties = new StampingProperties();
-            //For any signature in the Pdf but the first one, you need to use appendMode
-            stampingProperties = stampingProperties.useAppendMode();
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+            StampingProperties stampingProperties = new StampingProperties().useAppendMode();
             PdfSigner signer = new PdfSigner(reader, byteArrayOutputStream, stampingProperties);
+
             PdfSignatureAppearance appearance = signer.getSignatureAppearance();
-            appearance
-//                .setPageRect(new Rectangle(toX, toY, toH, toW))
-                    .setPageRect(new Rectangle( toX,  toY, toW,  toH))
+
+            // --- Fix tọa độ Y ---
+            PdfPage page = signer.getDocument().getPage(pageNumber);
+            float pageHeight = page.getPageSize().getHeight();
+            float correctedY = pageHeight - toY - toH; // convert top-left (FE) -> bottom-left (PDF)
+            log.info("Corrected Y for PDF bottom-left coordinates: {}", correctedY);
+
+            appearance.setPageRect(new Rectangle(toX, correctedY, toW, toH))
                     .setPageNumber(pageNumber)
                     .setSignatureGraphic(ImageDataFactory.create(image))
                     .setRenderingMode(PdfSignatureAppearance.RenderingMode.GRAPHIC)
                     .setCertificate(chain[0]);
+
             signer.setFieldName(fieldName);
 
-            /* ExternalBlankSignatureContainer constructor will create the PdfDictionary for the signature
-             * information and will insert the /Filter and /SubFilter values into this dictionary.
-             * It will leave just a blank placeholder for the signature that is to be inserted later.
-             */
-            IExternalSignatureContainer external = new ExternalBlankSignatureContainer(PdfName.Adobe_PPKLite,
-                    PdfName.Adbe_pkcs7_detached);
+            // Tạo placeholder signature trống
+            IExternalSignatureContainer external = new ExternalBlankSignatureContainer(
+                    PdfName.Adobe_PPKLite, PdfName.Adbe_pkcs7_detached);
 
-            // Sign the document using an external container.
-            // 8192 is the size of the empty signature placeholder.
+            // Kích thước placeholder (có thể tăng nếu cần)
             signer.signExternalContainer(external, 200000);
+
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
             byteArrayOutputStream.close();
             return byteArrayInputStream;
-        }catch (Exception e){
-            log.error("lỗi tạo tại hàm emptySignature {}",e);
-            throw new RuntimeException(e.getMessage());
+
+        } catch (Exception e) {
+            log.error("Lỗi tạo signature trống tại hàm emptySignature", e);
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
+
 
     private void changDbFieldName(String fieldName, Integer fieldId) {
         Optional<Field> fieldOptional = fieldRepository.findById(fieldId);
@@ -394,80 +408,39 @@ public class SignService {
     }
 
     /**
+     * Hàm chuyển đổi tọa độ từ hệ thống sang hệ thống
      *
-     * @param field
-     * @param presignedUrl
-     * @return
-     *
-     *  x giữ nguyên
-    - y = chiều cao của trang chứa chữ ký - (toạ độ y truyền lên - pageHeight) - chiều cao ô ký
-    - w = chiều rộng ô ký
-    - h = chiều cao ô ký
-    (pageHeight là tổng chiều cao trang thứ nhất đến trang chứa chữ ký trừ đi 1;
-    ví dụ: trang chứa ô ký là trang 5 thì currentHeight sẽ là tổng chiều cao từ trang thứ nhất đến trang thứ 4
-    )
      */
     public Optional<CoordinateDto> convertCoordinateToPKI(Field field, String presignedUrl) {
 
+        log.info("_------pa this box X before convert : {}", field.getBoxX());
+        log.info("---tiu this box Y before convert : {}", field.getBoxY());
         log.info("+========convertCoordinateToPKI - field: {}", field);
-        var pageIndex = field.getPage();
+
+        int pageIndex = field.getPage();
         double toX = field.getBoxX();
         double toY = field.getBoxY();
         double toW = field.getBoxW();
         double toH = field.getBoxH();
 
-        try {
-            var pdfDoc = new PdfDocument(new PdfReader(new URL(presignedUrl).openStream()));
-            int rotation = pdfDoc.getPage(pageIndex).getRotation();
+        int fx = (int) Math.round(toX);
+        int fy = (int) Math.round(toY);
+        int fw = (int) Math.round(toW);
+        int fh = (int) Math.round(toH);
 
-            if (rotation == 0) {
-                // FE cong chieu cao tat ca cac trang vao toa do y (y_n = page(0).h + page(1).h + .... + page(n).h)
-                for (int i = 1 ;i < pageIndex; i++) {
-                    toY = (float) (toY -  Math.floor(pdfDoc.getPage(i).getPageSize().getHeight()));
-                }
+        log.info("xion chao this box X after convert : {}", fx);
+        log.info("heh ohe this box Y after convert : {}", fy);
 
-                // convert top left -> bottom left
-//                toY = (float) (Math.floor(pdfDoc.getPage(pageIndex).getPageSize().getHeight()) - toY - toH + (pageIndex) * 6);
-                toY = (float) (Math.floor(pdfDoc.getPage(pageIndex).getPageSize().getHeight()) - toY - toH + (pageIndex) * 5.0);
-            } else {
-                for (int i = 1; i < pageIndex; i++) {
-                    toY = toY - (float) Math.floor(pdfDoc.getPage(i).getPageSize().getWidth());
-
-//                    toY = (float) (toY -  Math.floor(pdfDoc.getPage(i).getPageSize().getHeight()));
-                }
-                toY = toY - 10;
-                double tmp = toX;
-                toX = toY;
-                toY = tmp;
-
-                tmp = toW;
-                toW = toH;
-                toH = tmp;
-            }
-
-
-            //chuyển độ tọa độ và làm tròn
-            int toX1 = (int) Math.round(toX);
-            int toY1 = (int) Math.round(toY);
-            int toX2 = (int) Math.round(toW);
-            int toY2 = (int) Math.round(toH);
-
-            return Optional.of(
-                    CoordinateDto.builder()
-                            .boxX(toX1)
-                            .boxX(toY1)
-                            .boxW(toX2)
-                            .boxH(toY2)
-                            .page(pageIndex)
-                            .build()
-            );
-        }catch (Exception e) {
-            log.error(String.format("can't load pdf sign sim pki at \"%s\"", presignedUrl), e);
-        }
-
-        return Optional.empty();
+        return Optional.of(
+                CoordinateDto.builder()
+                        .boxX(fx)
+                        .boxY(fy)
+                        .boxW(fw)
+                        .boxH(fh)
+                        .page(pageIndex)
+                        .build()
+        );
     }
-
 
     /**
      * Hàm gen ảnh chữ ký
