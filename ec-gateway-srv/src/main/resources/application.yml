@@ -26,6 +26,13 @@ spring:
             allowedHeaders: "*"
             allowCredentials: true
 
+    httpclient:
+      max-initial-line-length: 8192
+      max-header-size: 16384
+
+    httpserver:
+      max-request-size: 50MB   # <<< BẮT BUỘC CÓ
+
 eureka:
   client:
     service-url:
