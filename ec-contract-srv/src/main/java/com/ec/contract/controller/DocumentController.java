@@ -22,7 +22,6 @@ import java.util.Map;
 @Tag(name = "Document Controller API", description = "Quản lý thông tin tài liệu")
 public class DocumentController {
 
-    private final ContractRepository contractRepository;
     private final DocumentService documentService;
 
     @Operation(summary = "Kiểm tra số lượng trang tải lên", description = "Kiểm tra số lượng trang của tài liệu PDF được tải lên.")
