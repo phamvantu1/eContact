@@ -41,7 +41,7 @@ public class DashBoardController {
         return Response.success(dashBoardService.countContractByOrganization(fromDate, toDate, organizationId));
     }
 
-    @Operation(summary = "lấy thông tin số lượng hợp đồng hoàn thành")
+    @Operation(summary = "Thống kê khách hàng sử dụng nhiều hợp đồng nhất", description = "Thống kê khách hàng sử dụng nhiều hợp đồng nhất")
     @GetMapping("/statistics/customer-user-max-contracts")
     public Response<?> statisticsCustomerUseMaxContracts() {
         return Response.success(dashBoardService.statisticsCustomerUseMaxContracts());
