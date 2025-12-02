@@ -1,13 +1,19 @@
 package com.ec.contract.service;
 
 import com.ec.contract.constant.ContractStatus;
+import com.ec.contract.model.dto.response.ContractCustomerDTO;
 import com.ec.contract.model.dto.response.DashBoardStatisticDTO;
+import com.ec.contract.model.dto.response.StaticCustomerUseContract;
 import com.ec.contract.model.entity.Customer;
 import com.ec.contract.repository.ContractRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -86,6 +92,38 @@ public class DashBoardService {
 
         } catch (Exception e) {
             log.error("Error in countContractByOrganization: ", e);
+            return null;
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<ContractCustomerDTO> statisticsCustomerUseMaxContracts(){
+        try{
+            List<ContractCustomerDTO> response = new ArrayList<>();
+
+            List<StaticCustomerUseContract> result = contractRepository.statisticsCustomerUseMaxContracts();
+
+            if(result == null || result.isEmpty()){
+                return null;
+            }
+
+            result.forEach(r -> {
+
+                Customer customer = customerService.getCustomerById(r.getCustomerId());
+
+                ContractCustomerDTO contractCustomerDTO = ContractCustomerDTO.builder()
+                        .customerId(customer.getId())
+                        .customerName(customer.getName())
+                        .totalContracts(r.getTotal())
+                        .build();
+
+                response.add(contractCustomerDTO);
+            });
+
+            return response;
+
+        } catch (Exception e){
+            log.error("Error in countCompletedContracts: ", e);
             return null;
         }
     }

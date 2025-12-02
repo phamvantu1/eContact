@@ -218,7 +218,7 @@ public class ChangeFileService {
 
                 ty = (float) (Math.floor(pdfDoc.getPage(pageIndex).getPageSize().getHeight()) - ty - height + (pageIndex - 1) * 5.0);
             } else {
-                if (text.startsWith("Mã HĐ:")) {
+                if (text.startsWith("Mã HD:")) {
                     tx = 10.0f;
                     ty = 15.0f;
                 } else {
@@ -328,7 +328,7 @@ public class ChangeFileService {
                             150,
                             "Times New Roman",
                             11,
-                            "Mã HĐ: " + contract.getContractNo(),
+                            "Mã HD: " + contract.getContractNo(),
                             true
                     );
 

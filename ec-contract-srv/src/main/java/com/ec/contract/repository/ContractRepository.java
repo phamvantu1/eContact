@@ -1,5 +1,6 @@
 package com.ec.contract.repository;
 
+import com.ec.contract.model.dto.response.StaticCustomerUseContract;
 import com.ec.contract.model.entity.Contract;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -307,4 +308,13 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
                                 @Param("typeId") Integer typeId,
                                 @Param("status") Integer status);
 
+
+    @Query(value = "SELECT c.customer_id AS customerId," +
+            "count(*) as total " +
+            "from contracts c " +
+            "group by customer_id " +
+            "order by total desc " +
+            "limit 10 "
+            , nativeQuery = true)
+    List<StaticCustomerUseContract> statisticsCustomerUseMaxContracts();
 }
