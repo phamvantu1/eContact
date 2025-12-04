@@ -92,7 +92,7 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
             "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) " +
             "ORDER BY c.created_at DESC",
             countQuery = "SELECT count(*) FROM contracts c " +
-                    "WHERE c.created_by = :customerId " +
+                    "WHERE c.created_by in (:listCustomerIds) " +
                     "AND c.status = :status " +
                     "and (c.contract_no ILIKE CONCAT('%', :textSearch, '%') OR c.name ILIKE CONCAT('%', :textSearch, '%')) " +
                     "AND (:fromDate IS NULL  OR c.created_at >= CAST(:fromDate AS timestamp)) " +
