@@ -3,18 +3,17 @@ package com.ec.notification.model.entity;
 
 import com.ec.library.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Entity
 @Table(name = "notices")
-@Data
-@Builder
-@AllArgsConstructor
+@Entity
+@Getter
+@Setter
 @NoArgsConstructor
-public class notice extends BaseEntity {
+@AllArgsConstructor
+@ToString
+@Builder
+public class Notice extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

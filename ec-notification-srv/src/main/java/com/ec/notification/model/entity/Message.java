@@ -2,18 +2,18 @@ package com.ec.notification.model.entity;
 
 import com.ec.library.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.validator.constraints.UniqueElements;
 
+@Table(name = "messages")
 @Entity
-@Table(name = "message")
-@Data
-@Builder
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
-public class message extends BaseEntity {
+@AllArgsConstructor
+@ToString
+@Builder
+public class Message{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,12 +22,14 @@ public class message extends BaseEntity {
     private String name;
 
     @Lob
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "mail_template", columnDefinition = "TEXT")
     private String mailTemplate;
 
     private String url;
 
     @Lob
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "notice_template", columnDefinition = "TEXT")
     private String noticeTemplate;
+
+    private String code;
 }

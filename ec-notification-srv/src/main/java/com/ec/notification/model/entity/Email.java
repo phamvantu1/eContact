@@ -2,18 +2,17 @@ package com.ec.notification.model.entity;
 
 import com.ec.library.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
-@Table(name = "email")
+@Table(name = "emails")
 @Entity
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@ToString
 @Builder
-public class email extends BaseEntity {
+public class Email extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
