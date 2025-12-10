@@ -1,35 +1,34 @@
 package com.ec.notification.model.entity;
 
-import com.ec.library.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.validator.constraints.UniqueElements;
 
-@Table(name = "messages")
 @Entity
+@Table(name = "messages")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 @Builder
-public class Message{
+public class Message {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Integer id;
 
+    @Column(name = "code")
+    private String code;
+
+    @Column(name = "name")
     private String name;
 
-    @Lob
+    @Column(name = "url")
+    private String url;
+
     @Column(name = "mail_template", columnDefinition = "TEXT")
     private String mailTemplate;
 
-    private String url;
-
-    @Lob
     @Column(name = "notice_template", columnDefinition = "TEXT")
     private String noticeTemplate;
-
-    private String code;
 }

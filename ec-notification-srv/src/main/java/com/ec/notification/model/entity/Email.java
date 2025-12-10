@@ -24,7 +24,6 @@ public class Email extends BaseEntity {
 
     private String cc;
 
-    @Lob
     @Column(columnDefinition = "TEXT")
     private String content;
 
