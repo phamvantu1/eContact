@@ -42,7 +42,6 @@ public class ContractService {
     private ModelMapper modelMapper;
 
     private final ContractRepository contractRepository;
-    private final ContractRefRepository contractRefRepository;
     private final CustomerService customerService;
     private final ParticipantRepository participantRepository;
     private final ParticipantService participantService;

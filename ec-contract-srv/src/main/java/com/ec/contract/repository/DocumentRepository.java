@@ -29,6 +29,5 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
                     "order by d.id desc",
             nativeQuery = true)
     Collection<Document> findAllByContractIdAndStatusOrderByIdDesc(@Param("contractId") int contractId,
-                                                                   @Param("status") int status
-    );
+                                                                   @Param("status") int status);
 }

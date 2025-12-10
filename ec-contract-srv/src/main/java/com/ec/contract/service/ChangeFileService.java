@@ -201,7 +201,7 @@ public class ChangeFileService {
      * @param isColor   Tô màu text hay không?
      * @return Đường dẫn tạm của tệp tin sau khi xử lý
      */
-    private String addText(String filePath, int pageIndex, float tx, float ty, float height, float width, String fontName, int fontSize, String text, boolean isColor) {
+    public String addText(String filePath, int pageIndex, float tx, float ty, float height, float width, String fontName, int fontSize, String text, boolean isColor) {
         try {
             var pdfReader = new PdfReader(new URL(filePath).openStream());
             String newFilePath = String.format("%s/%s.pdf", tempFolder, UUID.randomUUID());
