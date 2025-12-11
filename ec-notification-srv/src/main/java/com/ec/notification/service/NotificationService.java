@@ -29,13 +29,15 @@ public class NotificationService {
     public void sendEmailNotification(SendEmailDTO request) {
         try{
 
+            log.info("Sending email notification to {}", request.getRecipient());
+
             Message message = messageRepository.findByCode(request.getCode());
 
             Email email = Email.builder()
                     .subject(request.getSubject())
                     .recipient(request.getRecipient())
-//                    .cc(request.getCc())
-                    .content(message.getMailTemplate())
+                    .cc(request.getCc())
+                    .content(message != null ? message.getMailTemplate() : "")
                     .status(request.getStatus())
                     .build();
 

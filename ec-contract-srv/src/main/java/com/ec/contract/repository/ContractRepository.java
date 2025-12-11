@@ -33,26 +33,58 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
             Pageable pageable);
 
 
-    @Query(value = "SELECT * FROM contracts c " +
-            "WHERE c.created_by = :customerId " +
-            "AND c.status = :status " +
-            "and (c.contract_no ILIKE CONCAT('%', :textSearch, '%') OR c.name ILIKE CONCAT('%', :textSearch, '%')) " +
-            "AND (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
-            "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) " +
-            "ORDER BY c.created_at DESC",
-            countQuery = "SELECT count(*) FROM contracts c " +
-                    "WHERE c.created_by = :customerId " +
-                    "AND c.status = :status " +
-                    "and (c.contract_no ILIKE CONCAT('%', :textSearch, '%') OR c.name ILIKE CONCAT('%', :textSearch, '%')) " +
-                    "AND (:fromDate IS NULL  OR c.created_at >= CAST(:fromDate AS timestamp)) " +
-                    "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp))",
+    @Query(value = """
+            SELECT *
+            FROM contracts c
+            WHERE c.created_by = :customerId
+            AND (
+                    :textSearch IS NULL 
+                    OR c.contract_no ILIKE CONCAT('%', :textSearch, '%')
+                    OR c.name ILIKE CONCAT('%', :textSearch, '%')
+                )
+            AND (
+                    (:status != 1 AND c.status = :status)
+                    OR
+                    (:status = 1 
+                        AND c.status = 20
+                        AND c.contract_expire_time <= now() + interval '5 days'
+                        AND c.contract_expire_time >= now()
+                    )
+            )
+            AND (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp))
+            AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp))
+            ORDER BY c.created_at DESC
+            """,
+            countQuery = """
+                    SELECT count(*)
+                    FROM contracts c
+                    WHERE c.created_by = :customerId
+                    AND (
+                            :textSearch IS NULL 
+                            OR c.contract_no ILIKE CONCAT('%', :textSearch, '%')
+                            OR c.name ILIKE CONCAT('%', :textSearch, '%')
+                        )                        
+                    AND (
+                            (:status != 1 AND c.status = :status)
+                            OR
+                            (:status = 1 
+                                AND c.status = 20
+                                AND c.contract_expire_time <= now() + interval '5 days'
+                                AND c.contract_expire_time >= now()
+                            )
+                    )
+                    AND (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp))
+                    AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp))
+                    """,
             nativeQuery = true)
-    Page<Contract> findMyContracts(@Param("customerId") Integer customerId,
-                                   @Param("status") Integer status,
-                                   @Param("textSearch") String textSearch,
-                                   @Param("fromDate") String fromDate,
-                                   @Param("toDate") String toDate,
-                                   Pageable pageable);
+    Page<Contract> findMyContracts(
+            @Param("customerId") Integer customerId,
+            @Param("status") Integer status,
+            @Param("textSearch") String textSearch,
+            @Param("fromDate") String fromDate,
+            @Param("toDate") String toDate,
+            Pageable pageable);
+
 
     @Query(value = "SELECT distinct c.* from contracts c " +
             "JOIN participants p ON c.id = p.contract_id " +

@@ -25,7 +25,6 @@ public class EmailService {
         mailSender.send(message);
     }
 
-
     public void sendEmail(EmailDTO email) throws MessagingException {
 
         MimeMessage message = mailSender.createMimeMessage();
