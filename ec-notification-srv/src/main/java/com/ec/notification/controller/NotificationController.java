@@ -1,6 +1,6 @@
 package com.ec.notification.controller;
 
-import com.ec.notification.model.DTO.SendEmailDTO;
+import com.ec.notification.model.dto.SendEmailDTO;
 import com.ec.notification.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,7 +18,7 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
-    @PostMapping("/send-email")
+    @PostMapping("/internal/send-email")
     @Operation(summary = "Send Email Notification", description = "Sends an email notification to the specified recipient.")
     public void sendEmailNotification(@RequestBody SendEmailDTO request) {
         notificationService.sendEmailNotification(request);

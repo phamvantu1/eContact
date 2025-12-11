@@ -1,4 +1,4 @@
-package com.ec.notification.model.DTO;
+package com.ec.contract.model.dto;
 
 import lombok.Data;
 

@@ -1,6 +1,6 @@
 package com.ec.notification.mapper;
 
-import com.ec.notification.model.DTO.NoticeDTO;
+import com.ec.notification.model.dto.NoticeDTO;
 import com.ec.notification.model.entity.Notice;
 import org.mapstruct.Mapper;
 

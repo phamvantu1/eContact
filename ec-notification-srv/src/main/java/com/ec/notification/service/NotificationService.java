@@ -3,7 +3,7 @@ package com.ec.notification.service;
 import com.ec.notification.mapper.EmailMapper;
 import com.ec.notification.mapper.MessageMapper;
 import com.ec.notification.mapper.NoticeMapper;
-import com.ec.notification.model.DTO.SendEmailDTO;
+import com.ec.notification.model.dto.SendEmailDTO;
 import com.ec.notification.model.entity.Email;
 import com.ec.notification.model.entity.Message;
 import com.ec.notification.repository.EmailRepository;

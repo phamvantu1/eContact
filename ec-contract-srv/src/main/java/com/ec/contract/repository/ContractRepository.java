@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -308,7 +309,6 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
                                 @Param("typeId") Integer typeId,
                                 @Param("status") Integer status);
 
-
     @Query(value = "SELECT c.customer_id AS customerId," +
             "count(*) as total " +
             "from contracts c " +
@@ -317,4 +317,10 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
             "limit 10 "
             , nativeQuery = true)
     List<StaticCustomerUseContract> statisticsCustomerUseMaxContracts();
+
+    @Query(value = "SELECT c.* from contracts c " +
+            "where c.status = 20 " +
+            "and c.contract_expire_time <= :currentDate "
+            , nativeQuery = true)
+    List<Contract> findContractsToExpire(@Param("currentDate") LocalDateTime currentDate);
 }

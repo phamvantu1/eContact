@@ -1,4 +1,4 @@
-package com.ec.notification.model.DTO;
+package com.ec.notification.model.dto;
 
 
 import com.ec.library.entity.BaseEntity;

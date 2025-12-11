@@ -510,5 +510,20 @@ public class ContractService {
         );
     }
 
+    public void expireContractDaily(){
+        try{
+
+            List<Contract> contractsToExpire = contractRepository.findContractsToExpire(LocalDateTime.now());
+
+            contractsToExpire.forEach(contract -> {
+                contract.setStatus(ContractStatus.EXPIRE.getDbVal());
+                contractRepository.save(contract);
+            });
+
+        }catch (Exception e){
+            log.error("Failed to expire contracts daily: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to expire contracts daily", e);
+        }
+    }
 
 }

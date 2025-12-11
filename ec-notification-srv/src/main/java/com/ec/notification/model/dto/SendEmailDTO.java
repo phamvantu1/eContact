@@ -1,11 +1,9 @@
-package com.ec.notification.model.DTO;
+package com.ec.notification.model.dto;
 
 import lombok.Data;
 
 @Data
-public class EmailDTO {
-
-    private Integer id;
+public class SendEmailDTO {
 
     private String subject;
 
@@ -16,5 +14,7 @@ public class EmailDTO {
     private String content;
 
     private Integer status;
+
+    private String code;
 
 }

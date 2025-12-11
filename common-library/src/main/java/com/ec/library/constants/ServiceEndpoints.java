@@ -10,7 +10,7 @@ public class ServiceEndpoints {
 
     // Base API paths
     public static final String CUSTOMER_API = CUSTOMER_SERVICE ;
-    public static final String NOTICE_API = NOTICE_SERVICE + "/api/notification";
+    public static final String NOTICE_API = NOTICE_SERVICE;
     public static final String AUTH_API = AUTH_SERVICE + "/api/auth";
     public static final String CONTRACT_API = CONTRACT_SERVICE + "/api/contracts";
 

@@ -1,6 +1,6 @@
 package com.ec.notification.service;
 
-import com.ec.notification.model.DTO.EmailDTO;
+import com.ec.notification.model.dto.EmailDTO;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.mail.SimpleMailMessage;
