@@ -7,6 +7,10 @@ public class CommonConstants {
         public static final String UPDATE_CONTRACT = "Cập nhật hợp đồng thành công";
         public static final String ABOUT_EXPIRY_CONTRACT = "Hợp đồng sắp hết hạn";
         public static final String EXPIRED_CONTRACT = "Hợp đồng đã hết hạn";
+        public static final String COORDINATOR = "Hợp đồng điều phối";
+        public static final String REVIEWER = "Hợp đồng yêu cầu xem xét";
+        public static final String SIGNER = "Hợp đồng chờ ký";
+        public static final String ARCHIVER = "Hợp đồng cần đóng dấu";
     }
 
     public static class CodeEmail {
@@ -19,8 +23,10 @@ public class CommonConstants {
 
     public static class TitleEmail {
         public static final String VIEW_CONTRACT = "Bạn có hợp đồng {status}";
-        public static final String APPROVE = "approve";
-        public static final String SIGN = "sign";
+        public static final String COORDINATOR = "Hợp đồng yêu cầu điều phối";
+        public static final String REVIEWER = "Hợp đồng yêu cầu xem xét";
+        public static final String SIGNER = "Hợp đồng yêu cầu ký";
+        public static final String ARCHIVER = "Hợp đồng yêu cầu đóng dấu";
     }
 
     public static class ActionButton {
@@ -29,5 +35,9 @@ public class CommonConstants {
 
     public static class url {
         public static final String VIEW_CONTRACT = "/contracts/view/";
+        public static final String SIGNER = "/contracts/signer/";
+        public static final String REVIEWER = "/contracts/approve/";
+        public static final String COORDINATOR = "/contracts/coordinator/";
+        public static final String ARCHIVER = "/contracts/archiver/";
     }
 }

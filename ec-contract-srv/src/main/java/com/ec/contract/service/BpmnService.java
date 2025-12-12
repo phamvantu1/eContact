@@ -3,12 +3,11 @@ package com.ec.contract.service;
 import com.ec.contract.constant.ContractStatus;
 import com.ec.contract.constant.RecipientRole;
 import com.ec.contract.constant.RecipientStatus;
-import com.ec.contract.model.dto.ContractChangeStatusRequest;
-import com.ec.contract.model.dto.OrganizationDTO;
-import com.ec.contract.model.dto.ParticipantDTO;
-import com.ec.contract.model.dto.RecipientDTO;
+import com.ec.contract.model.dto.*;
+import com.ec.contract.model.dto.request.SendEmailRequestDTO;
 import com.ec.contract.model.dto.response.ContractResponseDTO;
 import com.ec.contract.model.entity.Customer;
+import com.ec.library.constants.CommonConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -28,6 +27,7 @@ public class BpmnService {
 
     private final CustomerService customerService;
     private final ContractService contractService;
+    private final NotificationService notificationService;
 
     private RecipientService recipientService; // không final
 
@@ -76,6 +76,20 @@ public class BpmnService {
                         recipientDto.setStatus(RecipientStatus.PROCESSING.getDbVal());
                         recipientService.changeRecipientProcessing(recipientDto.getId());
 
+                        // send notice
+                        SendEmailRequestDTO requestDTO = SendEmailRequestDTO.builder()
+                                .subject(CommonConstants.SubjectEmail.COORDINATOR)
+                                .contractId(contractDto.getId())
+                                .recipientId(recipientDto.getId())
+                                .code(CommonConstants.CodeEmail.EMAIL)
+                                .actionButton(CommonConstants.ActionButton.VIEW_CONTRACT)
+                                .titleEmail(CommonConstants.TitleEmail.COORDINATOR)
+                                .url(CommonConstants.url.COORDINATOR)
+                                .build();
+                        SendEmailDTO emailDTO = notificationService.setSendEmailDTO(requestDTO);
+                        log.info("send email COORDINATOR contract to recipient {}" , emailDTO);
+                        notificationService.sendEmailNotification(emailDTO);
+
                         findCoordinator = true;
                     }
                 }
@@ -111,6 +125,20 @@ public class BpmnService {
                         // cap nhat trang thai dang xu ly
                         recipientDto.setStatus(RecipientStatus.PROCESSING.getDbVal());
                         recipientService.changeRecipientProcessing(recipientDto.getId());
+
+                        // send notice
+                        SendEmailRequestDTO requestDTO = SendEmailRequestDTO.builder()
+                                .subject(CommonConstants.SubjectEmail.REVIEWER)
+                                .contractId(contractDto.getId())
+                                .recipientId(recipientDto.getId())
+                                .code(CommonConstants.CodeEmail.EMAIL)
+                                .actionButton(CommonConstants.ActionButton.VIEW_CONTRACT)
+                                .titleEmail(CommonConstants.TitleEmail.REVIEWER)
+                                .url(CommonConstants.url.REVIEWER)
+                                .build();
+                        SendEmailDTO emailDTO = notificationService.setSendEmailDTO(requestDTO);
+                        log.info("send email COORDINATOR contract to recipient {}" , emailDTO);
+                        notificationService.sendEmailNotification(emailDTO);
 
                         // da tim duoc nguoi xu ly
                         findRecipient = true;
@@ -152,6 +180,20 @@ public class BpmnService {
                                 recipientDto.setStatus(RecipientStatus.PROCESSING.getDbVal());
 
                                 recipientService.changeRecipientProcessing(recipientDto.getId());
+
+                                // send notice
+                                SendEmailRequestDTO requestDTO = SendEmailRequestDTO.builder()
+                                        .subject(CommonConstants.SubjectEmail.SIGNER)
+                                        .contractId(contractDto.getId())
+                                        .recipientId(recipientDto.getId())
+                                        .code(CommonConstants.CodeEmail.EMAIL)
+                                        .actionButton(CommonConstants.ActionButton.VIEW_CONTRACT)
+                                        .titleEmail(CommonConstants.TitleEmail.SIGNER)
+                                        .url(CommonConstants.url.SIGNER)
+                                        .build();
+                                SendEmailDTO emailDTO = notificationService.setSendEmailDTO(requestDTO);
+                                log.info("send email COORDINATOR contract to recipient {}" , emailDTO);
+                                notificationService.sendEmailNotification(emailDTO);
 
                                 log.info("[contract-{}] notify SIGNER: {}", contractDto.getId(), recipientDto.getId());
                             }
@@ -219,11 +261,25 @@ public class BpmnService {
                             break;
                         }
 
-                        updateStatusAndNotice(recipientDto);
+                        updateStatusRecipient(recipientDto);
 
                         prevOrder = recipientDto.getOrdering();
 
                         nextRecipientDto = recipientDto;
+
+                        // send notice
+                        SendEmailRequestDTO requestDTO = SendEmailRequestDTO.builder()
+                                .subject(CommonConstants.SubjectEmail.SIGNER)
+                                .contractId(contractDto.getId())
+                                .recipientId(recipientDto.getId())
+                                .code(CommonConstants.CodeEmail.EMAIL)
+                                .actionButton(CommonConstants.ActionButton.VIEW_CONTRACT)
+                                .titleEmail(CommonConstants.TitleEmail.SIGNER)
+                                .url(CommonConstants.url.SIGNER)
+                                .build();
+                        SendEmailDTO emailDTO = notificationService.setSendEmailDTO(requestDTO);
+                        log.info("send email COORDINATOR contract to recipient {}" , emailDTO);
+                        notificationService.sendEmailNotification(emailDTO);
 
                     }
 
@@ -249,7 +305,7 @@ public class BpmnService {
         return error;
     }
 
-    private void updateStatusAndNotice(RecipientDTO recipientDto) {
+    private void updateStatusRecipient(RecipientDTO recipientDto) {
 
         recipientDto.setStatus(RecipientStatus.PROCESSING.getDbVal());
         recipientService.changeRecipientProcessing(recipientDto.getId());
@@ -285,6 +341,21 @@ public class BpmnService {
 
         for (var recipientDto : recipients) {
             noticeToRecipient(recipientDto);
+
+            // send notice
+            SendEmailRequestDTO requestDTO = SendEmailRequestDTO.builder()
+                    .subject(CommonConstants.SubjectEmail.ARCHIVER)
+                    .contractId(contractDto.getId())
+                    .recipientId(recipientDto.getId())
+                    .code(CommonConstants.CodeEmail.EMAIL)
+                    .actionButton(CommonConstants.ActionButton.VIEW_CONTRACT)
+                    .titleEmail(CommonConstants.TitleEmail.ARCHIVER)
+                    .url(CommonConstants.url.ARCHIVER)
+                    .build();
+            SendEmailDTO emailDTO = notificationService.setSendEmailDTO(requestDTO);
+            log.info("send email ARCHIVER contract to recipient {}" , emailDTO);
+            notificationService.sendEmailNotification(emailDTO);
+
         }
 
         if (recipients.size() > 0) {
@@ -321,9 +392,23 @@ public class BpmnService {
         for (var participantDto : contractDto.getParticipants()) {
             if (participantDto.getOrdering() == minOrder) {
                 for (var recipientDto : participantDto.getRecipients()) {
-                    if (recipientDto.getRole() == RecipientRole.REVIEWER.getDbVal()
+                    if (Objects.equals(recipientDto.getRole(), RecipientRole.REVIEWER.getDbVal())
                             && recipientDto.getOrdering() == 1) {
                         noticeToRecipient(recipientDto);
+
+                        // send notice
+                        SendEmailRequestDTO requestDTO = SendEmailRequestDTO.builder()
+                                .subject(CommonConstants.SubjectEmail.REVIEWER)
+                                .contractId(contractDto.getId())
+                                .recipientId(recipientDto.getId())
+                                .code(CommonConstants.CodeEmail.EMAIL)
+                                .actionButton(CommonConstants.ActionButton.VIEW_CONTRACT)
+                                .titleEmail(CommonConstants.TitleEmail.REVIEWER)
+                                .url(CommonConstants.url.REVIEWER)
+                                .build();
+                        SendEmailDTO emailDTO = notificationService.setSendEmailDTO(requestDTO);
+                        log.info("send email REVIEWER contract to recipient {}" , emailDTO);
+                        notificationService.sendEmailNotification(emailDTO);
 
                         findReviewer = true;
                     }
@@ -343,6 +428,20 @@ public class BpmnService {
                             && recipientDto.getOrdering() == 1) {
 
                         noticeToRecipient(recipientDto);
+
+                        // send notice
+                        SendEmailRequestDTO requestDTO = SendEmailRequestDTO.builder()
+                                .subject(CommonConstants.SubjectEmail.SIGNER)
+                                .contractId(contractDto.getId())
+                                .recipientId(recipientDto.getId())
+                                .code(CommonConstants.CodeEmail.EMAIL)
+                                .actionButton(CommonConstants.ActionButton.VIEW_CONTRACT)
+                                .titleEmail(CommonConstants.TitleEmail.SIGNER)
+                                .url(CommonConstants.url.SIGNER)
+                                .build();
+                        SendEmailDTO emailDTO = notificationService.setSendEmailDTO(requestDTO);
+                        log.info("send email SIGNER contract to recipient {}" , emailDTO);
+                        notificationService.sendEmailNotification(emailDTO);
                     }
                 }
             }

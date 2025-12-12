@@ -32,8 +32,8 @@ public class BatchService {
         try {
             log.info("start run batch expire contract");
 
-            String titleEmail = CommonConstants.TitleEmail.VIEW_CONTRACT.replace("{status}", ContractStatus.EXPIRE.getViLabel());
-
+            String titleEmail = CommonConstants.TitleEmail.VIEW_CONTRACT
+                    .replace("{status}", ContractStatus.EXPIRE.getViLabel());
 
             List<Contract> listContract = contractService.expireContractDaily();
 
@@ -71,7 +71,7 @@ public class BatchService {
         }
     }
 
-    @Scheduled(cron = "0 */5 * * * *")
+    @Scheduled(cron = "0 0 8 * * *")
     public void sendNoticeAboutExpireContracts() {
         try {
             log.info("start run batch send notice about expire contract");
