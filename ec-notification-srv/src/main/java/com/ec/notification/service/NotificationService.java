@@ -29,15 +29,27 @@ public class NotificationService {
     public void sendEmailNotification(SendEmailDTO request) {
         try{
 
-            log.info("Sending email notification to {}", request.getRecipient());
+            log.info("Sending email notification to {}", request.getRecipientEmail());
 
             Message message = messageRepository.findByCode(request.getCode());
 
+            String template = message.getMailTemplate();
+
+            template = template.replace("{recipientName}", request.getRecipientName());
+            template = template.replace("{contractNo}", request.getContractNo());
+            template = template.replace("{contractName}", request.getContractName());
+            template = template.replace("{note}", request.getNote());
+            template = template.replace("{sendFrom}", request.getSenderName());
+            template = template.replace("{titleEmail}", request.getTitleEmail());
+            template = template.replace("{actionButton}", request.getActionButton());
+
+            log.info("Email template after replacement: {}", template);
+
             Email email = Email.builder()
                     .subject(request.getSubject())
-                    .recipient(request.getRecipient())
+                    .recipient(request.getRecipientEmail())
                     .cc(request.getCc())
-                    .content(message != null ? message.getMailTemplate() : "")
+                    .content(template)
                     .status(request.getStatus())
                     .build();
 
@@ -46,7 +58,7 @@ public class NotificationService {
             emailRepository.save(email);
 
         }catch (Exception e){
-            log.error("Failed to send email notification", e);
+            log.error("Failed to send email notification contractNo :  {}",  request.getContractNo());
         }
     }
 }

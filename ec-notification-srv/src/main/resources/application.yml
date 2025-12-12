@@ -14,10 +14,14 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: create-drop # update
     show-sql: false
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     defer-datasource-initialization: true
+  sql:
+    init:
+      mode: always        # never
+      data-locations: classpath:data.sql  # chỉ định file SQL
 
   rabbitmq:
     host: localhost

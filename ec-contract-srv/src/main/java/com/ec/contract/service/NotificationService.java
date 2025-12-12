@@ -72,13 +72,16 @@ public class NotificationService {
 
         return SendEmailDTO.builder()
                 .subject(requestDTO.getSubject())
-                .recipient(recipient.getEmail())
+                .recipientEmail(recipient.getEmail())
                 .code(requestDTO.getCode())
                 .contractName(contract.getName())
                 .contractNo(contract.getContractNo())
-                .nameRecipient(recipient.getName())
-                .nameSender(nameSender)
+                .recipientName(recipient.getName())
+                .senderName(nameSender)
                 .note(contract.getNote())
+                .actionButton(requestDTO.getActionButton())
+                .titleEmail(requestDTO.getTitleEmail())
+                .url(requestDTO.getUrl())
                 .build();
     }
 

@@ -15,4 +15,10 @@ public class SendEmailRequestDTO {
 
     private String code;
 
+    private String actionButton;
+
+    private String titleEmail;
+
+    private String url;
+
 }

@@ -1,5 +1,7 @@
 package com.ec.contract.service;
 
+import com.ec.contract.constant.Constants;
+import com.ec.contract.constant.ContractStatus;
 import com.ec.contract.model.dto.SendEmailDTO;
 import com.ec.contract.model.dto.request.SendEmailRequestDTO;
 import com.ec.contract.model.entity.Contract;
@@ -25,10 +27,13 @@ public class BatchService {
     private final ContractService contractService;
     private final ParticipantRepository participantRepository;
 
-    @Scheduled(cron = "0 */5 * * * *")
+    @Scheduled(cron = "0 */1 * * * *")
     public void expireContractsDaily() {
         try {
             log.info("start run batch expire contract");
+
+            String titleEmail = CommonConstants.TitleEmail.VIEW_CONTRACT.replace("{status}", ContractStatus.EXPIRE.getViLabel());
+
 
             List<Contract> listContract = contractService.expireContractDaily();
 
@@ -46,7 +51,10 @@ public class BatchService {
                                 .subject(CommonConstants.SubjectEmail.EXPIRED_CONTRACT)
                                 .contractId(contract.getId())
                                 .recipientId(recipient.getId())
-                                .code(CommonConstants.CodeEmail.EXPIRED_CONTRACT)
+                                .code(CommonConstants.CodeEmail.EMAIL)
+                                .actionButton(CommonConstants.ActionButton.VIEW_CONTRACT)
+                                .titleEmail(titleEmail)
+                                .url(CommonConstants.url.VIEW_CONTRACT)
                                 .build();
 
                         SendEmailDTO emailDTO = notificationService.setSendEmailDTO(requestDTO);

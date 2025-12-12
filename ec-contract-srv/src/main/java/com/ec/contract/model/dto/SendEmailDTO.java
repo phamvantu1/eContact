@@ -9,7 +9,7 @@ public class SendEmailDTO {
 
     private String subject; // chủ đề email
 
-    private String recipient; // email người nhận
+    private String recipientEmail; // email người nhận
 
     private String cc;
 
@@ -23,12 +23,16 @@ public class SendEmailDTO {
 
     private String contractNo;
 
-    private String nameRecipient; // tên người xử lý hợp đồng
+    private String recipientName; // tên người xử lý hợp đồng
 
-    private String nameSender; // tên người gửi hợp đồng
+    private String senderName; // tên người gửi hợp đồng
 
     private String note;
 
     private String url;
+
+    private String actionButton;
+
+    private String titleEmail;
 
 }
