@@ -302,7 +302,7 @@ public class ContractService {
             List<Integer> newListStatus = new ArrayList<>();
 
             switch (filterContractDTO.getStatus()) {
-                case 1 -> newListStatus = Arrays.asList(10, 20);
+                case 1 -> newListStatus = List.of(20);
                 case 2 -> newListStatus = Arrays.asList(30, 40, 31, 32);
                 // Có thể thêm nhiều case khác nếu cần
                 default -> newListStatus = Collections.emptyList(); // hoặc giữ nguyên list trống
@@ -424,7 +424,6 @@ public class ContractService {
             List<BpmnRecipientDto> bpmnRecipientList = new ArrayList<>();
             List<BpmnRecipientDto> normalRecipientList = new ArrayList<>();
             List<BpmnRecipientDto> cancelRecipientList = new ArrayList<>();
-            res.setRecipients(bpmnRecipientList);
 
             var customer = customerService.getCustomerById(contractDto.getCreatedBy());
 
@@ -437,6 +436,7 @@ public class ContractService {
             res.setReasonCancel(contractDto.getReasonReject());
             res.setCreatedAt(contractDto.getCreatedAt());
             res.setContractStatus(contractDto.getStatus());
+            res.setCancelDate(contractDto.getCancelDate());
 
             for (var participant : contractDto.getParticipants()) {
                 participantResult.add(participant);
@@ -493,6 +493,8 @@ public class ContractService {
 //        bpmnRecipientList.addAll(historyRecipientList);
             bpmnRecipientList.addAll(normalRecipientList);
             bpmnRecipientList.addAll(cancelRecipientList);
+
+            res.setRecipients(bpmnRecipientList);
 
             return res;
         } catch (Exception e) {

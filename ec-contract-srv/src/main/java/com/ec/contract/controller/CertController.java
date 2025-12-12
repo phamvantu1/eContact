@@ -34,7 +34,6 @@ public class CertController {
                                   @RequestParam(name = "list_email", required = false) String[] emails,
                                   @RequestParam(name = "password") String password,
                                   @RequestParam(name = "status") Integer status) {
-        try {
             String[] fileNameSplit = file.getOriginalFilename().split("\\.");
             if (!(fileNameSplit[fileNameSplit.length - 1].equals("p12"))) {
                 return Response.error(ResponseCode.FILE_DONT_TYPE_P12);
@@ -42,10 +41,6 @@ public class CertController {
             var result = certService.importCertToDatabase(file, emails, password, status, authentication);
 
             return Response.success(result);
-        } catch (RuntimeException e) {
-            log.error("Import cert error: ", e);
-            return Response.error(ResponseCode.CREATE_CERT_FAILED);
-        }
     }
 
     @GetMapping("/find-cert-user")
