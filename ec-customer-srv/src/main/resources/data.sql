@@ -25,8 +25,12 @@ VALUES
     (2, 'VIEW_CUSTOMER', NOW(), NOW()),
     (3, 'UPDATE_CUSTOMER', NOW(), NOW()),
     (4, 'DELETE_CUSTOMER', NOW(), NOW()),
-    (5, 'MANAGE_ROLE', NOW(), NOW());
-
+    (5, 'VIEW_REPORT', NOW(), NOW()),
+    (6, 'CONFIG_CERTIFICATE', NOW(), NOW()),
+    (7, 'CONFIG_TYPE_DOCUMENT', NOW(), NOW()),
+    (8, 'MANAGER_CUSTOMER', NOW(), NOW()),
+    (9, 'MANAGER_ORGANIZATION', NOW(), NOW()),
+    (10, 'MANAGER_ROLE', NOW(), NOW());
 
 
 INSERT INTO roles (id, name, status, created_at, updated_at)
