@@ -16,12 +16,12 @@ VALUES
     (1, 'Tổ chức PTIT', 'ptit@phuhoa.vn', 1, '0123456789', 'PTIT', NULL, NOW(), NOW()),
     (2, 'Tổ chức chứng khoán', 'chungkhoan@phuhoa.vn', 1, '12345678', 'CHUNGKHOAN', 1, NOW(), NOW()),
     (3, 'Tổ chức bảo hiểm', 'baohiem@phuhoa.vn', 1, '1234567', 'BAOHIEM', 2, NOW(), NOW()),
-    (4, 'Tổ chức y tế', 'yte@gmail.com.vn', 1, '123456', 'YTE', 1, NOW(), NOW()),
+    (4, 'Tổ chức y tế', 'yte@gmail.com.vn', 1, '123456', 'YTE', NULL, NOW(), NOW()),
     (5, 'Tổ chức kinh doanh', 'kinhdoanh@gmail.com.vn', 1, '123456', 'KINHDOANH', 1, NOW(), NOW()),
-    (6, 'Tổ chức HDPE', 'hdpe@gmail.com.vn', 1, '123456', 'HDPE', 1, NOW(), NOW()),
+    (6, 'Tổ chức HDPE', 'hdpe@gmail.com.vn', 1, '123456', 'HDPE', NULL, NOW(), NOW()),
     (7, 'Tổ chức giáo dục', 'giaoduc@gmail.com.vn', 1, '123456', 'GIAODUC', 1, NOW(), NOW()),
-    (8, 'Tổ chức xây dựng', 'xaydung@gmail.com.vn', 1, '123456', 'XAYDUNG', 1, NOW(), NOW()),
-    (9, 'Tổ chức tài chính', 'taichinh@gmail.com.vn', 1, '123456', 'TAICHINH', 1, NOW(), NOW());
+    (8, 'Tổ chức xây dựng', 'xaydung@gmail.com.vn', 1, '123456', 'XAYDUNG', NULL, NOW(), NOW()),
+    (9, 'Tổ chức tài chính', 'taichinh@gmail.com.vn', 1, '123456', 'TAICHINH', NULL, NOW(), NOW());
 
 
 INSERT INTO permissions (id, name, created_at, updated_at)
