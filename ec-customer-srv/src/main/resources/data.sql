@@ -13,15 +13,16 @@
 
 INSERT INTO organizations (id, name, email, status, tax_code, code, parent_id, created_at, updated_at)
 VALUES
-    (1, 'Tổ chức PTIT', 'ptit@phuhoa.vn', 1, '0123456789', 'PTIT', NULL, NOW(), NOW()),
-    (2, 'Tổ chức chứng khoán', 'chungkhoan@phuhoa.vn', 1, '12345678', 'CHUNGKHOAN', 1, NOW(), NOW()),
-    (3, 'Tổ chức bảo hiểm', 'baohiem@phuhoa.vn', 1, '1234567', 'BAOHIEM', 2, NOW(), NOW()),
+    (1, 'Tổ chức PTIT', 'ptit@gmail.com.vn', 1, '0123456789', 'PTIT', NULL, NOW(), NOW()),
+    (2, 'Tổ chức chứng khoán', 'chungkhoan@gmail.com.vn', 1, '12345678', 'CHUNGKHOAN', 1, NOW(), NOW()),
+    (3, 'Tổ chức bảo hiểm', 'baohiem@gmail.com.vn', 1, '1234567', 'BAOHIEM', 2, NOW(), NOW()),
     (4, 'Tổ chức y tế', 'yte@gmail.com.vn', 1, '123456', 'YTE', NULL, NOW(), NOW()),
     (5, 'Tổ chức kinh doanh', 'kinhdoanh@gmail.com.vn', 1, '123456', 'KINHDOANH', 1, NOW(), NOW()),
     (6, 'Tổ chức HDPE', 'hdpe@gmail.com.vn', 1, '123456', 'HDPE', NULL, NOW(), NOW()),
     (7, 'Tổ chức giáo dục', 'giaoduc@gmail.com.vn', 1, '123456', 'GIAODUC', 1, NOW(), NOW()),
     (8, 'Tổ chức xây dựng', 'xaydung@gmail.com.vn', 1, '123456', 'XAYDUNG', NULL, NOW(), NOW()),
-    (9, 'Tổ chức tài chính', 'taichinh@gmail.com.vn', 1, '123456', 'TAICHINH', NULL, NOW(), NOW());
+    (9, 'Tổ chức tài chính', 'taichinh@gmail.com.vn', 1, '123456', 'TAICHINH', NULL, NOW(), NOW()),
+    (10, 'Tổ chức công nghệ', 'congnghe@gmail.com.vn', 1, '123456', 'CONGNGHE', NULL, NOW(), NOW());
 
 
 INSERT INTO permissions (id, name, created_at, updated_at)
@@ -52,9 +53,9 @@ INSERT INTO customers (
       (2, 'Nguyễn Thái Minh', 'thaiminhnguyen2003@gmail.com', '$2a$10$UPF5aWUqKSeuoJR0kpSAKumzjjvqOh7VdpQHVP8ptBoReHO13LXqe', '0902345678', '2003-05-05', 1, 'male', '12345678', 1, '{}'::jsonb, NOW(), NOW()),
       (3, 'Trần Tuấn Phúc', 'tranphuc120203@gmail.com', '$2a$10$UPF5aWUqKSeuoJR0kpSAKumzjjvqOh7VdpQHVP8ptBoReHO13LXqe', '0903456789', '2003-03-03', 1, 'male', '1234567', 1, '{}'::jsonb, NOW(), NOW()),
       (4, 'Phạm Hoàng Lâm', 'tutupham5@gmail.com', '$2a$10$UPF5aWUqKSeuoJR0kpSAKumzjjvqOh7VdpQHVP8ptBoReHO13LXqe', '0904567890', '1992-07-12', 1, 'female', '222333444', 1, '{}'::jsonb, NOW(), NOW()),
-      (5, 'Hoàng Văn An', 'anhoang@gmail.com', '$2a$10$UPF5aWUqKSeuoJR0kpSAKumzjjvqOh7VdpQHVP8ptBoReHO13LXqe', '0905678901', '1993-09-21', 1, 'male', '333444555', 2, '{}'::jsonb, NOW(), NOW()),
-      (6, 'Đỗ Thị Lụa', 'dothilua@gmail.com', '$2a$10$UPF5aWUqKSeuoJR0kpSAKumzjjvqOh7VdpQHVP8ptBoReHO13LXqe', '0906789012', '1998-04-10', 1, 'female', '444555666', 3, '{}'::jsonb, NOW(), NOW()),
-      (7, 'Phan Văn Giang', 'giangphan@gmail.com', '$2a$10$UPF5aWUqKSeuoJR0kpSAKumzjjvqOh7VdpQHVP8ptBoReHO13LXqe', '0907890123', '1988-11-30', 1, 'male', '555666777', 1, '{}'::jsonb, NOW(), NOW()),
+      (5, 'Đinh Khánh Ngân', 'khanhngan@gmail.com', '$2a$10$UPF5aWUqKSeuoJR0kpSAKumzjjvqOh7VdpQHVP8ptBoReHO13LXqe', '0905678901', '1993-09-21', 1, 'male', '333444555', 2, '{}'::jsonb, NOW(), NOW()),
+      (6, 'Trần Quang Huy', 'quanghuy@gmail.com', '$2a$10$UPF5aWUqKSeuoJR0kpSAKumzjjvqOh7VdpQHVP8ptBoReHO13LXqe', '0906789012', '1998-04-10', 1, 'female', '444555666', 3, '{}'::jsonb, NOW(), NOW()),
+      (7, 'Trần Văn Đạt', 'vandat@gmail.com', '$2a$10$UPF5aWUqKSeuoJR0kpSAKumzjjvqOh7VdpQHVP8ptBoReHO13LXqe', '0907890123', '1988-11-30', 1, 'male', '555666777', 1, '{}'::jsonb, NOW(), NOW()),
       (8, 'Bùi Thị Hoa', 'hoabui@gmail.com', '$2a$10$UPF5aWUqKSeuoJR0kpSAKumzjjvqOh7VdpQHVP8ptBoReHO13LXqe', '0908901234', '1997-02-14', 1, 'female', '666777888', 2, '{}'::jsonb, NOW(), NOW()),
       (9, 'Vũ Văn Tiến', 'tienvu@gmail.com', '$2a$10$UPF5aWUqKSeuoJR0kpSAKumzjjvqOh7VdpQHVP8ptBoReHO13LXqe', '0909012345', '1985-08-08', 1, 'male', '777888999', 3, '{}'::jsonb, NOW(), NOW()),
       (10, 'Ngô Thị Thương', 'thuongngo@gmail.com', '$2a$10$UPF5aWUqKSeuoJR0kpSAKumzjjvqOh7VdpQHVP8ptBoReHO13LXqe', '0910123456', '1994-12-25', 1, 'female', '888999000', 1, '{}'::jsonb, NOW(), NOW()),
