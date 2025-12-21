@@ -1,14 +1,13 @@
 package com.ec.notification.controller;
 
+import com.ec.library.response.Response;
 import com.ec.notification.model.dto.SendEmailDTO;
 import com.ec.notification.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("")
@@ -23,5 +22,20 @@ public class NotificationController {
     public void sendEmailNotification(@RequestBody SendEmailDTO request) {
         notificationService.sendEmailNotification(request);
     }
+
+    @GetMapping("/get-all-notice")
+    @Operation(summary = "Get All Notices", description = "Retrieves all notices from the system.")
+    public Response<?> getAllNotice(Authentication authentication,
+                                    @RequestParam(value = "page", defaultValue = "0") int page,
+                                    @RequestParam(value = "size", defaultValue = "10") int size) {
+        return Response.success(notificationService.getAllNotice(authentication, page, size));
+    }
+
+    @PutMapping("/read-notice/{id}")
+    @Operation(summary = "Mark Notice as Read", description = "Marks a specific notice as read.")
+    public Response<?> readNotice(@PathVariable("id") Integer id) {
+        return Response.success(notificationService.readNotice(id));
+    }
+
 
 }

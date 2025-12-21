@@ -3,6 +3,7 @@ package com.ec.contract.controller;
 import com.ec.contract.model.dto.ContractChangeStatusRequest;
 import com.ec.contract.model.dto.RecipientDTO;
 import com.ec.contract.model.dto.keystoreDTO.CertificateDtoRequest;
+import com.ec.contract.model.dto.request.AuthorizeDTO;
 import com.ec.contract.service.*;
 import com.ec.library.response.Response;
 import io.swagger.v3.oas.annotations.Operation;
@@ -53,8 +54,7 @@ public class ProcessController {
     public Response<?> approval(@PathVariable("recipientId") int recipientId) {
 
         //  gọi hàm updateFieldsTextAndCurrency để add ô text/currency của người tạo chưa được add vào hợp đồng
-
-//        fieldService.updateFieldsTextAndCurrency(recipientId);
+        //  fieldService.updateFieldsTextAndCurrency(recipientId);
 
         return Response.success(processService.approval(recipientId));
 
@@ -87,5 +87,13 @@ public class ProcessController {
 
     }
 
+    @PostMapping("/authorize/{recipientId}")
+    @Operation(summary = "Ủy quyền xử lý hợp đồng")
+    public Response<?> authorizeContract(
+            @PathVariable("recipientId") int recipientId,
+            @RequestBody AuthorizeDTO authorizeDTO) {
 
+        return Response.success(processService.authorizeContract(recipientId, authorizeDTO));
+
+    }
 }

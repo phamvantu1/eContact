@@ -9,7 +9,12 @@ package com.ec.contract.constant;
  */
 public enum RecipientStatus implements IDbValue<Integer> {
 
-    DEFAULT(0), PROCESSING(1), APPROVAL(2), REJECT(3), AUTHORIZE(4), WAIT(5);
+    DEFAULT(0),
+    PROCESSING(1),
+    APPROVAL(2),
+    REJECT(3),
+    AUTHORIZE(4),
+    WAIT(5);
 
     private final Integer dbValue;
 

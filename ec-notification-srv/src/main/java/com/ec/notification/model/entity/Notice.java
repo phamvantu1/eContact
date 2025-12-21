@@ -18,12 +18,14 @@ public class Notice extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private Integer contractId;
+    private String contractNo;
 
     private String noticeContent;
 
     private String noticeUrl;
 
     private String email;
+
+    private boolean isRead;
 
 }

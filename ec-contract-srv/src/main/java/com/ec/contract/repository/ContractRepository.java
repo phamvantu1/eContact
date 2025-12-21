@@ -47,7 +47,7 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
                     OR
                     (:status = 1 
                         AND c.status = 20
-                        AND c.contract_expire_time <= now() + interval '5 days'
+                        AND c.contract_expire_time <= now() + interval '15 days'
                         AND c.contract_expire_time >= now()
                     )
             )
@@ -69,7 +69,7 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
                             OR
                             (:status = 1 
                                 AND c.status = 20
-                                AND c.contract_expire_time <= now() + interval '5 days'
+                                AND c.contract_expire_time <= now() + interval '15 days'
                                 AND c.contract_expire_time >= now()
                             )
                     )
@@ -160,7 +160,7 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
             " and ( (:status = 30 and c.status = 30)  " +
             " or (:status = 20 and c.status = 20 and r.status = 1) " +
             " or (:status = 50 and r.status not in (1, 2) )" + // fix cung 50 la waiting
-            " or (:status = 1 and c.status = 20  and c.contract_expire_time <= now() + interval '5 days' and c.contract_expire_time >= now() )" +
+            " or (:status = 1 and c.status = 20  and c.contract_expire_time <= now() + interval '15 days' and c.contract_expire_time >= now() )" +
             " )  "
             , nativeQuery = true)
     Integer countMyProcessContract(@Param("email") String email,
@@ -319,7 +319,7 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
 
     @Query(value = "SELECT count(distinct c.id) from contracts c " +
             "where c.organization_id = :organizationId " +
-            "and (c.status = :status or (:status = 1 and c.contract_expire_time <= now() + interval '5 days' and c.contract_expire_time >= now() ) ) " +
+            "and (c.status = :status or (:status = 1 and c.contract_expire_time <= now() + interval '15 days' and c.contract_expire_time >= now() ) ) " +
             "and (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
             "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) "
             , nativeQuery = true)
@@ -331,7 +331,7 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
     @Query(value = "SELECT count(distinct c.id) from contracts c " +
             "where c.organization_id = :organizationId " +
             "and (:typeId IS NULL OR c.type_id = :typeId ) " +
-            "and ( c.status = :status or (:status = 1 and c.contract_expire_time <= now() + interval '5 days' and c.contract_expire_time >= now() ) ) " +
+            "and ( c.status = :status or (:status = 1 and c.contract_expire_time <= now() + interval '15 days' and c.contract_expire_time >= now() ) ) " +
             "and (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
             "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) "
             , nativeQuery = true)
@@ -355,4 +355,10 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
             "and c.contract_expire_time <= :currentDate "
             , nativeQuery = true)
     List<Contract> findContractsToExpire(@Param("currentDate") LocalDateTime currentDate);
+
+    @Query(value = "SELECT c.* from contracts c " +
+            "where c.status = 20 " +
+            "and c.contract_expire_time <= now() + interval '15 days' and c.contract_expire_time >= now() "
+    , nativeQuery = true)
+    List<Contract> getContractsAboutToExpire();
 }

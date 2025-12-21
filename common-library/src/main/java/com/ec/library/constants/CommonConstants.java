@@ -11,6 +11,8 @@ public class CommonConstants {
         public static final String REVIEWER = "Hợp đồng yêu cầu xem xét";
         public static final String SIGNER = "Hợp đồng chờ ký";
         public static final String ARCHIVER = "Hợp đồng cần đóng dấu";
+        public static final String REJECTED_CONTRACT = "Hợp đồng bị từ chối";
+        public static final String AUTHORIZE_CONTRACT = "Hợp đồng được ủy quyền";
     }
 
     public static class CodeEmail {
@@ -27,6 +29,8 @@ public class CommonConstants {
         public static final String REVIEWER = "Hợp đồng yêu cầu xem xét";
         public static final String SIGNER = "Hợp đồng yêu cầu ký";
         public static final String ARCHIVER = "Hợp đồng yêu cầu đóng dấu";
+        public static final String REJECTED_CONTRACT = "Hợp đồng bị từ chối";
+        public static final String AUTHORIZE_CONTRACT = "Hợp đồng được ủy quyền";
     }
 
     public static class ActionButton {
@@ -39,5 +43,7 @@ public class CommonConstants {
         public static final String REVIEWER = "/contracts/approve/";
         public static final String COORDINATOR = "/contracts/coordinator/";
         public static final String ARCHIVER = "/contracts/archiver/";
+        public static final String REJECTED_CONTRACT = "/contracts/rejected/";
+        public static final String AUTHORIZE_CONTRACT = "/contracts/authorize/";
     }
 }

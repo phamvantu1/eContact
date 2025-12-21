@@ -1,12 +1,12 @@
 package com.ec.contract.service;
 
-import com.ec.contract.constant.Constants;
 import com.ec.contract.constant.ContractStatus;
 import com.ec.contract.model.dto.SendEmailDTO;
 import com.ec.contract.model.dto.request.SendEmailRequestDTO;
 import com.ec.contract.model.entity.Contract;
 import com.ec.contract.model.entity.Participant;
 import com.ec.contract.model.entity.Recipient;
+import com.ec.contract.repository.ContractRepository;
 import com.ec.contract.repository.ParticipantRepository;
 import com.ec.library.constants.CommonConstants;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +26,7 @@ public class BatchService {
     private final NotificationService notificationService;
     private final ContractService contractService;
     private final ParticipantRepository participantRepository;
+    private final ContractRepository contractRepository;
 
     @Scheduled(cron = "0 */1 * * * *")
     public void expireContractsDaily() {
@@ -59,7 +60,7 @@ public class BatchService {
 
                         SendEmailDTO emailDTO = notificationService.setSendEmailDTO(requestDTO);
 
-                        log.info("send email expire contract to recipient {}" , emailDTO);
+                        log.info("send email expire contract to recipient {}", emailDTO);
 
                         notificationService.sendEmailNotification(emailDTO);
                     });
@@ -67,7 +68,7 @@ public class BatchService {
             });
 
         } catch (Exception e) {
-            log.error("error expire contract {}" , e.getMessage());
+            log.error("error expire contract {}", e.getMessage());
         }
     }
 
@@ -76,12 +77,42 @@ public class BatchService {
         try {
             log.info("start run batch send notice about expire contract");
 
-            SendEmailDTO emailDTO = SendEmailDTO.builder()
-                    .build();
+            String titleEmail = CommonConstants.TitleEmail.VIEW_CONTRACT
+                    .replace("{status}", ContractStatus.ABOUT_EXPIRE.getViLabel());
 
-            notificationService.sendEmailNotification(emailDTO);
+            List<Contract> listContractAboutToExpire = contractRepository.getContractsAboutToExpire();
+
+            listContractAboutToExpire.forEach(contract -> {
+
+                Collection<Participant> participants = participantRepository.findByContractIdOrderByOrderingAsc(contract.getId());
+
+                participants.forEach(participant -> {
+
+                    Set<Recipient> recipientSet = participant.getRecipients();
+
+                    recipientSet.forEach(recipient -> {
+
+                        SendEmailRequestDTO requestDTO = SendEmailRequestDTO.builder()
+                                .subject(CommonConstants.SubjectEmail.EXPIRED_CONTRACT)
+                                .contractId(contract.getId())
+                                .recipientId(recipient.getId())
+                                .code(CommonConstants.CodeEmail.EMAIL)
+                                .actionButton(CommonConstants.ActionButton.VIEW_CONTRACT)
+                                .titleEmail(titleEmail)
+                                .url(CommonConstants.url.VIEW_CONTRACT)
+                                .build();
+
+                        SendEmailDTO emailDTO = notificationService.setSendEmailDTO(requestDTO);
+
+                        log.info("send email ABOUT_EXPIRE contract to recipient {}", emailDTO);
+
+                        notificationService.sendEmailNotification(emailDTO);
+                    });
+                });
+            });
+
         } catch (Exception e) {
-            log.error("error send notice about expire contract {}" , e.getMessage());
+            log.error("error send notice about expire contract {}", e.getMessage());
         }
     }
 }
