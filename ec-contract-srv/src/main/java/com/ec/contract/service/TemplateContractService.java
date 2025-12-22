@@ -291,7 +291,7 @@ public class TemplateContractService {
     }
 
     @Transactional(readOnly = true)
-    public List<ContractResponseDTO> getMyTemplateContracts(Authentication authentication,
+    public Page<ContractResponseDTO> getMyTemplateContracts(Authentication authentication,
                                                             Integer type,
                                                             String name,
                                                             Integer size,
@@ -307,7 +307,7 @@ public class TemplateContractService {
 
             Page<TemplateContract> templateContracts = templateContractRepository.getMyTemplateContracts(customer.getId(), type, name,pageable);
 
-            return templateContractMapper.toDtoList(templateContracts.getContent());
+            return templateContracts.map(templateContractMapper::toDto);
         } catch (CustomException ex) {
             throw ex;
         } catch (Exception e) {
