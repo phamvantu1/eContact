@@ -120,12 +120,21 @@ public class ParticipantService {
                                 .filter(r -> r.getId().equals(recipientDto.getId()))
                                 .findFirst()
                                 .orElse(new Recipient());
+                    } else if (recipientDto.getRole() == 1){  // đoan này đã code như này vì fe đang làm sai, chưa sửa được
+                        recipient = existingRecipients.stream()
+                                .filter(r -> r.getEmail().equals(recipientDto.getEmail()))
+                                .findFirst()
+                                .orElse(new Recipient());
                     } else {
                         recipient = new Recipient();
+                        BeanUtils.copyProperties(recipientDto, recipient,
+                                "fields", "signType", "role", "status");
                     }
 
-                    BeanUtils.copyProperties(recipientDto, recipient,
-                            "fields", "signType", "role", "status");
+                    if (recipient.getEmail() == null){
+                        BeanUtils.copyProperties(recipientDto, recipient,
+                                "fields", "signType", "role", "status");
+                    }
 
                     recipient.setSignType(recipientDto.getSignType());
                     recipient.setRole(recipientDto.getRole());
