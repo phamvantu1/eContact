@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -50,11 +51,14 @@ public class ProcessService {
 
     @Transactional
     public ParticipantDTO updateRecipientForCoordinator(Authentication authentication,
-                                                                  int participantId,
-                                                                  int recipientId,
-                                                                  Collection<RecipientDTO> recipientDtoCollection) {
+                                                        int participantId,
+                                                        int recipientId,
+                                                        Collection<RecipientDTO> recipientDtoCollection) {
         try {
             final var participantOptional = participantRepository.findById(participantId);
+
+            Recipient recipientOptional = recipientRepository.findById(recipientId)
+                    .orElseThrow(() -> new CustomException(ResponseCode.RECIPIENT_NOT_FOUND));
 
             if (participantOptional.isPresent()) {
                 final var participant = participantOptional.get();
@@ -65,25 +69,28 @@ public class ProcessService {
 
                 //Thêm mới khách hàng xử lý
                 for (var recipientDto : recipientDtoCollection) {
-                    var recipient = new Recipient();
-                    BeanUtils.copyProperties(
-                            recipientDto, recipient,
-                            "fields"
-                    );
 
-                    participant.addRecipient(recipient);
+                    var recipient = new Recipient();
+
+                    if(!recipientDto.getEmail().equals(recipientOptional.getEmail())){
+                        BeanUtils.copyProperties(
+                                recipientDto, recipient,
+                                "fields"
+                        );
+                        participant.addRecipient(recipient);
+                    }else {
+                        participant.addRecipient(recipientOptional);
+                    }
                 }
 
                 final var updated = participantRepository.save(participant);
 
-                final var recipientOptional = recipientRepository.findById(recipientId);
-                if (recipientOptional.isPresent()) {
-                    final var recipient = recipientOptional.get();
-
+                if(recipientOptional != null){
+                    log.info("this phamtusss jjj ");
                     // update recipient status
-                    recipient.setStatus(RecipientStatus.APPROVAL.getDbVal());
-                    recipient.setProcessAt(LocalDateTime.now());
-                    recipientRepository.save(recipient);
+                    recipientOptional.setStatus(RecipientStatus.APPROVAL.getDbVal());
+                    recipientOptional.setProcessAt(LocalDateTime.now());
+                    recipientRepository.save(recipientOptional);
 
                     Contract contract = contractRepository.findById(participant.getContractId())
                             .orElseThrow(() -> new CustomException(ResponseCode.CONTRACT_NOT_FOUND));
@@ -95,11 +102,10 @@ public class ProcessService {
 
                 return participantMapper.toDto(updated);
             }
-        }catch (CustomException ce){
+        } catch (CustomException ce) {
             log.error("Error updateRecipientForCoordinator: {}", ce.getMessage());
             throw ce;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.error("Error catch updateRecipientForCoordinator: {}", e.getMessage());
             // TODO: handle exception
             throw e;
@@ -128,8 +134,8 @@ public class ProcessService {
     }
 
     @Transactional
-    public RecipientDTO rejectContract(int recipientId, ContractChangeStatusRequest reason){
-        try{
+    public RecipientDTO rejectContract(int recipientId, ContractChangeStatusRequest reason) {
+        try {
 
             Recipient recipient = recipientRepository.findById(recipientId)
                     .orElseThrow(() -> new CustomException(ResponseCode.RECIPIENT_NOT_FOUND));
@@ -146,10 +152,10 @@ public class ProcessService {
 
             return recipientMapper.toDto(update);
 
-        }catch (CustomException ce){
+        } catch (CustomException ce) {
             log.error("Error rejectContract: {}", ce.getMessage());
             throw ce;
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error("Error catch rejectContract: {}", e.getMessage());
             // TODO: handle exception
             throw e;
@@ -158,8 +164,8 @@ public class ProcessService {
 
     @Transactional
     public RecipientDTO authorizeContract(Integer recipientId,
-                                          AuthorizeDTO authorizeDTO){
-        try{
+                                          AuthorizeDTO authorizeDTO) {
+        try {
 
             Contract contract = contractRepository.findByRecipientId(recipientId)
                     .orElseThrow(() -> new CustomException(ResponseCode.CONTRACT_NOT_FOUND));
@@ -219,10 +225,10 @@ public class ProcessService {
 
             return recipientMapper.toDto(newRecipient);
 
-        }catch (CustomException ce){
+        } catch (CustomException ce) {
             log.error("Error authorizeContract: {}", ce.getMessage());
             throw ce;
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("Error --- authorizeContract: {}", e.getMessage());
             throw e;
         }

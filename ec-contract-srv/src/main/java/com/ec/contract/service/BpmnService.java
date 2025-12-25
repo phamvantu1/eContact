@@ -531,6 +531,8 @@ public class BpmnService {
     }
 
     private void coordinatorToNext(ContractResponseDTO contractDto, ParticipantDTO currentParticipant) {
+
+        log.info("this code test kkk tyu67");
         // check nguoi dieu phoi hop dong
         int minOrder = -1;
 
@@ -539,6 +541,7 @@ public class BpmnService {
         for (var participant : participants) {
 
             if (minOrder > -1 && participant.getOrdering() > minOrder) {
+                log.info("found next coordinator, stop processing");
                 return;
             }
 
@@ -556,6 +559,7 @@ public class BpmnService {
         }
 
         if (minOrder > -1) {
+            log.info("found next coordinator, stop processing");
             return;
         }
 
@@ -584,11 +588,14 @@ public class BpmnService {
         }
 
         if (findReviewr) {
+            log.info("kkkkkk ssss this review ");
             return;
         }
 
         // khong co nguoi xem xet chuyen den nguoi ky
         for (var participant : participants) {
+
+            log.info("phamtu this code00000");
 
             if (participant.getOrdering() > minOrder) {
                 break;
