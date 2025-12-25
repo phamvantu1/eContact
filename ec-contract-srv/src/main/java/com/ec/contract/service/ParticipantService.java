@@ -1,6 +1,8 @@
 package com.ec.contract.service;
 
+import com.ec.contract.mapper.FieldMapper;
 import com.ec.contract.mapper.ParticipantMapper;
+import com.ec.contract.model.dto.FieldDto;
 import com.ec.contract.model.dto.ParticipantDTO;
 import com.ec.contract.model.dto.RecipientDTO;
 import com.ec.contract.model.entity.Contract;
@@ -35,6 +37,7 @@ public class ParticipantService {
     private final RecipientRepository recipientRepository;
     private final ParticipantMapper participantMapper;
     private final FieldRepository fieldRepository;
+    private final FieldMapper fieldMapper;
 
     @Transactional
     public List<ParticipantDTO> createParticipant(List<ParticipantDTO> participantDTOList,
@@ -114,27 +117,40 @@ public class ParticipantService {
                 for (var recipientDto : participantDto.getRecipients()) {
                     Recipient recipient;
 
+                    Optional<Field> oldField = fieldRepository.findByRecipientAndContract(recipientDto.getEmail(), contractId);
+
                     if (recipientDto.getId() != null) {
                         // Tìm recipient cũ trong danh sách hiện tại
                         recipient = existingRecipients.stream()
                                 .filter(r -> r.getId().equals(recipientDto.getId()))
                                 .findFirst()
                                 .orElse(new Recipient());
-                    } else if (recipientDto.getRole() == 1){  // đoan này đã code như này vì fe đang làm sai, chưa sửa được
+                    }  else if( recipientDto.getEmail() != null ){
                         recipient = existingRecipients.stream()
                                 .filter(r -> r.getEmail().equals(recipientDto.getEmail()))
                                 .findFirst()
                                 .orElse(new Recipient());
                     } else {
                         recipient = new Recipient();
-                        BeanUtils.copyProperties(recipientDto, recipient,
-                                "fields", "signType", "role", "status");
                     }
 
                     if (recipient.getEmail() == null){
                         BeanUtils.copyProperties(recipientDto, recipient,
                                 "fields", "signType", "role", "status");
+
                     }
+
+//                    if(oldField.isPresent()){
+//                        FieldDto fieldDto = new FieldDto();
+//
+//                        BeanUtils.copyProperties(oldField, fieldDto,
+//                                "id");
+//                        fieldDto.setRecipientId(recipient.getId());
+//
+//                        Field newField = fieldMapper.toEntity(fieldDto);
+//
+//                        fieldRepository.save(newField);
+//                    }
 
                     recipient.setSignType(recipientDto.getSignType());
                     recipient.setRole(recipientDto.getRole());
