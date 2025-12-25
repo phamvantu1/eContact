@@ -62,7 +62,7 @@ INSERT INTO customers (
       (2, 'Nguyễn Thái Minh', 'thaiminhnguyen2003@gmail.com', '$2a$10$UPF5aWUqKSeuoJR0kpSAKumzjjvqOh7VdpQHVP8ptBoReHO13LXqe', '0902345678', '2003-05-05', 1, 'male', '12345678', 1, '{}'::jsonb, NOW(), NOW()),
       (3, 'Trần Tuấn Phúc', 'tranphuc120203@gmail.com', '$2a$10$UPF5aWUqKSeuoJR0kpSAKumzjjvqOh7VdpQHVP8ptBoReHO13LXqe', '0903456789', '2003-03-03', 1, 'male', '1234567', 1, '{}'::jsonb, NOW(), NOW()),
       (4, 'Phạm Hoàng Lâm', 'tutupham5@gmail.com', '$2a$10$UPF5aWUqKSeuoJR0kpSAKumzjjvqOh7VdpQHVP8ptBoReHO13LXqe', '0904567890', '1992-07-12', 1, 'female', '222333444', 1, '{}'::jsonb, NOW(), NOW()),
-      (5, 'Đinh Khánh Ngân', 'khanhngan@gmail.com', '$2a$10$UPF5aWUqKSeuoJR0kpSAKumzjjvqOh7VdpQHVP8ptBoReHO13LXqe', '0905678901', '1993-09-21', 1, 'male', '333444555', 2, '{}'::jsonb, NOW(), NOW()),
+      (5, 'Đinh Khánh Ngân', 'dinhkhanhngan@gmail.com', '$2a$10$UPF5aWUqKSeuoJR0kpSAKumzjjvqOh7VdpQHVP8ptBoReHO13LXqe', '0905678901', '1993-09-21', 1, 'male', '333444555', 2, '{}'::jsonb, NOW(), NOW()),
       (6, 'Phạm Anh Tuấn', 'phamanhtuan@gmail.com', '$2a$10$UPF5aWUqKSeuoJR0kpSAKumzjjvqOh7VdpQHVP8ptBoReHO13LXqe', '0906789012', '1998-04-10', 1, 'female', '444555666', 3, '{}'::jsonb, NOW(), NOW()),
       (7, 'Phạm Thuý Vân', 'phamthuyvan@gmail.com', '$2a$10$UPF5aWUqKSeuoJR0kpSAKumzjjvqOh7VdpQHVP8ptBoReHO13LXqe', '0907890123', '1988-11-30', 1, 'male', '555666777', 1, '{}'::jsonb, NOW(), NOW()),
       (8, 'Đinh Đức Thuận', 'dinhducthuan@gmail.com', '$2a$10$UPF5aWUqKSeuoJR0kpSAKumzjjvqOh7VdpQHVP8ptBoReHO13LXqe', '0908901234', '1997-02-14', 1, 'female', '666777888', 2, '{}'::jsonb, NOW(), NOW()),
