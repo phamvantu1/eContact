@@ -214,6 +214,9 @@ public class ProcessService {
                     "fields"
             );
             newRecipient.setCardId(authorizeDTO.getTaxCode());
+            newRecipient.setName(authorizeDTO.getName());
+            newRecipient.setEmail(authorizeDTO.getEmail());
+            newRecipient.setStatus(RecipientStatus.PROCESSING.getDbVal());
             recipientRepository.save(newRecipient);
 
             oldRecipient.setStatus(RecipientStatus.AUTHORIZE.getDbVal());
