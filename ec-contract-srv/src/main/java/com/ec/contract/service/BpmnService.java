@@ -264,12 +264,12 @@ public class BpmnService {
             changeStatusAndNoticeToRecipient(recipientDto, contractDto.getId());
         }
 
-        if (recipients.size() > 0) {
-
-            log.info("[SingerToArchiver] sms/email config email sms config");
-
-            return;
-        }
+//        if (recipients.size() > 0) {
+//
+//            log.info("[SingerToArchiver] sms/email config email sms config");
+//
+//            return;
+//        }
 
         log.info("khong co van thu chuyen luong xu ly sang to chuc tiep theo");
         switchToNextParticipant(contractDto, currentParticipant);
