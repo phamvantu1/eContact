@@ -336,7 +336,7 @@ public class BpmnService {
             if (participantDto.getOrdering() == minOrder) {
                 for (var recipientDto : participantDto.getRecipients()) {
                     if (Objects.equals(recipientDto.getRole(), RecipientRole.REVIEWER.getDbVal())
-                            && recipientDto.getOrdering() == 1) {
+                            && recipientDto.getOrdering() == 1 && recipientDto.getStatus() == 0) {
                         changeStatusAndNoticeToRecipient(recipientDto, contractDto.getId());
 
                         findReviewer = true;
@@ -354,7 +354,7 @@ public class BpmnService {
             if (participantDto.getOrdering() == minOrder) {
                 for (var recipientDto : participantDto.getRecipients()) {
                     if (recipientDto.getRole() == RecipientRole.SIGNER.getDbVal()
-                            && recipientDto.getOrdering() == 1) {
+                            && recipientDto.getOrdering() == 1 && recipientDto.getStatus() == 0) {
 
                         changeStatusAndNoticeToRecipient(recipientDto, contractDto.getId());
 
