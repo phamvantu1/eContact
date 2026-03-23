@@ -183,7 +183,7 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
                                     @Param("status") Integer status);
 
     @Query(value = "SELECT count(distinct c.id) from contracts c " +
-            "where ( organizationId is null or c.organization_id = :organizationId )" +
+            "where ( :organizationId is null or c.organization_id = :organizationId )" +
             "and c.status = 30 " +
             "and (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
             "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) "
@@ -193,7 +193,7 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
                                                     @Param("toDate") String toDate);
 
     @Query(value = "SELECT count(distinct c.id) from contracts c " +
-            "where ( organizationId is null or c.organization_id = :organizationId )" +
+            "where ( :organizationId is null or c.organization_id = :organizationId )" +
             "and c.status = 20 " +
             "and (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
             "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) "
@@ -203,7 +203,7 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
                                                         @Param("toDate") String toDate);
 
     @Query(value = "SELECT count(distinct c.id) from contracts c " +
-            "where ( organizationId is null or c.organization_id = :organizationId )" +
+            "where ( :organizationId is null or c.organization_id = :organizationId )" +
             "and c.status = 31 " +
             "and (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
             "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) "
@@ -213,7 +213,7 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
                                                       @Param("toDate") String toDate);
 
     @Query(value = " SELECT count(distinct c.id) from contracts c " +
-            "where ( organizationId is null or c.organization_id = :organizationId )" +
+            "where ( :organizationId is null or c.organization_id = :organizationId )" +
             "and c.status = 32 " +
             "and (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
             "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) "
@@ -223,7 +223,7 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
                                                        @Param("toDate") String toDate);
 
     @Query(value = " SELECT count(distinct c.id) from contracts c " +
-            "where ( organizationId is null or c.organization_id = :organizationId )" +
+            "where ( :organizationId is null or c.organization_id = :organizationId )" +
             "and c.status = 2 " +
             "and (:fromDate IS NULL OR c.created_at >= CAST(:fromDate AS timestamp)) " +
             "AND (:toDate IS NULL OR c.created_at <= CAST(:toDate AS timestamp)) "
